@@ -566,3 +566,35 @@ class AdminBulkCacheTests(TestCase):
         self.assertFalse(Vehicle.objects.get(pk=vehicle.pk).is_published)
 
 
+class VehicleAdminAddFormTests(TestCase):
+    def test_ckeditor_upload_url_is_wired(self):
+        """Admin vehicle form uses CKEditor5Widget; upload reverse must exist."""
+        from django.urls import reverse
+
+        self.assertEqual(
+            reverse("ck_editor_5_upload_file"),
+            "/ckeditor5/image_upload/",
+        )
+
+    def test_add_form_renders_without_reverse_error(self):
+        from django.contrib.admin.sites import AdminSite
+        from django.contrib.auth import get_user_model
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.test import RequestFactory
+
+        from catalog.admin import VehicleAdmin
+
+        user = get_user_model().objects.create_superuser(
+            "vehicle-admin", "va@example.com", "pass-not-used"
+        )
+        request = RequestFactory().get("/admin/catalog/vehicle/add/")
+        request.user = user
+        request.session = {}
+        request._messages = FallbackStorage(request)
+
+        response = VehicleAdmin(Vehicle, AdminSite()).add_view(request)
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "ckeditor5")
+
+

@@ -158,6 +158,8 @@ urlpatterns = [
     path("catalog/", include("catalog.urls", namespace="catalog")),
     path("leads/", include("leads.urls", namespace="leads")),
     path("content/", include("content.urls", namespace="content")),
+    # CKEditor 5 image upload endpoint (required by admin widgets)
+    path("ckeditor5/", include("django_ckeditor_5.urls")),
 ]
 
 if settings.DEBUG:
