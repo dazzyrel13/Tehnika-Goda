@@ -19,10 +19,12 @@ COPY requirements.txt .
 RUN pip install --upgrade pip setuptools && pip install -r requirements.txt
 
 COPY entrypoint.sh .
-RUN sed -i 's/\r$//g' /usr/src/app/entrypoint.sh \
+RUN sed -i 's/\r$//' /usr/src/app/entrypoint.sh \
     && chmod +x /usr/src/app/entrypoint.sh
 
 COPY . .
-RUN chown -R appuser:appuser /usr/src/app
+RUN sed -i 's/\r$//' /usr/src/app/entrypoint.sh \
+    && chmod +x /usr/src/app/entrypoint.sh \
+    && chown -R appuser:appuser /usr/src/app
 
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
