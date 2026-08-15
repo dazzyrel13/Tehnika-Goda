@@ -1,0 +1,17 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Страница не найдена | Техника Года{% endblock %}
+{% block meta_robots %}noindex, follow{% endblock %}
+
+{% block content %}
+<section style="padding: 100px 0; text-align: center;">
+    <div class="container">
+        <h1 style="font-size: 36px; margin-bottom: 16px;">404</h1>
+        <p style="color: var(--text-muted); margin-bottom: 28px;">Страница не найдена или ссылка устарела.</p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+            <a href="/" class="btn-elite" style="display: inline-block; padding: 14px 28px; text-decoration: none;">На главную</a>
+            <a href="{% url 'catalog:category' category_slug='cars' %}" class="btn-elite btn-elite-ghost" style="display: inline-block; padding: 14px 28px; text-decoration: none;">В каталог</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

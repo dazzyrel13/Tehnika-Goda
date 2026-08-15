@@ -1,0 +1,70 @@
+.tf-body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Manrope, sans-serif;
+    background: #f4f5f7;
+    color: #12141a;
+}
+.tf-card {
+    width: min(420px, calc(100% - 32px));
+    background: #fff;
+    border: 1px solid #e6e8ee;
+    border-radius: 8px;
+    padding: 32px 28px 28px;
+}
+.tf-logo {
+    display: block;
+    margin: 0 auto 18px;
+    width: 72px;
+    height: auto;
+}
+.tf-card h1,
+.tf-card legend {
+    font-size: 20px;
+    margin: 0 0 12px;
+}
+.tf-card p,
+.tf-card li {
+    color: #5b6170;
+    font-size: 14px;
+    line-height: 1.5;
+}
+.tf-card form p {
+    margin: 0 0 14px;
+}
+.tf-card label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.tf-card input[type="text"],
+.tf-card input[type="password"],
+.tf-card input[type="number"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid #d7dbe3;
+    border-radius: 6px;
+    font-size: 15px;
+}
+.tf-card button,
+.tf-card input[type="submit"] {
+    margin-top: 8px;
+    width: 100%;
+    border: 0;
+    border-radius: 6px;
+    padding: 12px 16px;
+    background: #ffb300;
+    color: #12141a;
+    font-weight: 800;
+    cursor: pointer;
+}
+.tf-card .errorlist {
+    margin: 0 0 12px;
+    padding-left: 18px;
+    color: #b45309;
+}

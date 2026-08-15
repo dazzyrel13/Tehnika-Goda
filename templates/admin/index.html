@@ -1,0 +1,95 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}{% endblock %}
+
+{% block coltype %}{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard tg-dashboard{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<div class="tg-dash">
+  <div class="tg-dash__intro">
+    <p class="tg-dash__eyebrow">Панель каталога</p>
+    <h1>Добро пожаловать</h1>
+    <p class="tg-dash__lead">Добавляйте автомобили и обрабатывайте заявки — всё в одном месте.</p>
+  </div>
+
+  <div class="tg-stat-row">
+    <div class="tg-stat">
+      <strong>{{ tg_vehicles_count|default:0 }}</strong>
+      <span>авто в базе</span>
+    </div>
+    <div class="tg-stat">
+      <strong>{{ tg_published_count|default:0 }}</strong>
+      <span>опубликовано</span>
+    </div>
+    <div class="tg-stat {% if tg_new_leads_count %}tg-stat--alert{% endif %}">
+      <strong>{{ tg_new_leads_count|default:0 }}</strong>
+      <span>новых заявок</span>
+    </div>
+  </div>
+
+  <a href="{% url 'admin:catalog_vehicle_add' %}" class="tg-hero-cta">
+    <div class="tg-hero-cta__icon">＋</div>
+    <div class="tg-hero-cta__body">
+      <strong>Добавить автомобиль</strong>
+      <span>Фото, цена в ₽, описание — и в каталог</span>
+    </div>
+    <div class="tg-hero-cta__arrow">→</div>
+  </a>
+
+  <div class="tg-card-grid">
+    <a href="{% url 'admin:catalog_vehicle_changelist' %}" class="tg-card">
+      <div class="tg-card__badge tg-card__badge--blue">Каталог</div>
+      <h2>Автомобили</h2>
+      <p>Список, публикация, цены и галерея</p>
+      <span class="tg-card__link">Открыть список →</span>
+    </a>
+
+    <a href="{% url 'admin:leads_inquiry_changelist' %}" class="tg-card">
+      <div class="tg-card__badge tg-card__badge--green">Заявки</div>
+      <h2>Лиды{% if tg_new_leads_count %} · {{ tg_new_leads_count }}{% endif %}</h2>
+      <p>Входящие обращения клиентов</p>
+      <span class="tg-card__link">Смотреть →</span>
+    </a>
+
+    <a href="{% url 'admin:content_review_changelist' %}" class="tg-card">
+      <div class="tg-card__badge tg-card__badge--yellow">Контент</div>
+      <h2>Отзывы</h2>
+      <p>Карточки на главной: 2ГИС, Авито, Яндекс</p>
+      <span class="tg-card__link">Редактировать →</span>
+    </a>
+
+    <a href="{% url 'admin:catalog_inspectionreport_changelist' %}" class="tg-card">
+      <div class="tg-card__badge tg-card__badge--blue">Отчёты</div>
+      <h2>Цифровые отчёты</h2>
+      <p>PDF и досье для карточек авто</p>
+      <span class="tg-card__link">Открыть →</span>
+    </a>
+
+    <a href="{% url 'admin:catalog_brand_changelist' %}" class="tg-card">
+      <div class="tg-card__badge tg-card__badge--yellow">Справочник</div>
+      <h2>Марки</h2>
+      <p>Бренды и логотипы</p>
+      <span class="tg-card__link">Управлять →</span>
+    </a>
+
+    <a href="{% url 'admin:catalog_category_changelist' %}" class="tg-card">
+      <div class="tg-card__badge tg-card__badge--yellow">Справочник</div>
+      <h2>Категории</h2>
+      <p>Разделы каталога</p>
+      <span class="tg-card__link">Управлять →</span>
+    </a>
+  </div>
+
+  <div class="tg-dash__footer-row">
+    <a href="{% url 'admin:catalog_vehicle_parse_url' %}" class="tg-secondary-cta">Добавить по ссылке</a>
+    <a href="/" class="tg-secondary-cta tg-secondary-cta--ghost" target="_blank" rel="noopener">Открыть сайт ↗</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

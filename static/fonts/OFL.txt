@@ -1,0 +1,3 @@
+These fonts are licensed under the SIL Open Font License 1.1 (OFL-1.1):
+Manrope, Outfit, Unbounded, Caveat — Copyright Google Inc. / respective authors.
+Source: Fontsource packages. License: https://scripts.sil.org/OFL

@@ -1,0 +1,210 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load catalog_extras %}
+
+{% block og_type %}product{% endblock %}
+{% block body_class %}bg-detail{% endblock %}
+
+{% block json_ld %}
+<script type="application/ld+json">{{ product_json_ld }}</script>
+<script type="application/ld+json">{{ breadcrumb_json_ld }}</script>
+{% endblock %}
+{% block content %}
+<section class="detail-page-section">
+    <div class="container">
+        <nav class="detail-breadcrumbs" aria-label="Хлебные крошки">
+            {% for crumb in breadcrumb_links %}
+            <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+            <span class="detail-breadcrumbs__sep" aria-hidden="true">/</span>
+            {% endfor %}
+            <span class="detail-breadcrumbs__current">{{ display_title }}</span>
+        </nav>
+
+        <div class="vehicle-detail-layout">
+            <div>
+                <div class="glass-panel glass-shadow vehicle-gallery-main">
+                    {% if vehicle.main_image %}
+                    {% responsive_image vehicle.main_image 800 as main_img %}
+                    <img
+                        id="vehicle-main-image"
+                        class="vehicle-gallery-main__img"
+                        src="{{ main_img.src }}"
+                        srcset="{{ main_img.srcset }}"
+                        sizes="(max-width: 900px) 94vw, 720px"
+                        data-full-src="{{ main_img.full_src }}"
+                        alt="{{ vehicle.title }}"
+                        fetchpriority="high"
+                        decoding="async"
+                    >
+                    <button
+                        type="button"
+                        id="vehicle-gallery-prev"
+                        class="vehicle-gallery-nav vehicle-gallery-nav--prev"
+                        aria-label="Предыдущее фото"
+                    >‹</button>
+                    <button
+                        type="button"
+                        id="vehicle-gallery-next"
+                        class="vehicle-gallery-nav vehicle-gallery-nav--next"
+                        aria-label="Следующее фото"
+                    >›</button>
+                    {% else %}
+                    <div class="vehicle-gallery-empty">Нет фото</div>
+                    {% endif %}
+                    {% vehicle_badge_items vehicle as badges %}
+                    {% if badges %}
+                    <div class="car-card__badges">
+                        {% for badge in badges %}
+                        <div class="elite-badge {{ badge.class }}">{{ badge.text }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if vehicle.gallery.all %}
+                <div class="vehicle-thumbs-grid">
+                    {% for item in vehicle.gallery.all %}
+                        {% responsive_image item.image 400 as thumb %}
+                        <button
+                            type="button"
+                            class="glass-panel vehicle-gallery-thumb"
+                            data-full-src="{{ thumb.full_src }}"
+                            data-srcset="{{ thumb.srcset }}"
+                            data-display-src="{{ thumb.src }}"
+                            aria-label="Показать фото {{ forloop.counter }}"
+                        >
+                            <img
+                                src="{{ thumb.src }}"
+                                srcset="{{ thumb.srcset }}"
+                                sizes="96px"
+                                alt="Фото {{ forloop.counter }} {{ vehicle.title }}"
+                                loading="lazy"
+                                decoding="async"
+                            >
+                        </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="glass-panel vehicle-detail-sidebar">
+                <div class="vehicle-detail-head">
+                    <span class="accent-text vehicle-detail-brand">{{ vehicle.brand.name }}</span>
+                    <h1 class="vehicle-detail-title">{{ display_title }}</h1>
+                    <div class="vehicle-price-row">
+                        <span class="accent-text vehicle-price-main">{{ vehicle.price_rub|price_rub_display }}</span>
+                    </div>
+                    <div class="vehicle-price-note glass-panel">
+                        Цена в карточке ориентировочная. Финальная цена под ключ фиксируется в договоре после подтверждения комплектации и маршрута.
+                    </div>
+                </div>
+
+                <div class="vehicle-specs-grid">
+                    <div class="glass-panel vehicle-spec-card vehicle-spec-card--year">
+                        <div class="vehicle-spec-label">Год выпуска</div>
+                        <div class="vehicle-spec-value vehicle-spec-value--lg">{{ vehicle.year|default:"-" }}</div>
+                    </div>
+                    <div class="glass-panel vehicle-spec-card">
+                        <div class="vehicle-spec-label">Пробег</div>
+                        <div class="vehicle-spec-value vehicle-spec-value--lg">{% if vehicle.mileage != None %}{{ vehicle.mileage }} км{% else %}уточняется{% endif %}</div>
+                    </div>
+                    {% for key, value in vehicle.specs.items %}
+                    <div class="glass-panel vehicle-spec-card">
+                        <div class="vehicle-spec-label">
+                            {% if key == "engine_vol" %}
+                                Объём двигателя
+                            {% else %}
+                                {{ key }}
+                            {% endif %}
+                        </div>
+                        <div class="vehicle-spec-value">{{ value }}</div>
+                    </div>
+                    {% endfor %}
+
+                    {% if vehicle.category and vehicle.category.parent and vehicle.category.parent.slug == "cars" %}
+                    <div class="glass-panel vehicle-spec-card">
+                        <div class="vehicle-spec-label">Лошадиные силы</div>
+                        <div class="vehicle-spec-value">
+                            {% if vehicle.horsepower %}
+                                {{ vehicle.horsepower }} л.с.
+                            {% elif vehicle.specs.horsepower %}
+                                {{ vehicle.specs.horsepower }}
+                            {% elif vehicle.specs.power %}
+                                {{ vehicle.specs.power }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="glass-panel vehicle-spec-card">
+                        <div class="vehicle-spec-label">Коробка передач</div>
+                        <div class="vehicle-spec-value">
+                            {% if vehicle.transmission %}
+                                {{ vehicle.transmission }}
+                            {% elif vehicle.specs.transmission %}
+                                {{ vehicle.specs.transmission }}
+                            {% elif vehicle.specs.gearbox %}
+                                {{ vehicle.specs.gearbox }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="glass-panel vehicle-spec-card">
+                        <div class="vehicle-spec-label">Тип кузова</div>
+                        <div class="vehicle-spec-value">
+                            {% if vehicle.body_type %}
+                                {{ vehicle.body_type }}
+                            {% elif vehicle.category %}
+                                {{ vehicle.category.name }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="glass-panel vehicle-spec-card">
+                        <div class="vehicle-spec-label">Цвет</div>
+                        <div class="vehicle-spec-value">
+                            {% if vehicle.color %}
+                                {{ vehicle.color }}
+                            {% elif vehicle.specs.color %}
+                                {{ vehicle.specs.color }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="vehicle-description">
+                    <h4>Описание комплектации:</h4>
+                    {% if vehicle.description %}
+                        {{ vehicle.description|sanitized_html }}
+                    {% else %}
+                        <p style="color: var(--text-muted); margin: 0;">Описание уточняется, запросите расчёт под ключ — подготовим детали по комплектации и срокам.</p>
+                    {% endif %}
+                </div>
+
+                <a href="#leads-section" class="btn-elite vehicle-consult-btn js-price-key-btn"
+                    data-vehicle-id="{{ vehicle.id }}"
+                    data-vehicle-title="{{ display_title|escape }}"
+                >Запросить расчёт под ключ</a>
+
+                {% if vehicle.report %}
+                <a href="{% url 'catalog:vehicle_dossier' vehicle.slug %}" class="glass-panel vehicle-dossier-link">
+                    <span class="vehicle-dossier-link__icon">Цифровое досье</span> — результаты осмотра
+                </a>
+                {% endif %}
+
+                <p class="vehicle-price-disclaimer">Условия, сроки и комплектация уточняются индивидуально при заключении договора.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/detail.js' %}?v=3"></script>
+{% endblock %}

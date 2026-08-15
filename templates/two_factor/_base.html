@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Вход | Техника Года{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'admin/css/two_factor.css' %}?v=2">
+    {% block extra_media %}{% endblock %}
+</head>
+<body class="tf-body">
+    <main class="tf-card">
+        <img src="{% static 'images/logo_emblem.webp' %}?v=7" alt="Техника Года" class="tf-logo" width="96" height="101">
+        {% block content_wrapper %}
+        {% block content %}{% endblock %}
+        {% endblock %}
+    </main>
+</body>
+</html>

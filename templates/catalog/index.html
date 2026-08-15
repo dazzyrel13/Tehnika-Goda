@@ -1,0 +1,160 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load catalog_extras %}
+
+{% block body_class %}{% if is_cars_catalog %}bg-catalog-cars{% elif is_trucks_catalog %}bg-catalog-trucks{% elif is_special_catalog %}bg-catalog-special{% else %}bg-catalog{% endif %}{% endblock %}
+
+{% block content %}
+<section style="padding: 60px 0;">
+    <div class="container">
+        <div class="catalog-seo-intro">
+            <h1 class="catalog-seo-intro__title">{{ seo_h1 }}</h1>
+            <p class="catalog-seo-intro__text">{{ seo_intro }}</p>
+        </div>
+        <!-- Filters -->
+        <div class="glass-panel catalog-filters">
+            <form action="{% url 'catalog:category' category_slug=catalog_root_slug %}" method="GET">
+                <div class="catalog-filters__grid">
+                    <div class="catalog-filters__q">
+                        <label for="catalog-q">Поиск по ключевым словам</label>
+                        <input id="catalog-q" type="text" name="q" value="{{ request.GET.q }}" placeholder="Например: Zeekr 001">
+                    </div>
+
+                    <div class="catalog-filters__field">
+                        <label>Год:</label>
+                        <div class="catalog-filters__range">
+                            <input type="number" name="year_from" value="{{ request.GET.year_from }}" placeholder="От" aria-label="Год от">
+                            <input type="number" name="year_to" value="{{ request.GET.year_to }}" placeholder="До" aria-label="Год до">
+                        </div>
+                    </div>
+
+                    <div class="catalog-filters__field">
+                        <label>Цена (₽):</label>
+                        <div class="catalog-filters__range">
+                            <input type="number" name="price_from" value="{{ request.GET.price_from }}" placeholder="От" aria-label="Цена от">
+                            <input type="number" name="price_to" value="{{ request.GET.price_to }}" placeholder="До" aria-label="Цена до">
+                        </div>
+                    </div>
+
+                    <div class="catalog-filters__field">
+                        <label for="catalog-mileage">Макс. пробег:</label>
+                        <input id="catalog-mileage" type="number" name="mileage_to" value="{{ request.GET.mileage_to }}" placeholder="До км...">
+                    </div>
+
+                    <div class="catalog-filters__field">
+                        <button type="submit" class="btn-elite" style="width: 100%; padding: 12px;">Показать результаты</button>
+                    </div>
+                </div>
+                
+                <!-- Hidden inputs to maintain category/brand context if set -->
+                {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+                {% if active_brand %}<input type="hidden" name="brand" value="{{ active_brand }}">{% endif %}
+            </form>
+        </div>
+
+        <!-- Filter Bar (Brands) -->
+        <div class="glass-panel catalog-brands-bar">
+            <div class="catalog-brands-row" style="margin-bottom: 12px;">
+                <span class="catalog-brands-label">Тип: </span>
+                {% for chip in type_chips %}
+                <a href="{% url 'catalog:category' category_slug=chip.slug %}" class="catalog-brand-chip{% if active_category == chip.slug or not active_category and chip.slug == catalog_root_slug %} is-active{% endif %}">{{ chip.label }}</a>
+                {% endfor %}
+            </div>
+            <div class="catalog-brands-row">
+                <span class="catalog-brands-label">Марки: </span>
+                {% for brand in listing_brands %}
+                    {% if active_category %}
+                    <a href="{% url 'catalog:category' category_slug=active_category %}?brand={{ brand.slug }}"
+                        class="catalog-brand-chip{% if active_brand == brand.slug %} is-active{% endif %}">
+                        {{ brand.name }}
+                    </a>
+                    {% else %}
+                    <a href="{% url 'catalog:brand' brand_slug=brand.slug %}"
+                        class="catalog-brand-chip{% if active_brand == brand.slug %} is-active{% endif %}">
+                        {{ brand.name }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+                {% if active_brand or active_category %}
+                    <a href="{% url 'catalog:category' category_slug=catalog_root_slug %}" class="catalog-brands-reset">✕ Сбросить</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Vehicle Grid -->
+        <div class="catalog-vehicle-grid">
+            {% for vehicle in vehicles %}
+                <div class="glass-panel car-card glass-shadow car-card--list {% if vehicle.is_featured %}featured-glare{% endif %}">
+                    <!-- Image Wrapper -->
+                    <a href="{{ vehicle.get_absolute_url }}" class="car-card__media--list">
+                        {% if vehicle.main_image %}
+                        {% responsive_image vehicle.main_image 800 as img %}
+                        <img
+                            src="{{ img.src }}"
+                            srcset="{{ img.srcset }}"
+                            sizes="(max-width: 640px) 92vw, (max-width: 1100px) 45vw, 380px"
+                            alt="{{ vehicle.title }}"
+                            {% if not forloop.first %}loading="lazy"{% else %}fetchpriority="high"{% endif %}
+                            decoding="async"
+                        >
+                        {% else %}
+                        <div class="car-card__no-photo">Нет фото</div>
+                        {% endif %}
+                        
+                        <div class="car-card__brand-badge">
+                            {{ vehicle.brand.name }}
+                        </div>
+                        
+                        {% vehicle_badge_items vehicle as badges %}
+                        {% if badges %}
+                        <div class="car-card__badges">
+                            {% for badge in badges %}
+                            <div class="elite-badge {{ badge.class }}">{{ badge.text }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </a>
+
+                    <div class="car-card__body">
+                        <h3 class="car-card__title">{{ vehicle.title }}</h3>
+                        <div class="car-card__price">{{ vehicle.price_rub|price_rub_display }}</div>
+                        {% include "catalog/partials/vehicle_card_meta.html" %}
+                        <a href="{{ vehicle.get_absolute_url }}" class="btn-elite car-card__cta">Подробнее</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="grid-column: 1/-1; text-align: center; padding: 80px 24px;">
+                    <p style="color: var(--text-muted); margin-bottom: 12px;">По этим фильтрам предложений нет.</p>
+                    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Сбросьте фильтры или оставьте заявку на подбор.</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                        <a href="{% url 'catalog:category' category_slug=catalog_root_slug %}" class="btn-elite btn-elite-ghost">Сбросить фильтры</a>
+                        <a href="#leads-section" class="btn-elite">Оставить заявку на подбор</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div style="margin-top: 30px; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;">
+            {% if page_obj.has_previous %}
+                <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.previous_page_number }}" class="btn-elite" style="padding: 8px 14px; font-size: 12px;">← Назад</a>
+            {% endif %}
+
+            {% for num in paginator.page_range %}
+                {% if num == page_obj.number %}
+                    <span class="glass-panel" style="padding: 8px 12px; border-color: var(--accent-yellow); color: var(--text-main); font-size: 12px; background: var(--accent-yellow);">{{ num }}</span>
+                {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                    <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ num }}" class="glass-panel" style="padding: 8px 12px; text-decoration: none; color: var(--text-muted); font-size: 12px;">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.next_page_number }}" class="btn-elite" style="padding: 8px 14px; font-size: 12px;">Вперёд →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        </div>
+</section>
+{% endblock %}

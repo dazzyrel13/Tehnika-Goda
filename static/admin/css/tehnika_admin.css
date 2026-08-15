@@ -1,0 +1,2013 @@
+/* Техника Года — admin mini-app theme */
+
+html[data-theme="light"],
+:root {
+    --tg-yellow: #ffb300;
+    --tg-yellow-soft: #fff4d6;
+    --tg-blue: #1a1c24;
+    --tg-blue-soft: #f0f1f3;
+    --tg-navy: #1a1c24;
+    --tg-bg: #fafafa;
+    --tg-card: #ffffff;
+    --tg-text: #0f1419;
+    --tg-muted: #3d4654;
+    --tg-border: rgba(15, 20, 25, 0.08);
+    --tg-shadow: 0 10px 30px rgba(15, 20, 25, 0.07);
+    --tg-shadow-lg: 0 18px 50px rgba(15, 20, 25, 0.12);
+    --tg-radius: 18px;
+    --tg-radius-sm: 12px;
+    --font-display: "Outfit", "Manrope", "Segoe UI", sans-serif;
+    --font-body: "Manrope", "Segoe UI", sans-serif;
+
+    --primary: var(--tg-blue);
+    --secondary: var(--tg-navy);
+    --accent: var(--tg-yellow);
+    --primary-fg: #fff;
+    --body-fg: var(--tg-text);
+    --body-bg: var(--tg-bg);
+    --body-quiet-color: var(--tg-muted);
+    --body-medium-color: #3a4350;
+    --body-loud-color: var(--tg-text);
+    --header-color: #fff;
+    --header-branding-color: #fff;
+    --header-bg: var(--tg-navy);
+    --header-link-color: #fff;
+    --breadcrumbs-fg: var(--tg-muted);
+    --breadcrumbs-link-fg: var(--tg-blue);
+    --breadcrumbs-bg: transparent;
+    --link-fg: var(--tg-blue);
+    --link-hover-color: #ffb300;
+    --hairline-color: var(--tg-border);
+    --border-color: var(--tg-border);
+    --darkened-bg: #eef1f5;
+    --selected-bg: var(--tg-yellow-soft);
+    --selected-row: var(--tg-yellow-soft);
+    --button-fg: var(--tg-navy);
+    --button-bg: var(--tg-yellow);
+    --button-hover-bg: #e0b40f;
+    --default-button-bg: var(--tg-blue);
+    --default-button-hover-bg: #2a2d36;
+    --close-button-bg: #8a93a0;
+    --close-button-hover-bg: #6c7583;
+}
+
+html[data-theme="dark"] {
+    /* Force light brand theme even if OS prefers dark */
+    color-scheme: light;
+}
+
+body {
+    font-family: var(--font-body) !important;
+    background:
+        radial-gradient(ellipse 70% 40% at 100% 0%, rgba(255, 179, 0, 0.18), transparent 55%),
+        radial-gradient(ellipse 50% 35% at 0% 100%, rgba(26, 28, 36, 0.06), transparent 50%),
+        var(--tg-bg) !important;
+    color: var(--tg-text);
+    -webkit-font-smoothing: antialiased;
+}
+
+#container {
+    min-height: 100vh;
+}
+
+/* Header */
+#header {
+    background: rgba(26, 28, 36, 0.96) !important;
+    backdrop-filter: blur(12px);
+    border-bottom: none !important;
+    box-shadow: 0 8px 28px rgba(15, 20, 25, 0.18);
+    padding: 14px 28px !important;
+    align-items: center;
+}
+
+#branding {
+    float: none !important;
+}
+
+.tg-brand a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none !important;
+}
+
+.tg-brand__logo {
+    height: 44px;
+    width: auto;
+    display: block;
+}
+
+.tg-brand__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+.tg-brand__text strong {
+    font-family: var(--font-display);
+    font-size: 17px;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.tg-brand__text small {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#user-tools {
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-weight: 600;
+}
+
+#user-tools a {
+    color: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 999px;
+    padding: 6px 10px;
+    transition: 0.2s ease;
+}
+
+#user-tools a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff !important;
+}
+
+#header .theme-toggle {
+    display: none !important;
+}
+
+/* Layout */
+#main {
+    padding: 0 !important;
+}
+
+#content {
+    padding: 28px 28px 48px !important;
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+#content h1,
+.tg-dash h1 {
+    font-family: var(--font-display) !important;
+    letter-spacing: -0.03em;
+    font-weight: 700 !important;
+    color: var(--tg-text) !important;
+}
+
+div.breadcrumbs {
+    background: transparent !important;
+    padding: 16px 28px 0 !important;
+    max-width: 1120px;
+    margin: 0 auto;
+    font-size: 13px;
+    color: var(--tg-muted) !important;
+}
+
+div.breadcrumbs a {
+    color: var(--tg-blue) !important;
+}
+
+/* Dashboard */
+.tg-dashboard #content {
+    max-width: 980px;
+}
+
+.tg-dash__intro {
+    margin-bottom: 28px;
+}
+
+.tg-dash__eyebrow {
+    display: inline-flex;
+    background: var(--tg-blue-soft);
+    color: var(--tg-blue);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 999px;
+    margin: 0 0 14px;
+}
+
+.tg-dash h1 {
+    font-size: 2rem !important;
+    margin: 0 0 10px !important;
+}
+
+.tg-dash__lead {
+    margin: 0;
+    color: var(--tg-muted);
+    font-size: 16px;
+    max-width: 560px;
+    line-height: 1.5;
+}
+
+.tg-hero-cta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 24px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #2a2d36 0%, #1a1c24 55%, #0e0f12 100%);
+    color: #fff !important;
+    text-decoration: none !important;
+    box-shadow: 0 18px 40px rgba(18, 20, 26, 0.28);
+    margin-bottom: 22px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tg-hero-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 24px 48px rgba(18, 20, 26, 0.38);
+}
+
+.tg-hero-cta__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: var(--tg-yellow);
+    color: var(--tg-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.tg-hero-cta__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.tg-hero-cta__body strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+}
+
+.tg-hero-cta__body span {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 14px;
+}
+
+.tg-hero-cta__arrow {
+    font-size: 24px;
+    opacity: 0.85;
+}
+
+.tg-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.tg-card {
+    display: block;
+    background: var(--tg-card);
+    border: 1px solid var(--tg-border);
+    border-radius: var(--tg-radius);
+    padding: 22px 20px;
+    text-decoration: none !important;
+    color: inherit !important;
+    box-shadow: var(--tg-shadow);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.tg-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--tg-shadow-lg);
+    border-color: transparent;
+}
+
+.tg-card__badge {
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+}
+
+.tg-card__badge--blue {
+    background: var(--tg-blue-soft);
+    color: var(--tg-blue);
+}
+
+.tg-card__badge--yellow {
+    background: var(--tg-yellow-soft);
+    color: #8a6d00;
+}
+
+.tg-card__badge--green {
+    background: #e7f7ee;
+    color: #1b7a45;
+}
+
+.tg-card h2 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+    color: var(--tg-text);
+}
+
+.tg-card p {
+    margin: 0 0 16px;
+    color: var(--tg-muted);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.tg-card__link {
+    font-size: 13px;
+    font-weight: 800;
+    color: #0f1419;
+}
+
+.tg-dash__footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tg-secondary-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--tg-yellow);
+    color: var(--tg-navy) !important;
+    text-decoration: none !important;
+    font-weight: 700;
+    font-size: 13px;
+    box-shadow: 0 8px 20px rgba(255, 179, 0, 0.3);
+}
+
+.tg-secondary-cta--ghost {
+    background: #fff;
+    box-shadow: none;
+    border: 1px solid rgba(15, 20, 25, 0.16);
+    color: #0f1419 !important;
+}
+
+.tg-tool-dark {
+    background: #1a1c24 !important;
+    color: #fff !important;
+}
+
+.tg-tool-dark:hover {
+    background: #2a2d36 !important;
+    color: #fff !important;
+}
+
+/* Modules / changelist / forms */
+.module,
+#changelist,
+#changelist-filter,
+.inline-group,
+fieldset.module {
+    background: var(--tg-card) !important;
+    border: 1px solid var(--tg-border) !important;
+    border-radius: var(--tg-radius) !important;
+    box-shadow: var(--tg-shadow);
+    overflow: visible;
+}
+
+#changelist {
+    overflow: visible !important;
+}
+
+.module h2,
+.module caption,
+inline-group h2,
+.inline-related h3 {
+    background: #f8fafc !important;
+    color: var(--tg-text) !important;
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    border-bottom: 1px solid var(--tg-border);
+}
+
+#changelist .actions {
+    background: transparent !important;
+    padding: 12px 0;
+}
+
+#changelist table thead th {
+    background: #f8fafc !important;
+    border-bottom: 1px solid var(--tg-border) !important;
+}
+
+#changelist tbody tr:hover {
+    background: rgba(255, 179, 0, 0.08) !important;
+}
+
+#changelist-filter h2 {
+    background: var(--tg-navy) !important;
+    color: #fff !important;
+}
+
+#changelist-filter a {
+    border-radius: 8px;
+}
+
+#changelist-filter li.selected a {
+    background: var(--tg-yellow-soft) !important;
+    color: var(--tg-navy) !important;
+    border-left-color: var(--tg-yellow) !important;
+}
+
+/* Buttons */
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+    border: none !important;
+    box-shadow: 0 6px 16px rgba(255, 179, 0, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.button:hover,
+input[type="submit"]:hover,
+a.button:hover {
+    transform: translateY(-1px);
+}
+
+.button.default,
+input[type="submit"].default,
+.submit-row input.default {
+    background: var(--tg-blue) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 20px rgba(18, 20, 26, 0.28);
+}
+
+a.addlink,
+a.changelink,
+a.deletelink,
+.object-tools a {
+    border-radius: 999px !important;
+    font-weight: 700;
+    padding: 8px 14px !important;
+    box-shadow: var(--tg-shadow);
+}
+
+.object-tools a.addlink,
+.object-tools a {
+    background: var(--tg-yellow) !important;
+    color: var(--tg-navy) !important;
+}
+
+.object-tools a:hover {
+    background: #e0b40f !important;
+}
+
+/* Forms */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="number"],
+textarea,
+select,
+.vTextField,
+.vLargeTextField {
+    border-radius: 12px !important;
+    border: 1px solid var(--tg-border) !important;
+    background: #fff !important;
+    padding: 10px 12px !important;
+    box-shadow: none !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--tg-blue) !important;
+    box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.28) !important;
+    outline: none;
+}
+
+.submit-row {
+    background: transparent !important;
+    border: none !important;
+    padding: 16px 0 !important;
+}
+
+.messagelist li {
+    border-radius: var(--tg-radius-sm);
+    box-shadow: var(--tg-shadow);
+    border: none !important;
+}
+
+/* Login page */
+body.login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+    box-sizing: border-box;
+}
+
+.login #container {
+    width: min(100%, 420px) !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 auto !important;
+    background: var(--tg-card);
+    border-radius: 20px;
+    box-shadow: var(--tg-shadow-lg);
+    border: 1px solid var(--tg-border);
+    overflow: hidden;
+    display: block !important;
+}
+
+.login #container > .main {
+    display: block !important;
+    flex: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+.login #nav-sidebar,
+.login .toggle-nav-sidebar,
+.login #toggle-nav-sidebar {
+    display: none !important;
+}
+
+.login #header {
+    box-shadow: none !important;
+    padding: 22px 24px !important;
+    justify-content: center;
+}
+
+.login .tg-brand a {
+    justify-content: center;
+}
+
+.login .tg-brand__logo {
+    height: 48px;
+}
+
+.login #content {
+    padding: 28px 28px 32px !important;
+}
+
+.login #content-main {
+    float: none !important;
+    width: 100% !important;
+}
+
+.login .form-row {
+    padding: 0 0 16px !important;
+}
+
+.login .form-row label {
+    color: var(--tg-text);
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.3 !important;
+    margin-bottom: 6px;
+}
+
+.login .form-row #id_username,
+.login .form-row #id_password {
+    border: 1px solid var(--tg-border) !important;
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+    font-size: 15px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login .form-row #id_username:focus,
+.login .form-row #id_password:focus {
+    border-color: var(--tg-yellow) !important;
+    box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.22);
+    outline: none;
+}
+
+.login .submit-row {
+    padding: 8px 0 0 !important;
+    text-align: center;
+}
+
+.login .submit-row input {
+    width: 100%;
+    border: none !important;
+    border-radius: 10px !important;
+    background: var(--tg-yellow) !important;
+    color: var(--tg-navy) !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 13px 18px !important;
+    box-shadow: 0 8px 20px rgba(255, 179, 0, 0.35);
+    cursor: pointer;
+}
+
+.login .submit-row input:hover {
+    background: #e0a100 !important;
+}
+
+.login .errornote,
+.login .errorlist {
+    border-radius: 10px;
+}
+
+@media (max-width: 780px) {
+    .tg-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tg-stat-row {
+        grid-template-columns: 1fr;
+    }
+
+    #content,
+    div.breadcrumbs {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .tg-brand__text {
+        display: none;
+    }
+}
+
+@media (max-width: 1100px) {
+    .tg-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Dashboard stats */
+.tg-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 0 0 22px;
+}
+
+.tg-stat {
+    background: var(--tg-card);
+    border: 1px solid var(--tg-border);
+    border-radius: var(--tg-radius-sm);
+    padding: 16px 18px;
+    box-shadow: var(--tg-shadow);
+}
+
+.tg-stat strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--tg-navy);
+    line-height: 1.1;
+}
+
+.tg-stat span {
+    color: var(--tg-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.tg-stat--alert {
+    border-color: rgba(255, 179, 0, 0.45);
+    background: linear-gradient(180deg, var(--tg-blue-soft), #fff);
+}
+
+.tg-stat--alert strong {
+    color: var(--tg-blue);
+}
+
+/* Parse-by-URL page */
+.tg-parse {
+    max-width: 640px;
+    background: var(--tg-card);
+    border: 1px solid var(--tg-border);
+    border-radius: var(--tg-radius);
+    box-shadow: var(--tg-shadow);
+    padding: 28px 32px 32px;
+}
+
+.tg-parse h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    margin: 0 0 10px;
+    color: var(--tg-navy);
+}
+
+.tg-parse__lead {
+    color: var(--tg-muted);
+    margin: 0 0 24px;
+    line-height: 1.5;
+}
+
+.tg-parse__form label {
+    display: block;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: var(--tg-navy);
+}
+
+.tg-parse__form input[type="url"] {
+    width: 100%;
+    max-width: 100%;
+}
+
+.tg-parse__hint {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--tg-muted);
+}
+
+.tg-parse__actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 22px;
+}
+
+.tg-parse__submit {
+    background: var(--tg-blue) !important;
+    color: #fff !important;
+    border: none;
+    border-radius: 999px !important;
+    padding: 12px 22px !important;
+    font-weight: 700 !important;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(18, 20, 26, 0.28);
+}
+
+.tg-parse__cancel {
+    color: var(--tg-muted);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.tg-parse__cancel:hover {
+    color: var(--tg-blue);
+}
+
+/* ===== Modern app shell: nav + change form ===== */
+
+#nav-sidebar {
+    background: #f7f8fa !important;
+    border-right: 1px solid rgba(15, 20, 25, 0.08) !important;
+    box-shadow: none;
+    padding: 12px 10px 24px !important;
+}
+
+#nav-filter {
+    border-radius: 14px !important;
+    border: 1px solid rgba(15, 20, 25, 0.1) !important;
+    background: #fff !important;
+    margin: 4px 4px 16px !important;
+    padding: 11px 14px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #0f1419 !important;
+    width: calc(100% - 8px) !important;
+    box-shadow: 0 1px 2px rgba(15, 20, 25, 0.04);
+}
+
+#nav-filter::placeholder {
+    color: #6b7380 !important;
+    font-weight: 500 !important;
+}
+
+#nav-filter:focus {
+    border-color: var(--tg-yellow) !important;
+    box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.22) !important;
+    outline: none;
+}
+
+#nav-sidebar .current-app,
+#nav-sidebar .current-model {
+    background: transparent !important;
+}
+
+#nav-sidebar table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 4px !important;
+}
+
+#nav-sidebar table th,
+#nav-sidebar caption {
+    background: transparent !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+#nav-sidebar caption {
+    padding: 10px 10px 4px !important;
+    text-align: left !important;
+}
+
+#nav-sidebar caption a.section {
+    display: inline-block !important;
+    color: #6b7380 !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+#nav-sidebar caption a.section:hover {
+    color: #0f1419 !important;
+    background: transparent !important;
+}
+
+#nav-sidebar .module {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    margin: 0 0 14px !important;
+    overflow: visible !important;
+}
+
+#nav-sidebar tr[class^="model-"] {
+    background: transparent !important;
+}
+
+#nav-sidebar tr[class^="model-"] th,
+#nav-sidebar tr[class^="model-"] td {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    vertical-align: middle !important;
+}
+
+#nav-sidebar tr[class^="model-"] th {
+    width: 100%;
+}
+
+#nav-sidebar tr[class^="model-"] td {
+    width: 1%;
+    white-space: nowrap;
+    padding-right: 2px !important;
+}
+
+/* Row as a pill: link + add */
+#nav-sidebar tr[class^="model-"] th a {
+    display: block !important;
+    border-radius: 12px 0 0 12px !important;
+    margin: 0 !important;
+    padding: 11px 8px 11px 12px !important;
+    font-weight: 700 !important;
+    font-size: 13.5px !important;
+    line-height: 1.25 !important;
+    color: #0f1419 !important;
+    text-transform: none !important;
+    letter-spacing: -0.01em !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+#nav-sidebar tr[class^="model-"] td a.addlink {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 34px !important;
+    height: 34px !important;
+    margin: 0 4px 0 0 !important;
+    padding: 0 !important;
+    border-radius: 0 12px 12px 0 !important;
+    background: transparent !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    box-shadow: none !important;
+    position: relative;
+    transition: background 0.15s ease;
+}
+
+#nav-sidebar tr[class^="model-"] td a.addlink::before {
+    content: "+";
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    color: #9aa3b0;
+    transition: color 0.15s ease;
+}
+
+#nav-sidebar tr[class^="model-"]:hover th a,
+#nav-sidebar tr[class^="model-"]:hover td a.addlink {
+    background: #fff !important;
+}
+
+#nav-sidebar tr[class^="model-"]:hover td a.addlink::before {
+    color: #0f1419;
+}
+
+#nav-sidebar tr[class^="model-"]:hover th a {
+    box-shadow: none !important;
+}
+
+/* Active row */
+#nav-sidebar tr.current-model th a,
+#nav-sidebar tr.selected th a,
+#nav-sidebar .current-model th a {
+    background: #fff !important;
+    color: #0f1419 !important;
+    box-shadow: inset 3px 0 0 var(--tg-yellow) !important;
+    font-weight: 800 !important;
+}
+
+#nav-sidebar tr.current-model td a.addlink,
+#nav-sidebar tr.selected td a.addlink,
+#nav-sidebar .current-model td a.addlink {
+    background: #fff !important;
+}
+
+#nav-sidebar tr.current-model td a.addlink::before,
+#nav-sidebar tr.selected td a.addlink::before {
+    color: #0f1419;
+}
+
+#nav-sidebar tr.current-model:hover th a,
+#nav-sidebar tr.current-model:hover td a.addlink {
+    background: #fff !important;
+}
+
+.toggle-nav-sidebar {
+    border-radius: 0 12px 12px 0 !important;
+    background: #fff !important;
+    border: 1px solid rgba(15, 20, 25, 0.1) !important;
+    border-left: none !important;
+    box-shadow: 4px 0 16px rgba(15, 20, 25, 0.05);
+    color: #0f1419 !important;
+}
+
+/* Change form page */
+.change-form #content {
+    max-width: 920px;
+}
+
+.change-list #content {
+    max-width: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.change-form #content h1 {
+    font-size: 1.75rem !important;
+    margin: 4px 0 18px !important;
+}
+
+.change-form .object-tools {
+    margin-bottom: 18px !important;
+    float: none !important;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 !important;
+}
+
+/* Fieldset cards */
+.change-form fieldset.module {
+    margin-bottom: 18px !important;
+    padding: 0 !important;
+    border: 1px solid var(--tg-border) !important;
+    border-radius: 20px !important;
+    background: #fff !important;
+    box-shadow: 0 12px 36px rgba(15, 20, 25, 0.06) !important;
+    overflow: hidden;
+}
+
+.change-form fieldset.module > h2,
+.change-form fieldset.module > .description {
+    margin: 0 !important;
+}
+
+.change-form fieldset.module > h2 {
+    background: linear-gradient(180deg, #fbfbfc 0%, #f4f5f7 100%) !important;
+    color: var(--tg-navy) !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.01em !important;
+    padding: 16px 22px !important;
+    border-bottom: 1px solid var(--tg-border) !important;
+}
+
+.change-form fieldset.module > .description {
+    padding: 12px 22px !important;
+    color: var(--tg-muted) !important;
+    font-size: 13px !important;
+    background: #fafbfc !important;
+    border-bottom: 1px solid var(--tg-border);
+    line-height: 1.45;
+}
+
+.change-form .form-row {
+    padding: 16px 22px !important;
+    border-bottom: 1px solid rgba(15, 20, 25, 0.05) !important;
+    background: transparent !important;
+}
+
+.change-form .form-row:last-child {
+    border-bottom: none !important;
+}
+
+.change-form label {
+    font-weight: 700 !important;
+    color: var(--tg-navy) !important;
+    font-size: 13px !important;
+    margin-bottom: 6px;
+}
+
+.change-form .help,
+.change-form p.help,
+.change-form div.help {
+    color: var(--tg-muted) !important;
+    font-size: 12.5px !important;
+    line-height: 1.45 !important;
+    margin-top: 6px !important;
+}
+
+.change-form .checkbox-row label {
+    font-weight: 600 !important;
+}
+
+.change-form input[type="text"],
+.change-form input[type="password"],
+.change-form input[type="email"],
+.change-form input[type="url"],
+.change-form input[type="number"],
+.change-form textarea,
+.change-form select,
+.change-form .vTextField,
+.change-form .vLargeTextField,
+.change-form .vIntegerField,
+.change-form .vURLField {
+    border-radius: 14px !important;
+    border: 1px solid rgba(15, 20, 25, 0.12) !important;
+    background: #fbfbfc !important;
+    padding: 11px 14px !important;
+    min-height: 42px;
+    font-size: 14px !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.change-form input:hover,
+.change-form textarea:hover,
+.change-form select:hover {
+    background: #fff !important;
+    border-color: rgba(15, 20, 25, 0.2) !important;
+}
+
+.change-form input:focus,
+.change-form textarea:focus,
+.change-form select:focus {
+    background: #fff !important;
+    border-color: var(--tg-yellow) !important;
+    box-shadow: 0 0 0 4px rgba(255, 179, 0, 0.22) !important;
+}
+
+/* Related widget cluster (brand/category pickers) */
+.change-form .related-widget-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.change-form .related-widget-wrapper select {
+    min-width: min(280px, 100%);
+}
+
+.change-form .related-widget-wrapper-link {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 12px !important;
+    background: var(--tg-blue-soft) !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 1 !important;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.change-form .related-widget-wrapper-link:hover {
+    background: var(--tg-yellow-soft) !important;
+    transform: translateY(-1px);
+}
+
+/* File upload / gallery drop feel */
+.change-form input[type="file"] {
+    border-radius: 16px !important;
+    border: 1.5px dashed rgba(15, 20, 25, 0.18) !important;
+    background: linear-gradient(180deg, #fffef8, #f7f8fa) !important;
+    padding: 18px 16px !important;
+    width: 100%;
+    max-width: 520px;
+}
+
+.change-form .tg-gallery-multi-input,
+.change-form input.tg-gallery-multi-input {
+    max-width: 100%;
+}
+
+/* Inline gallery */
+.change-form .inline-group {
+    border-radius: 20px !important;
+    margin-top: 8px !important;
+    box-shadow: 0 12px 36px rgba(15, 20, 25, 0.06) !important;
+}
+
+.change-form .inline-group h2 {
+    background: linear-gradient(180deg, #fbfbfc 0%, #f4f5f7 100%) !important;
+    padding: 14px 20px !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+}
+
+.change-form .inline-related {
+    border-radius: 14px;
+}
+
+/* Sticky modern submit bar */
+.change-form .submit-row {
+    position: sticky;
+    bottom: 12px;
+    z-index: 20;
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--tg-border) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 16px 40px rgba(15, 20, 25, 0.12) !important;
+    padding: 14px 16px !important;
+    margin-top: 8px !important;
+}
+
+.change-form .submit-row input,
+.change-form .submit-row a.deletelink {
+    margin: 0 !important;
+    float: none !important;
+}
+
+.change-form .submit-row input {
+    padding: 11px 18px !important;
+    font-size: 13px !important;
+    letter-spacing: 0.01em;
+}
+
+.change-form .submit-row input.default {
+    order: -1;
+}
+
+.change-form .submit-row a.deletelink {
+    border-radius: 999px !important;
+    padding: 11px 16px !important;
+    background: #ffe8e6 !important;
+    color: #b42318 !important;
+    margin-left: auto !important;
+}
+
+/* CKEditor / content area breathing room */
+.change-form .django_ckeditor_5 {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+/* Changelist polish */
+.change-list #changelist {
+    border-radius: 20px !important;
+    overflow: visible !important;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0;
+}
+
+.change-list #changelist-form {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.change-list #changelist-form .results {
+    border-radius: 0 0 20px 0;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+}
+
+.change-list #result_list {
+    min-width: 960px;
+    width: 100%;
+}
+
+.change-list table {
+    border-collapse: separate !important;
+    border-spacing: 0;
+    table-layout: auto;
+}
+
+.change-list #result_list tbody tr {
+    transition: background 0.12s ease;
+}
+
+.change-list #toolbar {
+    border-radius: 14px;
+    background: #fff !important;
+    border: 1px solid var(--tg-border);
+    padding: 10px 12px !important;
+    margin-bottom: 14px;
+}
+
+.change-list #searchbar {
+    border-radius: 12px !important;
+    min-height: 40px;
+    padding: 8px 12px !important;
+}
+
+.change-list #changelist-filter {
+    flex: 0 0 220px;
+    max-width: 220px;
+    overflow: visible !important;
+    position: sticky;
+    top: 12px;
+}
+
+@media (max-width: 1024px) {
+    .change-form .submit-row {
+        position: static;
+    }
+}
+
+/* ===== Change form: app-like polish ===== */
+
+.change-form #content h1 {
+    font-size: 1.85rem !important;
+    margin: 8px 0 20px !important;
+    letter-spacing: -0.03em !important;
+}
+
+.change-form fieldset.module {
+    border-radius: 22px !important;
+    border: 1px solid rgba(15, 20, 25, 0.08) !important;
+    box-shadow: 0 10px 28px rgba(15, 20, 25, 0.05) !important;
+    margin-bottom: 20px !important;
+}
+
+.change-form fieldset.module > h2 {
+    background: #fff !important;
+    padding: 18px 24px 14px !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+    border-bottom: none !important;
+    color: #0f1419 !important;
+}
+
+.change-form fieldset.module > .description {
+    margin: 0 24px 8px !important;
+    padding: 10px 14px !important;
+    border: none !important;
+    border-radius: 12px !important;
+    background: #f4f6f8 !important;
+    color: #3d4654 !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+}
+
+.change-form .form-row {
+    padding: 14px 24px !important;
+    border-bottom: 1px solid rgba(15, 20, 25, 0.04) !important;
+}
+
+.change-form .form-row:last-child {
+    padding-bottom: 22px !important;
+}
+
+.change-form label,
+.change-form .flex-container label {
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    color: #3d4654 !important;
+    letter-spacing: 0.02em !important;
+    margin-bottom: 8px !important;
+}
+
+.change-form .form-row .flex-container {
+    gap: 18px 28px;
+}
+
+.change-form .form-row .flex-container > div {
+    flex: 1 1 220px;
+}
+
+/* Related FK widgets as one control */
+.change-form .related-widget-wrapper {
+    display: inline-flex !important;
+    align-items: stretch;
+    gap: 0 !important;
+    background: #fbfbfc;
+    border: 1px solid rgba(15, 20, 25, 0.12);
+    border-radius: 14px;
+    overflow: hidden;
+    max-width: 100%;
+    box-shadow: 0 1px 2px rgba(15, 20, 25, 0.03);
+}
+
+.change-form .related-widget-wrapper select,
+.change-form .related-widget-wrapper .select2-container {
+    min-width: min(260px, 70vw) !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    min-height: 44px !important;
+}
+
+.change-form .related-widget-wrapper select:focus {
+    box-shadow: none !important;
+}
+
+.change-form .related-widget-wrapper .select2-container--admin-autocomplete .select2-selection--single {
+    border: none !important;
+    border-radius: 0 !important;
+    min-height: 44px !important;
+    background: transparent !important;
+}
+
+.change-form .related-widget-wrapper-link {
+    width: 40px !important;
+    height: auto !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border-left: 1px solid rgba(15, 20, 25, 0.08) !important;
+    background: #fff !important;
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+.change-form .related-widget-wrapper-link:hover {
+    background: var(--tg-yellow-soft) !important;
+    transform: none !important;
+}
+
+.change-form .related-widget-wrapper-link img {
+    opacity: 0.75;
+}
+
+/* File drops */
+.change-form input[type="file"],
+.change-form .tg-gallery-multi-input {
+    border-radius: 16px !important;
+    border: 1.5px dashed rgba(15, 20, 25, 0.2) !important;
+    background:
+        linear-gradient(180deg, #fffef9 0%, #f7f8fa 100%) !important;
+    padding: 22px 18px !important;
+    max-width: 100% !important;
+    font-weight: 600 !important;
+    color: #0f1419 !important;
+}
+
+.change-form input[type="file"]:hover,
+.change-form .tg-gallery-multi-input:hover {
+    border-color: var(--tg-yellow) !important;
+    background: #fff8e6 !important;
+}
+
+/* Checkboxes */
+.change-form .checkbox-row,
+.change-form .form-row:has(input[type="checkbox"]) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    align-items: center;
+}
+
+.change-form input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--tg-yellow);
+}
+
+/* CKEditor card */
+.change-form .django_ckeditor_5,
+.change-form .ck-editor {
+    border-radius: 16px !important;
+    overflow: hidden;
+    border: 1px solid rgba(15, 20, 25, 0.1);
+    box-shadow: 0 1px 2px rgba(15, 20, 25, 0.03);
+}
+
+.change-form .ck.ck-toolbar {
+    background: #f7f8fa !important;
+    border: none !important;
+}
+
+.change-form .ck.ck-editor__main > .ck-editor__editable {
+    min-height: 160px;
+    background: #fff !important;
+}
+
+/* Inline gallery */
+.change-form .inline-group {
+    border-radius: 22px !important;
+    border: 1px solid rgba(15, 20, 25, 0.08) !important;
+    box-shadow: 0 10px 28px rgba(15, 20, 25, 0.05) !important;
+    overflow: hidden !important;
+}
+
+.change-form .inline-group > h2,
+.change-form .inline-group h2 {
+    background: #fff !important;
+    border-bottom: 1px solid rgba(15, 20, 25, 0.06) !important;
+    padding: 16px 20px !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    text-transform: none !important;
+    letter-spacing: -0.02em !important;
+    color: #0f1419 !important;
+}
+
+.change-form .add-row a {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    margin: 12px 16px 16px !important;
+    padding: 10px 16px !important;
+    border-radius: 999px !important;
+    background: var(--tg-yellow) !important;
+    color: #0f1419 !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+    box-shadow: 0 6px 16px rgba(255, 179, 0, 0.28);
+}
+
+/* Submit bar — one clear primary + soft secondaries */
+.change-form .submit-row {
+    position: sticky;
+    bottom: 14px;
+    z-index: 30;
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 10px !important;
+    align-items: center;
+    justify-content: flex-start;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(15, 20, 25, 0.1) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 18px 48px rgba(15, 20, 25, 0.14) !important;
+    padding: 14px 16px !important;
+    margin: 20px 0 8px !important;
+}
+
+.change-form .submit-row input {
+    float: none !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 999px !important;
+    padding: 12px 18px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    cursor: pointer;
+    box-shadow: none !important;
+}
+
+.change-form .submit-row input.default,
+.change-form .submit-row input[name="_save"] {
+    order: -1;
+    background: #12141a !important;
+    color: #fff !important;
+    box-shadow: 0 10px 24px rgba(18, 20, 26, 0.28) !important;
+}
+
+.change-form .submit-row input.default:hover,
+.change-form .submit-row input[name="_save"]:hover {
+    background: #2a2d36 !important;
+    color: #fff !important;
+}
+
+.change-form .submit-row input[name="_addanother"],
+.change-form .submit-row input[name="_continue"] {
+    background: #fff !important;
+    color: #0f1419 !important;
+    border: 1px solid rgba(15, 20, 25, 0.14) !important;
+    box-shadow: none !important;
+}
+
+.change-form .submit-row input[name="_addanother"]:hover,
+.change-form .submit-row input[name="_continue"]:hover {
+    background: #f4f6f8 !important;
+    border-color: rgba(15, 20, 25, 0.22) !important;
+    color: #0f1419 !important;
+}
+
+.change-form .submit-row a.deletelink {
+    margin-left: auto !important;
+    border-radius: 999px !important;
+    padding: 12px 16px !important;
+    background: #ffe8e6 !important;
+    color: #b42318 !important;
+    font-weight: 800 !important;
+    text-transform: none !important;
+}
+
+/* Global submit color fix (no invisible yellow primary) */
+input[type="submit"].default,
+button.default,
+.submit-row input.default {
+    background: #12141a !important;
+    color: #fff !important;
+}
+
+input[type="submit"]:not(.default),
+.submit-row input:not(.default) {
+    background: #fff !important;
+    color: #0f1419 !important;
+    border: 1px solid rgba(15, 20, 25, 0.14) !important;
+    box-shadow: none !important;
+}
+
+/* Keep login CTA yellow */
+.login .submit-row input {
+    background: var(--tg-yellow) !important;
+    color: #0f1419 !important;
+    border: none !important;
+}
+
+/* ===== Compact app density (vehicle/forms) ===== */
+
+.change-form #content {
+    max-width: 920px;
+}
+
+.change-form #content h1 {
+    font-size: 1.45rem !important;
+    margin: 0 0 14px !important;
+}
+
+.change-form fieldset.module {
+    border-radius: 16px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 4px 16px rgba(15, 20, 25, 0.04) !important;
+}
+
+.change-form fieldset.module > h2 {
+    padding: 12px 16px 8px !important;
+    font-size: 0.92rem !important;
+    font-weight: 800 !important;
+    background: #fff !important;
+    border-bottom: none !important;
+}
+
+.change-form fieldset.module > .description {
+    margin: 0 16px 10px !important;
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    background: #f3f4f6 !important;
+}
+
+.change-form .form-row {
+    padding: 8px 16px !important;
+    border-bottom: 1px solid rgba(15, 20, 25, 0.045) !important;
+}
+
+.change-form .form-row:last-child {
+    padding-bottom: 14px !important;
+    border-bottom: none !important;
+}
+
+.change-form label,
+.change-form .flex-container label {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    color: #5a6573 !important;
+    margin: 0 0 4px !important;
+    letter-spacing: 0.01em !important;
+}
+
+.change-form .help,
+.change-form p.help,
+.change-form div.help {
+    font-size: 11.5px !important;
+    margin-top: 4px !important;
+    color: #6b7380 !important;
+}
+
+.change-form .form-row .flex-container {
+    gap: 10px 14px !important;
+}
+
+.change-form .form-row .flex-container > div {
+    flex: 1 1 160px !important;
+}
+
+.change-form input[type="text"],
+.change-form input[type="password"],
+.change-form input[type="email"],
+.change-form input[type="url"],
+.change-form input[type="number"],
+.change-form textarea,
+.change-form select,
+.change-form .vTextField,
+.change-form .vLargeTextField,
+.change-form .vIntegerField,
+.change-form .vURLField,
+.change-form .vDateField,
+.change-form .vTimeField {
+    border-radius: 10px !important;
+    border: 1px solid rgba(15, 20, 25, 0.12) !important;
+    background: #fff !important;
+    padding: 7px 10px !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    box-shadow: none !important;
+}
+
+.change-form textarea,
+.change-form .vLargeTextField {
+    height: auto !important;
+    min-height: 88px !important;
+    line-height: 1.4 !important;
+}
+
+.change-form input:focus,
+.change-form textarea:focus,
+.change-form select:focus {
+    border-color: #ffb300 !important;
+    box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.18) !important;
+}
+
+/* Related: compact segmented control */
+.change-form .related-widget-wrapper {
+    display: inline-flex !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    flex-wrap: nowrap !important;
+    max-width: 100%;
+    background: #fff;
+    border: 1px solid rgba(15, 20, 25, 0.12);
+    border-radius: 10px;
+    overflow: hidden;
+    height: 34px;
+}
+
+.change-form .related-widget-wrapper select {
+    min-width: 180px !important;
+    max-width: 280px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 4px 8px !important;
+    background: transparent !important;
+}
+
+.change-form .related-widget-wrapper .select2-container {
+    min-width: 180px !important;
+    max-width: 280px !important;
+}
+
+.change-form .related-widget-wrapper .select2-container--admin-autocomplete .select2-selection--single {
+    border: none !important;
+    border-radius: 0 !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    background: transparent !important;
+}
+
+.change-form .related-widget-wrapper .select2-container--admin-autocomplete .select2-selection__rendered {
+    line-height: 32px !important;
+    padding-left: 10px !important;
+    font-size: 13px !important;
+}
+
+.change-form .related-widget-wrapper .select2-container--admin-autocomplete .select2-selection__arrow {
+    height: 32px !important;
+}
+
+.change-form .related-widget-wrapper-link {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    border-left: 1px solid rgba(15, 20, 25, 0.08) !important;
+    background: #fafafa !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.change-form .related-widget-wrapper-link img {
+    width: 16px !important;
+    height: 16px !important;
+    opacity: 0.7;
+}
+
+.change-form .related-widget-wrapper-link:hover {
+    background: #fff4d6 !important;
+    transform: none !important;
+}
+
+/* Hide rarely used view/change icons; keep + and clear */
+.change-form .related-widget-wrapper-link.view-related,
+.change-form .related-widget-wrapper-link.change-related {
+    display: none !important;
+}
+
+.change-form input[type="file"],
+.change-form .tg-gallery-multi-input {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 12px 14px !important;
+    border-radius: 12px !important;
+    font-size: 12.5px !important;
+    max-width: 100% !important;
+}
+
+.change-form .ck.ck-editor__main > .ck-editor__editable {
+    min-height: 120px !important;
+}
+
+.change-form .ck.ck-toolbar {
+    padding: 4px !important;
+}
+
+.change-form .inline-group {
+    border-radius: 16px !important;
+    margin-top: 10px !important;
+    box-shadow: 0 4px 16px rgba(15, 20, 25, 0.04) !important;
+}
+
+.change-form .inline-group > h2,
+.change-form .inline-group h2 {
+    padding: 12px 14px !important;
+    font-size: 0.92rem !important;
+}
+
+.change-form .add-row a {
+    margin: 8px 12px 12px !important;
+    padding: 7px 12px !important;
+    font-size: 12.5px !important;
+}
+
+.change-form .submit-row {
+    border-radius: 14px !important;
+    padding: 10px 12px !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+}
+
+.change-form .submit-row input {
+    padding: 9px 14px !important;
+    font-size: 12.5px !important;
+}
+
+#vehicleimage_set-group::before {
+    margin: 8px 12px !important;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+    border-radius: 10px !important;
+}
+
+
+
+/* ===== Readability + polish pass ===== */
+
+body,
+#content,
+.change-form,
+.change-list {
+    color: #0f1419 !important;
+}
+
+a:link,
+a:visited {
+    color: #12141a;
+}
+
+a:hover {
+    color: #8a6d00;
+}
+
+/* Don't force flex on Django field wrappers — breaks stacked labels */
+.change-form .form-row > div {
+    display: block;
+}
+
+.change-form .form-row .flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    align-items: flex-start;
+}
+
+.change-form .form-row .flex-container > div {
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+.change-form fieldset.module > .description,
+.change-form .help,
+.change-form p.help,
+.change-form div.help,
+.help {
+    color: #3d4654 !important;
+    font-weight: 500 !important;
+}
+
+/* Secondary yellow buttons: ensure dark readable text */
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+    color: #12141a !important;
+}
+
+.button.default,
+input[type="submit"].default,
+.submit-row input.default {
+    color: #fff !important;
+}
+
+/* Error / success messages readable */
+.messagelist li {
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    padding: 12px 16px !important;
+}
+
+.errornote,
+.errorlist li {
+    color: #8a1f11 !important;
+    font-weight: 700 !important;
+}
+
+ul.errorlist {
+    background: #ffe8e6;
+    border-radius: 10px;
+    padding: 8px 12px !important;
+    margin: 6px 0 10px !important;
+}
+
+/* Changelist table readability */
+#result_list th,
+#result_list td {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    vertical-align: middle !important;
+    color: #0f1419 !important;
+    white-space: nowrap;
+}
+
+#result_list td.field-title,
+#result_list th.column-title {
+    white-space: normal;
+    min-width: 160px;
+    max-width: 280px;
+}
+
+#result_list td.field-price_rub,
+#result_list th.column-price_rub,
+#result_list td.field-is_published,
+#result_list th.column-is_published,
+#result_list td.field-is_featured,
+#result_list th.column-is_featured {
+    white-space: nowrap;
+}
+
+#result_list thead th {
+    font-weight: 800 !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #3d4654 !important;
+}
+
+#result_list th a {
+    color: #0f1419 !important;
+}
+
+.paginator {
+    background: transparent !important;
+    color: #0f1419 !important;
+    font-weight: 600 !important;
+    padding: 14px 4px !important;
+}
+
+.paginator a {
+    border-radius: 10px !important;
+    padding: 6px 10px !important;
+    background: #fff;
+    border: 1px solid rgba(15, 20, 25, 0.12);
+}
+
+#changelist-filter {
+    background: #fff !important;
+}
+
+#changelist-filter h3,
+#changelist-filter h2 {
+    font-size: 12px !important;
+    font-weight: 800 !important;
+}
+
+#changelist-filter li a {
+    color: #0f1419 !important;
+    font-weight: 600 !important;
+    padding: 8px 10px !important;
+}
+
+#changelist-filter li.selected a {
+    font-weight: 800 !important;
+}
+
+/* Collapse headers readable */
+fieldset.collapse details summary,
+fieldset.collapsed .collapse-toggle {
+    color: #0f1419 !important;
+    font-weight: 700 !important;
+}
+
+/* Select2 / autocomplete (Django admin) */
+.select2-container--admin-autocomplete .select2-selection--single {
+    border-radius: 14px !important;
+    min-height: 42px !important;
+    border-color: rgba(15, 20, 25, 0.12) !important;
+}
+
+.select2-container--admin-autocomplete .select2-selection__rendered {
+    color: #0f1419 !important;
+    line-height: 42px !important;
+    padding-left: 14px !important;
+    font-weight: 600 !important;
+}
+
+/* Calendar / date widgets */
+.datetimeshortcuts a {
+    color: #0f1419 !important;
+    font-weight: 700 !important;
+}
+
+/* Delete confirmation */
+.delete-confirmation ul {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(15, 20, 25, 0.1);
+    padding: 16px 20px;
+    box-shadow: var(--tg-shadow);
+}
+
+/* Quiet empty changelist */
+.change-list .paginator {
+    border-top: 1px solid rgba(15, 20, 25, 0.06);
+}
+
+#content-main .quiet,
+.quiet {
+    color: #3d4654 !important;
+}
+
+/* Top save row on change form (save_on_top) */
+.change-form .submit-row + .inline-group,
+.change-form > form > .submit-row:first-of-type {
+    margin-bottom: 16px;
+}
+
+

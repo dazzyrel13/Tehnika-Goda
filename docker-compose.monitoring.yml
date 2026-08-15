@@ -1,0 +1,27 @@
+# Optional local/prod monitoring: Uptime Kuma (self-hosted, free, works in RF).
+#
+# Start:  make monitor
+# UI:     http://127.0.0.1:3001
+# Creds:  .uptime-kuma-admin (gitignored; created on first auto-setup)
+#
+# Dev probe URL must use a hostname Django accepts (no underscores):
+#   http://host.docker.internal:8000/healthz/
+# Prod (public):
+#   https://tehnikagoda.ru/healthz/
+#
+# Telegram alerts: later in Kuma → Settings → Notifications.
+
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: tehnikagoda_uptime_kuma
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - uptime_kuma_data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  uptime_kuma_data:

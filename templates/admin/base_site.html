@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/fonts.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'admin/css/tehnika_admin.css' %}?v=10">
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="{% static 'admin/js/force-light-theme.js' %}?v=1"></script>
+<meta name="theme-color" content="#ffb300">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name" class="tg-brand">
+  <a href="{% url 'admin:index' %}">
+    <img src="{% static 'images/logo_emblem.webp' %}?v=7" alt="Техника Года" class="tg-brand__logo" width="120" height="126">
+    <span class="tg-brand__text">
+      <strong>Техника Года</strong>
+      <small>Панель каталога</small>
+    </span>
+  </a>
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

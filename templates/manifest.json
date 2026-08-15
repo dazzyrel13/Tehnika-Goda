@@ -1,0 +1,24 @@
+﻿{
+  "name": "Техника Года",
+  "short_name": "Техника Года",
+  "start_url": "/catalog/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a1c24",
+  "description": "Техника Года — автомобили и спецтехника с площадки в Китае.",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/static/images/pwa/icon-512.png?v=7",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/pwa/icon-512.png?v=7",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

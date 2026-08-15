@@ -1,0 +1,32 @@
+﻿{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">Главная</a>
+&rsaquo; <a href="{% url 'admin:catalog_vehicle_changelist' %}">Автомобили</a>
+&rsaquo; Импорт по ссылке
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="tg-parse">
+  <h1>Добавить автомобиль по ссылке</h1>
+  <p class="tg-parse__lead">
+    Вставьте URL объявления — система подтянет название, цену и фото.
+    После импорта проверьте карточку и при необходимости поправьте категорию.
+  </p>
+
+  <form method="POST" class="tg-parse__form">
+    {% csrf_token %}
+    <label for="url">Ссылка на объявление</label>
+    <input type="url" name="url" id="url" required autofocus
+           placeholder="https://auto.drom.ru/...">
+    <p class="tg-parse__hint">Поддерживаются Drom, Avito и похожие объявления с разметкой.</p>
+    <div class="tg-parse__actions">
+      <button type="submit" class="tg-parse__submit">Импортировать</button>
+      <a href="{% url 'admin:catalog_vehicle_changelist' %}" class="tg-parse__cancel">Отмена</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,534 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load catalog_extras %}
+
+{% block body_class %}bg-home{% endblock %}
+
+{% block font_preload %}
+<link rel="preload" href="{% static 'fonts/caveat-cyrillic-700.woff2' %}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{% static 'images/team/leadership.webp' %}?v=1" as="image">
+{% endblock %}
+
+{% block json_ld %}
+{{ block.super }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for faq in home_faqs|slice:":4" %}
+    {
+      "@type": "Question",
+      "name": "{{ faq.question|escapejs }}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ faq.answer|striptags|escapejs }}"
+      }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="home-page">
+    <section class="ed-hero">
+        <div class="ed-hero__media" aria-hidden="true"></div>
+        <div class="ed-hero__inner">
+            <div class="ed-hero__copy">
+                <p class="ed-hero__brand">
+                    <span class="ed-hero__brand-dark">Техника</span>
+                    <span class="ed-hero__brand-accent">Года</span>
+                </p>
+                <h1 class="ed-hero__title">
+                    Ваш надёжный партнёр по импорту легковых автомобилей из&nbsp;Китая «под ключ».
+                </h1>
+                <ul class="ed-hero__features">
+                    <li>
+                        <span class="ed-hero__feature-mark" aria-hidden="true"></span>
+                        <div>
+                            <strong>Проверка до оплаты</strong>
+                            <span>Осмотр, полная диагностика технического состояния автомобиля, история автомобиля, фото/видео отчёты</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="ed-hero__feature-mark" aria-hidden="true"></span>
+                        <div>
+                            <strong>Гарантия 6 месяцев</strong>
+                            <span>На двигатель и коробку — условия в договоре</span>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="ed-hero__feature-mark" aria-hidden="true"></span>
+                        <div>
+                            <strong>Цена под ключ</strong>
+                            <span>Цена с учётом всех расходов и таможенных платежей в г. Благовещенске.</span>
+                        </div>
+                    </li>
+                </ul>
+                <div class="ed-hero__actions">
+                    <a href="{% url 'catalog:category' category_slug='cars' %}" class="btn-elite">Смотреть каталог</a>
+                    <a href="#leads-section" class="btn-elite btn-elite-ghost">Запросить расчёт под ключ</a>
+                </div>
+            </div>
+            <figure class="ed-hero__photo">
+                <img
+                    src="{% static 'images/team/leadership.webp' %}?v=1"
+                    alt="Александр, руководитель Техника Года, и Жэнь Джуншуай (Гриша), партнёр из Китая"
+                    width="1024"
+                    height="682"
+                    fetchpriority="high"
+                    decoding="async"
+                >
+                <figcaption class="ed-hero__caption">
+                    <span><strong>Александр</strong> — руководитель</span>
+                    <span class="ed-hero__caption-sep" aria-hidden="true"></span>
+                    <span><strong>Жэнь Джуншуай</strong> (Гриша) — партнёр из&nbsp;Китая</span>
+                </figcaption>
+                <p class="ed-hero__photo-badge">
+                    <span class="ed-hero__photo-badge-accent">От подбора до ключей</span>
+                    — берём всё на себя
+                </p>
+            </figure>
+        </div>
+    </section>
+
+    <section class="ed-metrics" aria-label="Ключевые факты">
+        <div class="ed-metrics__inner">
+            <div class="ed-metrics__item">
+                <strong>До 30 рабочих дней</strong>
+                <span>После оплаты инвойса</span>
+            </div>
+            <div class="ed-metrics__item">
+                <strong>Подбор</strong>
+                <span>Бесплатно</span>
+            </div>
+            <div class="ed-metrics__item">
+                <strong>Под ключ</strong>
+                <span>До Благовещенска</span>
+            </div>
+            <div class="ed-metrics__item">
+                <strong>Доставка</strong>
+                <span>Автовозом в любой город</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="ed-warranty" aria-labelledby="ed-warranty-heading">
+        <div class="ed-warranty__panel">
+            <div class="ed-warranty__copy reveal">
+                <p class="ed-warranty__eyebrow">Почему мы?!</p>
+                <h2 id="ed-warranty-heading">Гарантия 6&nbsp;месяцев на ДВС и КПП</h2>
+                <p class="ed-warranty__lead">Даём гарантию на двигатель и коробку передач для авто с нашей площадки. Срок и условия фиксируем в договоре.</p>
+            </div>
+            <div class="ed-warranty__visual">
+                <img
+                    class="ed-warranty__media"
+                    src="{% static 'images/home/warranty-banner.webp' %}?v=5"
+                    alt="Площадка и техника: гарантия на двигатель и коробку передач"
+                    width="1024"
+                    height="530"
+                    loading="lazy"
+                    decoding="async"
+                >
+                <div class="ed-warranty__write" data-warranty-write aria-hidden="true">
+                    <p class="ed-warranty__write-word">Единственные!</p>
+                </div>
+                <div class="ed-warranty__aside">
+                    <p class="ed-warranty__aside-title">Каждый автомобиль на нашей площадке прошёл тщательную диагностику.</p>
+                    <p class="ed-warranty__aside-sub">Мы уверены в качестве и готовы дать уникальное предложение!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="home-search-block reveal">
+        <div class="home-deep-search" data-home-picker>
+            <div class="home-deep-search__head">
+                <h4>Подбор по параметрам</h4>
+            </div>
+            <div class="home-deep-search__tabs" role="tablist" aria-label="Ниша подбора">
+                <button type="button" class="home-deep-search__tab is-active" role="tab" id="picker-tab-cars" aria-controls="picker-panel-cars" aria-selected="true" data-picker-tab="cars">Подобрать авто</button>
+                <button type="button" class="home-deep-search__tab" role="tab" id="picker-tab-trucks" aria-controls="picker-panel-trucks" aria-selected="false" data-picker-tab="trucks">Подобрать коммерческий транспорт</button>
+                <button type="button" class="home-deep-search__tab" role="tab" id="picker-tab-special" aria-controls="picker-panel-special" aria-selected="false" data-picker-tab="special">Подобрать спецтехнику</button>
+            </div>
+
+            <form action="{% url 'catalog:category' category_slug='cars' %}" method="GET" class="home-deep-search__grid" role="tabpanel" aria-labelledby="picker-tab-cars" data-picker-panel="cars" id="picker-panel-cars">
+                <input type="text" name="q" placeholder="Марка или модель" aria-label="Марка или модель">
+                <select name="brand" aria-label="Марка">
+                    <option value="">Все марки</option>
+                    {% for brand in car_brands %}
+                    <option value="{{ brand.slug }}">{{ brand.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="body_type" aria-label="Тип автомобиля">
+                    <option value="">Тип автомобиля</option>
+                    {% for cat in car_type_categories %}
+                    <option value="{{ cat.slug }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="category" aria-label="Категория">
+                    <option value="cars">Все легковые</option>
+                    <option value="cars_new">Новые (0 км)</option>
+                    <option value="cars_bought">Выкупленные</option>
+                </select>
+                <input type="number" name="year_from" placeholder="Год от" aria-label="Год от">
+                <input type="number" name="year_to" placeholder="Год до" aria-label="Год до">
+                <select name="color" aria-label="Цвет">
+                    <option value="">Цвет</option>
+                    {% for color in available_colors %}
+                    <option value="{{ color }}">{{ color }}</option>
+                    {% endfor %}
+                </select>
+                <select name="transmission" aria-label="Коробка передач">
+                    <option value="">Коробка передач</option>
+                    <option value="Робот">Робот</option>
+                    <option value="Вариатор">Вариатор</option>
+                    <option value="Автомат">Автоматическая</option>
+                    <option value="Механика">Механическая</option>
+                </select>
+                <input type="number" name="price_to" placeholder="Цена до (₽)" aria-label="Цена до">
+                <input type="number" name="mileage_to" placeholder="Пробег до (км)" aria-label="Пробег до">
+                <div class="home-deep-search__actions">
+                    <button type="submit" class="btn-elite home-deep-search__submit">Найти</button>
+                </div>
+            </form>
+
+            <form id="picker-panel-trucks" action="{% url 'catalog:category' category_slug='trucks' %}" method="GET" class="home-deep-search__grid" role="tabpanel" aria-labelledby="picker-tab-trucks" data-picker-panel="trucks" hidden>
+                <input type="text" name="q" placeholder="Марка или модель" aria-label="Марка или модель">
+                <select name="brand" aria-label="Марка">
+                    <option value="">Все марки</option>
+                    {% for brand in truck_brands %}
+                    <option value="{{ brand.slug }}">{{ brand.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="category" aria-label="Тип транспорта">
+                    <option value="trucks">Тип транспорта</option>
+                    {% for cat in truck_type_categories %}
+                    <option value="{{ cat.slug }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="year_from" placeholder="Год от" aria-label="Год от">
+                <input type="number" name="year_to" placeholder="Год до" aria-label="Год до">
+                <input type="number" name="price_to" placeholder="Цена до (₽)" aria-label="Цена до">
+                <input type="number" name="mileage_to" placeholder="Пробег до (км)" aria-label="Пробег до">
+                <div class="home-deep-search__actions">
+                    <button type="submit" class="btn-elite home-deep-search__submit">Найти</button>
+                </div>
+            </form>
+
+            <form id="picker-panel-special" action="{% url 'catalog:category' category_slug='special' %}" method="GET" class="home-deep-search__grid" role="tabpanel" aria-labelledby="picker-tab-special" data-picker-panel="special" hidden>
+                <input type="text" name="q" placeholder="Марка или модель" aria-label="Марка или модель">
+                <select name="brand" aria-label="Марка">
+                    <option value="">Все марки</option>
+                    {% for brand in special_brands %}
+                    <option value="{{ brand.slug }}">{{ brand.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="category" aria-label="Тип техники">
+                    <option value="special">Тип техники</option>
+                    {% for cat in special_type_categories %}
+                    <option value="{{ cat.slug }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="year_from" placeholder="Год от" aria-label="Год от">
+                <input type="number" name="year_to" placeholder="Год до" aria-label="Год до">
+                <input type="number" name="price_to" placeholder="Цена до (₽)" aria-label="Цена до">
+                <input type="number" name="mileage_to" placeholder="Наработка до (км)" aria-label="Наработка до">
+                <div class="home-deep-search__actions">
+                    <button type="submit" class="btn-elite home-deep-search__submit">Найти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="home-section home-section--offers">
+        <div class="home-section__head reveal">
+            <div class="home-section__eyebrow">Каталог</div>
+            <h2>Актуальные предложения</h2>
+            <p>Свежие позиции из каталога — откройте карточку и запросите расчёт.</p>
+        </div>
+
+        {% if has_home_offers %}
+        <section class="home-offer-block" aria-labelledby="home-cars-heading">
+            <div class="home-offer-divider reveal">
+                <h3 id="home-cars-heading">Легковые авто</h3>
+                <a href="{% url 'catalog:category' category_slug='cars' %}" class="home-offer-divider__link">Смотреть все</a>
+            </div>
+            {% if home_cars %}
+            <div class="home-featured-grid">
+                {% for vehicle in home_cars %}
+                {% include "catalog/partials/vehicle_card.html" with vehicle=vehicle priority=forloop.first %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="home-offer-empty">Пока нет опубликованных легковых авто.</p>
+            {% endif %}
+        </section>
+
+        <section class="home-offer-block" aria-labelledby="home-trucks-heading">
+            <div class="home-offer-divider reveal">
+                <h3 id="home-trucks-heading">Коммерческий транспорт</h3>
+                <a href="{% url 'catalog:category' category_slug='trucks' %}" class="home-offer-divider__link">Смотреть все</a>
+            </div>
+            {% if home_trucks %}
+            <div class="home-featured-grid">
+                {% for vehicle in home_trucks %}
+                {% include "catalog/partials/vehicle_card.html" with vehicle=vehicle %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="home-offer-empty">Пока нет опубликованного коммерческого транспорта.</p>
+            {% endif %}
+        </section>
+
+        <section class="home-offer-block" aria-labelledby="home-special-heading">
+            <div class="home-offer-divider reveal">
+                <h3 id="home-special-heading">Спецтехника</h3>
+                <a href="{% url 'catalog:category' category_slug='special' %}" class="home-offer-divider__link">Смотреть все</a>
+            </div>
+            {% if home_special %}
+            <div class="home-featured-grid">
+                {% for vehicle in home_special %}
+                {% include "catalog/partials/vehicle_card.html" with vehicle=vehicle %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="home-offer-empty">Пока нет опубликованной спецтехники.</p>
+            {% endif %}
+        </section>
+        {% else %}
+        <div class="home-empty reveal">
+            <h3>Сейчас нет активных предложений</h3>
+            <p>Оставьте заявку — подберём вариант под бюджет и задачи.</p>
+            <a href="#leads-section" class="btn-elite">Оставить заявку на подбор</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="home-section" id="how-we-work">
+        <div class="home-section__head reveal">
+            <div class="home-section__eyebrow">Как мы работаем</div>
+            <h2>От заявки до выдачи</h2>
+            <p>Четыре этапа сделки без лишних сюрпризов.</p>
+        </div>
+        <div class="process-grid">
+            <div class="process-card reveal">
+                <span class="process-card__meta">Бесплатно</span>
+                <h3>Подбор</h3>
+                <p>Подберём под ваш бюджет и пожелания.</p>
+            </div>
+            <div class="process-card reveal reveal-delay-1">
+                <span class="process-card__meta">До оплаты</span>
+                <h3>Проверка</h3>
+                <p>Осмотр, полная диагностика технического состояния автомобиля, история автомобиля, фото/видео отчёты.</p>
+            </div>
+            <div class="process-card reveal reveal-delay-2" id="customs">
+                <span class="process-card__meta">До 30 рабочих дней</span>
+                <h3>Ввоз и таможня</h3>
+                <p>Таможенное оформление, получение СБКТС, ЭПТС.</p>
+            </div>
+            <div class="process-card reveal reveal-delay-3">
+                <span class="process-card__meta">Благовещенск</span>
+                <h3>Получение</h3>
+                <p>Выдача автомобиля в г. Благовещенске или доставка в регионы автовозом.</p>
+            </div>
+        </div>
+        <p class="home-process-note">Доставка по РФ в цену под ключ не входит — ориентиры по городам ниже. Как устроена оплата — <a href="#how-we-work">четыре этапа выше</a>.</p>
+    </div>
+
+    <section class="ed-inspect" id="inspection" aria-labelledby="ed-inspect-heading">
+        <div class="ed-inspect__inner">
+            <div class="home-section__head reveal">
+                <div class="home-section__eyebrow">Проверка</div>
+                <h2 id="ed-inspect-heading">Что смотрим до выкупа</h2>
+                <p>Фиксируем состояние до перевода денег.</p>
+            </div>
+            <div class="ed-inspect__grid">
+                <article class="ed-inspect__card reveal">
+                    <span class="ed-inspect__mark" aria-hidden="true">01</span>
+                    <h3>Кузов и ЛКП</h3>
+                    <p>Осмотр кузова, сверка VIN, следы ремонта — в отчёте до выкупа.</p>
+                </article>
+                <article class="ed-inspect__card reveal reveal-delay-1">
+                    <span class="ed-inspect__mark" aria-hidden="true">02</span>
+                    <h3>Техническое состояние</h3>
+                    <p>ДВС, КПП, ходовая, электрика, компьютерная диагностика.</p>
+                </article>
+                <article class="ed-inspect__card reveal reveal-delay-2">
+                    <span class="ed-inspect__mark" aria-hidden="true">03</span>
+                    <h3>Фото и видео</h3>
+                    <p>Снаружи, салон, под капотом — материалы уходят вам до оплаты.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <div class="home-section" id="delivery-estimate">
+        <div class="home-section__head reveal">
+            <div class="home-section__eyebrow">Доставка</div>
+            <h2>Ориентир по городам</h2>
+            <p>Срок и стоимость автовоза после выдачи. Цены ориентировочные.</p>
+        </div>
+        <div class="ed-delivery reveal reveal-delay-1">
+            <div class="ed-delivery__table-wrap">
+                <table class="ed-delivery__table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Город</th>
+                            <th scope="col">Срок</th>
+                            <th scope="col">Ориентир</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Красноярск</td>
+                            <td>~10 дней</td>
+                            <td>от 100&nbsp;000&nbsp;₽</td>
+                        </tr>
+                        <tr>
+                            <td>Новосибирск</td>
+                            <td>~15 дней</td>
+                            <td>от 130&nbsp;000&nbsp;₽</td>
+                        </tr>
+                        <tr>
+                            <td>Екатеринбург</td>
+                            <td>~20 дней</td>
+                            <td>от 160&nbsp;000&nbsp;₽</td>
+                        </tr>
+                        <tr>
+                            <td>Москва</td>
+                            <td>~20 дней</td>
+                            <td>от 180&nbsp;000&nbsp;₽</td>
+                        </tr>
+                        <tr>
+                            <td>Санкт-Петербург</td>
+                            <td>~25 дней</td>
+                            <td>от 210&nbsp;000&nbsp;₽</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="ed-delivery__aside">
+                <p>Подбираем автовоз или ЖД под ваш город и срок. Итог зависит от тарифа перевозчика; страхование и подача на адрес — по его условиям.</p>
+                <div class="ed-delivery__actions">
+                    <a href="#leads-section" class="btn-elite">Рассчитать доставку</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="home-section home-section--about">
+        <div class="home-about-strip reveal">
+            <div>
+                <div class="home-section__eyebrow">О компании</div>
+                <h2>Команда на месте</h2>
+                <p>Партнёры в Китае контролируют подготовку и отправку автомобиля.</p>
+            </div>
+            <a href="{% url 'about' %}" class="btn-elite btn-elite-ghost">О компании</a>
+        </div>
+    </div>
+
+    <div class="home-section home-section--faq">
+        <div class="home-section__head reveal">
+            <div class="home-section__eyebrow">FAQ</div>
+            <h2>Частые вопросы</h2>
+        </div>
+        <div class="faq-list reveal reveal-delay-1">
+            {% for faq in home_faqs %}
+            {% if forloop.counter <= 4 %}
+            <details class="faq-item">
+                <summary>{{ faq.question }}</summary>
+                <div class="faq-item__answer">{{ faq.answer|linebreaksbr }}</div>
+            </details>
+            {% endif %}
+            {% endfor %}
+            <div class="faq-list__more">
+                <a href="{% url 'content:faq' %}">Все вопросы и ответы →</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="home-section home-section--reviews" aria-labelledby="home-reviews-heading">
+        <div class="home-section__head reveal">
+            <div class="home-section__eyebrow">Отзывы</div>
+            <h2 id="home-reviews-heading">Отзывы клиентов</h2>
+            <p>Реальные отзывы с 2ГИС, Авито и Яндекс Карт — можно перейти и проверить.</p>
+        </div>
+
+        {% if home_reviews %}
+        <div class="home-reviews-grid">
+            {% for review in home_reviews %}
+            <article class="home-review reveal">
+                <div class="home-review__head">
+                    <span class="home-review__avatar home-review__avatar--{{ review.avatar_tone }}" aria-hidden="true">{{ review.initials }}</span>
+                    <div class="home-review__who">
+                        <strong class="home-review__name">{{ review.client_name }}</strong>
+                        {% if review.subtitle %}
+                        <span class="home-review__subtitle">{{ review.subtitle }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="home-review__rating" aria-label="Оценка {{ review.rating }} из 5">
+                    {% for i in "12345" %}{% if forloop.counter <= review.rating %}<span class="home-review__star is-on">★</span>{% else %}<span class="home-review__star">☆</span>{% endif %}{% endfor %}
+                </div>
+                <div class="home-review__content">
+                    <p class="home-review__text js-review-text">{{ review.comment }}</p>
+                    <button type="button" class="home-review__more js-review-more" hidden>Читать целиком</button>
+                </div>
+                {% with link=review.resolved_source_url %}
+                {% if link %}
+                <a href="{{ link }}" class="home-review__source-link home-review__source-link--{{ review.source }}" target="_blank" rel="noopener noreferrer">
+                    <img src="{% static review.source_icon %}" alt="" class="home-review__source-icon" width="18" height="18" loading="lazy" decoding="async">
+                    {{ review.source_link_label }}
+                </a>
+                {% else %}
+                <span class="home-review__source-link home-review__source-link--{{ review.source }} is-static">
+                    <img src="{% static review.source_icon %}" alt="" class="home-review__source-icon" width="18" height="18" loading="lazy" decoding="async">
+                    {{ review.source_link_label }}
+                </span>
+                {% endif %}
+                {% endwith %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="home-reviews-empty reveal" aria-live="polite">
+            <div class="home-reviews-empty__card">
+                <p class="home-reviews-empty__title">Скоро здесь появятся отзывы</p>
+                <p class="home-reviews-empty__text">Мы собираем отзывы клиентов с 2ГИС, Авито и Яндекс Карт. Место для карточек уже готово.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="home-reviews-platforms reveal" aria-label="Рейтинги на площадках">
+            {% for platform in review_platforms %}
+            {% if platform.url %}
+            <a href="{{ platform.url }}" class="home-reviews-platform home-reviews-platform--{{ platform.key }}" target="_blank" rel="noopener noreferrer">
+            {% else %}
+            <div class="home-reviews-platform home-reviews-platform--{{ platform.key }} is-static">
+            {% endif %}
+                <img src="{% static platform.icon %}" alt="{{ platform.name }}" class="home-reviews-platform__icon" width="36" height="36" loading="lazy" decoding="async">
+                <span class="home-reviews-platform__body">
+                    <span class="home-reviews-platform__score{% if not platform.has_rating %} is-empty{% endif %}">
+                        {{ platform.score }}
+                        {% if platform.has_rating %}<span class="home-reviews-platform__star">★</span>{% endif %}
+                    </span>
+                    <span class="home-reviews-platform__label">{{ platform.label }}</span>
+                </span>
+            {% if platform.url %}
+            </a>
+            {% else %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}?v=1"></script>
+{% endblock %}

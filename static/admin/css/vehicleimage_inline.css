@@ -1,0 +1,79 @@
+/* Галерея авто в админке: мультизагрузка + drag-and-drop */
+
+.tg-gallery-multi-input {
+    min-height: 48px !important;
+    padding: 12px !important;
+    border: 2px dashed #1a1c24 !important;
+    border-radius: 12px !important;
+    background: #f0f1f3 !important;
+    width: 100%;
+    max-width: 520px;
+    cursor: pointer;
+}
+
+.tg-gallery-multi-input:hover {
+    border-color: #ffb300 !important;
+    background: #fff4d6 !important;
+}
+
+#vehicleimage_set-group .drag-handle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(15, 20, 25, 0.12);
+    border-radius: 10px;
+    background: #fff;
+    cursor: grab;
+    color: #1a1c24;
+    font-size: 20px;
+    line-height: 1;
+    padding: 0;
+    box-shadow: 0 2px 8px rgba(15, 20, 25, 0.06);
+}
+
+#vehicleimage_set-group .drag-handle:active {
+    cursor: grabbing;
+    background: #fff4d6;
+}
+
+#vehicleimage_set-group .tg-gallery-thumb {
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    border: 1px solid rgba(15, 20, 25, 0.08);
+}
+
+#vehicleimage_set-group tr.tg-sortable-row {
+    transition: background 0.12s ease;
+}
+
+#vehicleimage_set-group tr.tg-row-dragging {
+    opacity: 0.45;
+    background: #f0f1f3 !important;
+}
+
+#vehicleimage_set-group tr.tg-row-drag-over {
+    box-shadow: inset 0 3px 0 #ffb300;
+    background: #fff4d6 !important;
+}
+
+#vehicleimage_set-group .inline-related h2,
+#vehicleimage_set-group > h2 {
+    font-size: 15px;
+}
+
+/* Подсказка над инлайном */
+#vehicleimage_set-group::before {
+    content: "Зажмите ⠿ слева и перетащите строку — так задаётся порядок фото на сайте. Не забудьте сохранить.";
+    display: block;
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fff4d6;
+    border: 1px solid rgba(255, 179, 0, 0.35);
+    color: #1a1c24;
+    font-size: 13px;
+    line-height: 1.45;
+}

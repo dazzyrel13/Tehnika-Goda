@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: tehnikagoda_test
+          POSTGRES_USER: tehnikagoda
+          POSTGRES_PASSWORD: tehnikagoda
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tehnikagoda -d tehnikagoda_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      SECRET_KEY: ci-test-secret-key-not-for-production
+      DEBUG: "False"
+      USE_HTTPS: "False"
+      ALLOW_INSECURE_PRODUCTION: "True"
+      ALLOW_OPEN_ADMIN: "True"
+      DATABASE_URL: postgres://tehnikagoda:tehnikagoda@localhost:5432/tehnikagoda_test
+      REDIS_BROKER_URL: redis://localhost:6379/0
+      REDIS_CACHE_URL: redis://localhost:6379/1
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      SITE_URL: http://localhost:8000
+      ANALYTICS_ASYNC: "False"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install coverage
+
+      - name: Django checks
+        run: |
+          python manage.py check
+          python manage.py migrate --noinput
+
+      - name: Run tests with coverage
+        run: |
+          coverage run manage.py test --verbosity=1
+          coverage report
+          coverage xml
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+            .coverage
+          if-no-files-found: ignore
+
+      - name: pip-audit
+        run: |
+          pip install pip-audit
+          python -m pip_audit -r requirements.txt

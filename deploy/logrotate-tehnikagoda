@@ -1,0 +1,21 @@
+# Install on the VPS (as root):
+#   cp deploy/logrotate-tehnikagoda /etc/logrotate.d/tehnikagoda
+#   logrotate -d /etc/logrotate.d/tehnikagoda   # dry-run
+#
+# Django already uses RotatingFileHandler (5×5MB). This covers host-side copies
+# and any nginx access/error logs you mount under /var/log/tehnikagoda/.
+
+/opt/tehnikagoda/logs/*.log
+/var/log/tehnikagoda/*.log
+/var/log/tehnikagoda-backup.log
+/var/log/tehnikagoda-health.log
+{
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    maxsize 20M
+}

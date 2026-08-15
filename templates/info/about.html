@@ -1,0 +1,167 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block body_class %}bg-about{% endblock %}
+
+{% block content %}
+<section class="info-page about-case">
+    <div class="container">
+        <div class="home-section__head info-page__intro about-case__intro">
+            <div class="home-section__eyebrow">О компании</div>
+            <h1 class="about-case__manifesto">
+                <span class="about-case__manifesto-brand">Техника Года</span> — ваш надёжный партнёр по импорту легковых автомобилей из&nbsp;Китая «под ключ».
+                Мы работаем напрямую с заводами и дилерами, обеспечивая выгодные цены без лишних посредников.
+                Берём на себя весь процесс: от подбора модели до постановки на учёт.
+                Гарантируем прозрачность, полное юридическое сопровождение и безопасность на каждом этапе.
+            </h1>
+        </div>
+
+        <div class="about-case__lead glass-panel">
+            <figure class="about-case__photo">
+                <img
+                    src="{% static 'images/team/leadership.webp' %}?v=1"
+                    alt="Александр, руководитель Техника Года, и Жэнь Джуншуай (Гриша), партнёр из Китая"
+                    width="1024"
+                    height="682"
+                    loading="lazy"
+                    decoding="async"
+                >
+                <figcaption>
+                    <span><strong>Александр</strong> — руководитель</span>
+                    <span class="about-case__sep" aria-hidden="true"></span>
+                    <span><strong>Жэнь Джуншуай</strong> (Гриша) — партнёр из&nbsp;Китая</span>
+                </figcaption>
+            </figure>
+            <div class="about-case__lead-copy">
+                <div class="home-section__eyebrow">Для кого</div>
+                <h2>Работаем с теми, кому нужна честная цена</h2>
+                <p>
+                    Частные покупатели, автопарки, лизинговые компании и предприниматели,
+                    которые хотят получить современный автомобиль по честной цене.
+                </p>
+                <ul class="about-case__bullets">
+                    <li>Прямая работа с заводами и дилерами</li>
+                    <li>Весь путь — от подбора до постановки на учёт</li>
+                    <li>Юридическое сопровождение на каждом этапе</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="home-section about-case__block">
+            <div class="home-section__head">
+                <div class="home-section__eyebrow">Что мы делаем</div>
+                <h2>Весь процесс на нас</h2>
+                <p>От первой консультации до ключей и документов — без лишней беготни с вашей стороны.</p>
+            </div>
+            <ol class="about-case__services">
+                <li class="about-case__service">
+                    <span class="info-feature-mark" aria-hidden="true">01</span>
+                    <p>Подбираем автомобиль под ваш бюджет и задачи — от городских седанов и кроссоверов до премиальных электрокаров и гибридов.</p>
+                </li>
+                <li class="about-case__service">
+                    <span class="info-feature-mark" aria-hidden="true">02</span>
+                    <p>Проводим полную проверку состояния, истории и комплектации автомобиля.</p>
+                </li>
+                <li class="about-case__service">
+                    <span class="info-feature-mark" aria-hidden="true">03</span>
+                    <p>Организуем логистику: доставку морем, ж/д или автовозом до вашего города.</p>
+                </li>
+                <li class="about-case__service">
+                    <span class="info-feature-mark" aria-hidden="true">04</span>
+                    <p>Берём на себя таможенное оформление, уплату пошлин и сертификацию.</p>
+                </li>
+                <li class="about-case__service">
+                    <span class="info-feature-mark" aria-hidden="true">05</span>
+                    <p>Помогаем с постановкой на учёт и оформлением страховки.</p>
+                </li>
+            </ol>
+        </div>
+
+        <div class="home-section about-case__block">
+            <div class="home-section__head">
+                <div class="home-section__eyebrow">Почему мы</div>
+                <h2>Почему выбирают нас</h2>
+                <p>Понятные условия, реальные сроки и экспертиза китайского рынка.</p>
+            </div>
+            <div class="about-case__principles">
+                <article class="about-case__principle">
+                    <h3>Прозрачность</h3>
+                    <p>Фиксируем стоимость в договоре до начала работы. Никаких скрытых платежей.</p>
+                </article>
+                <article class="about-case__principle">
+                    <h3>Сроки</h3>
+                    <p>Средний срок доставки — от 30 до 60 дней в зависимости от региона.</p>
+                </article>
+                <article class="about-case__principle">
+                    <h3>Экспертиза</h3>
+                    <p>Знание китайского рынка, особенностей комплектаций и специфики таможенного законодательства.</p>
+                </article>
+                <article class="about-case__principle">
+                    <h3>Гарантия</h3>
+                    <p>Юридическая чистота сделки и поддержка после получения автомобиля.</p>
+                </article>
+                <article class="about-case__principle">
+                    <h3>Широкий выбор</h3>
+                    <p>Geely, Chery, Haval, BYD, Zeekr, Li Auto, Changan и десятки других брендов.</p>
+                </article>
+            </div>
+        </div>
+
+        <div class="home-section about-case__block">
+            <div class="home-section__head">
+                <div class="home-section__eyebrow">Что привозим</div>
+                <h2>Легковые, коммерческий транспорт и спецтехника</h2>
+            </div>
+            <div class="about-case__pillars">
+                <article class="about-case__pillar">
+                    <h3>Легковые</h3>
+                    <p>Новые и подержанные автомобили. Подберём под любой бюджет и вкус.</p>
+                </article>
+                <article class="about-case__pillar">
+                    <h3>Коммерческий транспорт</h3>
+                    <p>Бортовые грузовики, фургоны, рефрижераторы, эвакуаторы, борты с&nbsp;КМУ, илососы — под ваши задачи.</p>
+                </article>
+                <article class="about-case__pillar">
+                    <h3>Спецтехника</h3>
+                    <p>Автовышки и башенные краны — подбор под объект и работу на площадке.</p>
+                </article>
+            </div>
+            <aside class="about-case__dealer">
+                <span class="about-case__dealer-mark">Официальный дилер</span>
+                <p>
+                    <strong>Техника Года</strong> — официальный дилер башенных кранов
+                    <a href="{% url 'catalog:category' category_slug='special_cranes' %}">Dahan</a>.
+                </p>
+            </aside>
+        </div>
+
+        <blockquote class="about-case__quote glass-panel">
+            <p>Мы не просто привозим автомобили — мы делаем процесс покупки из‑за рубежа таким же простым и понятным, как визит в местный автосалон.</p>
+        </blockquote>
+
+        <div class="about-case__office glass-panel">
+            <div>
+                <div class="home-section__eyebrow">Где забрать</div>
+                <h2>Ждём вас в Благовещенске</h2>
+                <p>
+                    Амурская область, г. Благовещенск, ул. Тенистая, 131, вход №&nbsp;7.
+                    Здесь выдаём автомобили. Нужно дальше по России — поможем с автовозом.
+                </p>
+                <p class="about-case__phone">
+                    <a href="tel:+79241490013">8 (924) 149-00-13</a>
+                </p>
+            </div>
+            <div class="about-case__office-actions">
+                <a href="{% url 'catalog:home' %}#how-we-work" class="btn-elite btn-elite-ghost">Процесс</a>
+                <a href="{% url 'catalog:category' category_slug='cars' %}" class="btn-elite btn-elite-ghost">Каталог</a>
+            </div>
+        </div>
+
+        <div class="glass-panel info-page__cta">
+            <h3>Напишите или позвоните</h3>
+            <p>Подберём модель под бюджет, посчитаем стоимость под ключ и расскажем сроки доставки.</p>
+            <a href="#leads-section" class="btn-elite">Оставить заявку</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

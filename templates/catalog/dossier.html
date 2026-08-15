@@ -1,0 +1,80 @@
+﻿{% extends 'base.html' %}
+{% load static humanize catalog_extras %}
+
+{% block title %}Цифровое досье: {{ vehicle.title }} | Техника Года{% endblock %}
+{% block meta_robots %}noindex, follow{% endblock %}
+{% block body_class %}bg-dossier{% endblock %}
+
+{% block content %}
+<section style="padding: 100px 0;">
+    <div class="container">
+        
+        <!-- Header Section -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 50px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                    <span style="background: var(--accent-yellow); color: #141820; padding: 5px 15px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Отчёт осмотра</span>
+                    <span style="color: var(--text-muted); font-size: 13px;">📅 {{ vehicle.report.created_at|date:"d.m.Y" }}</span>
+                </div>
+                <h1 style="font-size: 48px; margin-bottom: 10px;">{{ vehicle.title }}</h1>
+                <p class="accent-text" style="text-transform: uppercase; font-weight: bold; font-size: 12px; letter-spacing: 3px;">UID отчёта: {{ vehicle.report.report_uid }}</p>
+            </div>
+            
+            <div class="glass-panel" style="padding: 20px 40px; border-radius: 15px; border-color: var(--accent-red);">
+                <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;">Цена</div>
+                <div style="font-size: 32px; font-weight: 900;">{% if vehicle.price_rub != None %}{{ vehicle.price_rub|intcomma }} <span class="accent-text">₽</span>{% else %}Цена по запросу{% endif %}</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 40px;">
+            <!-- Left Column -->
+            <div>
+                <div class="glass-panel" style="padding: 30px; margin-bottom: 30px; border-radius: 20px;">
+                    <h3 style="font-size: 16px; margin-bottom: 25px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px;">Технические данные</h3>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <span style="color: var(--text-muted);">Год выпуска:</span>
+                        <span style="font-weight: bold;">{{ vehicle.year }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <span style="color: var(--text-muted);">Пробег:</span>
+                        <span style="font-weight: bold;">{{ vehicle.mileage }} км</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel" style="padding: 30px; border-radius: 20px;">
+                    <h3 style="font-size: 16px; margin-bottom: 20px; color: var(--accent-red);">Комментарий по результатам осмотра</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.8; white-space: pre-line;">{{ vehicle.report.dealer_verdict|default:"Дополнительной информации от дилера не предоставлено." }}</p>
+                    
+                    {% if vehicle.report.pdf_file %}
+                    <a href="{% url 'catalog:vehicle_report_pdf' vehicle.slug %}" class="btn-elite" style="width: 100%; text-align: center; margin-top: 25px; padding: 12px; font-size: 14px;">Скачать полный PDF в высоком качестве</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Column: Gallery -->
+            <div>
+                <div class="glass-panel" style="padding: 30px; border-radius: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                        <h3 style="font-size: 18px;">Материалы осмотра</h3>
+                        <p style="font-size: 12px; color: var(--text-muted);">Все фото в оригинальном качестве</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        {% for img in vehicle.gallery.all %}
+                        {% responsive_image img.image 800 as shot %}
+                        <a href="{{ shot.full_src }}" target="_blank" rel="noopener noreferrer" style="border-radius: 12px; overflow: hidden; height: 250px; border: 1px solid var(--glass-border); display: block;">
+                            <img class="dossier-shot-img" src="{{ shot.src }}" srcset="{{ shot.srcset }}" sizes="(max-width: 700px) 92vw, 45vw" alt="">
+                        </a>
+                        {% endfor %}
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--glass-border);">
+                        <p style="color: var(--text-muted); font-size: 11px;">Фото публикуются в исходном качестве. Данные съёмки могут использоваться для внутренней верификации материалов.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

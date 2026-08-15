@@ -1,0 +1,33 @@
+{% load catalog_extras %}
+<div class="glass-panel car-card reveal {% if vehicle.is_featured %}featured-glare{% endif %}">
+    <a href="{{ vehicle.get_absolute_url }}" class="car-card__media">
+        {% if vehicle.main_image %}
+        {% responsive_image vehicle.main_image 800 as img %}
+        <img
+            src="{{ img.src }}"
+            srcset="{{ img.srcset }}"
+            sizes="(max-width: 640px) 92vw, (max-width: 1100px) 45vw, 380px"
+            alt="{{ vehicle.title }}"
+            {% if not priority %}loading="lazy"{% else %}fetchpriority="high"{% endif %}
+            decoding="async"
+        >
+        {% else %}
+        <div class="car-card__no-photo">Нет фото</div>
+        {% endif %}
+        <div class="car-card__brand">{{ vehicle.brand.name }}</div>
+        {% vehicle_badge_items vehicle as badges %}
+        {% if badges %}
+        <div class="car-card__badges">
+            {% for badge in badges %}
+            <div class="elite-badge {{ badge.class }}">{{ badge.text }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </a>
+    <div class="car-card__body">
+        <h3 class="car-card__title">{{ vehicle.title }}</h3>
+        <div class="car-card__price">{{ vehicle.price_rub|price_rub_display }}</div>
+        {% include "catalog/partials/vehicle_card_meta.html" %}
+        <a href="{{ vehicle.get_absolute_url }}" class="btn-elite car-card__cta">Подробнее</a>
+    </div>
+</div>

@@ -1,0 +1,283 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ seo_title|default:"Техника Года | Автомобили и спецтехника из Китая" }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ seo_description|default:"Техника Года — автомобили и спецтехника с площадки в Китае. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
+    <meta name="robots" content="{% block meta_robots %}{{ meta_robots|default:'index, follow' }}{% endblock %}">
+    <link rel="canonical" href="{% block canonical_url %}{{ canonical_url }}{% endblock %}">
+
+    <meta name="application-name" content="Техника Года">
+    <meta property="og:site_name" content="Техника Года">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{{ seo_title|default:"Техника Года | Автомобили и спецтехника из Китая" }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ seo_description|default:"Техника Года — автомобили и спецтехника с площадки в Китае. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ canonical_url }}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ og_image_url|default:default_og_image_url }}{% endblock %}">
+    <meta property="og:image:width" content="{{ og_image_width|default:'512' }}">
+    <meta property="og:image:height" content="{{ og_image_height|default:'512' }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ seo_title|default:"Техника Года | Автомобили и спецтехника из Китая" }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ seo_description|default:"Техника Года — автомобили и спецтехника с площадки в Китае. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{{ og_image_url|default:default_og_image_url }}{% endblock %}">
+    {% if GOOGLE_SITE_VERIFICATION %}
+    <meta name="google-site-verification" content="{{ GOOGLE_SITE_VERIFICATION }}">
+    {% endif %}
+    {% if YANDEX_VERIFICATION %}
+    <meta name="yandex-verification" content="{{ YANDEX_VERIFICATION }}">
+    {% endif %}
+    
+    <link rel="preload" href="{% static 'fonts/manrope-cyrillic-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/manrope-latin-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/unbounded-cyrillic-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
+    {% block font_preload %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.62">
+    
+    <!-- PWA Core Meta -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1c24">
+    <link rel="apple-touch-icon" href="{% static 'images/favicon-180.png' %}?v=9">
+    <link rel="icon" href="{% static 'images/favicon.ico' %}?v=9" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32.png' %}?v=9">
+    <link rel="icon" type="image/png" sizes="48x48" href="{% static 'images/favicon-48.png' %}?v=9">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}?v=9">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Core Organization SEO Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AutoDealer",
+      "name": "Техника Года",
+      "url": "{{ SITE_URL }}",
+      "image": "{{ default_og_image_url }}",
+      "telephone": "8 (924) 149-00-13",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ул. Тенистая, 131, вход № 7",
+        "addressLocality": "Благовещенск",
+        "addressRegion": "Амурская область",
+        "addressCountry": "RU"
+      }{% if review_aggregate %},
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "{{ review_aggregate.ratingValue }}",
+        "reviewCount": "{{ review_aggregate.reviewCount }}",
+        "bestRating": "5",
+        "worstRating": "1"
+      }{% endif %}
+    }
+    </script>
+    {% block json_ld %}{% endblock %}
+</head>
+<body class="{% block body_class %}bg-default{% endblock %}"{% if YANDEX_METRIKA_ID %} data-yandex-metrika-id="{{ YANDEX_METRIKA_ID }}"{% endif %}>
+
+    <!-- Header Navigation -->
+    <header class="glass-shadow">
+        <div class="container site-header-inner">
+            <div class="site-logo-wrap">
+                <a href="/" class="site-logo-link">
+                    <img src="{% static 'images/logo_emblem.webp' %}?v=7" alt="Техника Года" class="site-logo" width="120" height="126">
+                    <span class="visually-hidden">Техника Года</span>
+                </a>
+            </div>
+            
+            <nav class="site-nav">
+                <!-- Modern Search Bar (AJAX) -->
+                <div class="desktop-search">
+                    <input type="text" id="global-search" class="desktop-search__input" placeholder="Быстрый поиск" data-search-url="{% url 'catalog:search_ajax' %}">
+                    <div id="search-results" class="glass-panel desktop-search__results">
+                        <!-- Results will be injected here -->
+                    </div>
+                </div>
+
+                <ul class="nav-links">
+                    <li><a href="/">Главная</a></li>
+
+                    <!-- Легковые авто (Dropdown) -->
+                    <li class="nav-dropdown">
+                        <a href="{% url 'catalog:category' category_slug='cars' %}">Легковые авто ▾</a>
+                        <div class="nav-dropdown-menu glass-panel">
+                            <a href="{% url 'catalog:category' category_slug='cars' %}">Все легковые</a>
+                            <a href="{% url 'catalog:category' category_slug='cars_sedan' %}">Седаны</a>
+                            <a href="{% url 'catalog:category' category_slug='cars_crossover' %}">Кроссоверы</a>
+                            <a href="{% url 'catalog:category' category_slug='cars_suv' %}">Внедорожники</a>
+                            <a href="{% url 'catalog:category' category_slug='cars_minivan' %}">Минивэны</a>
+                            <a href="{% url 'catalog:category' category_slug='cars_bought' %}" class="nav-item-bought">
+                                <span class="nav-item-bought__label">Выкупленные</span>
+                            </a>
+                            <a href="{% url 'catalog:category' category_slug='cars_new' %}" class="nav-item-new">Новые</a>
+                        </div>
+                    </li>
+
+                    <!-- Коммерческий транспорт (Dropdown) -->
+                    <li class="nav-dropdown">
+                        <a href="{% url 'catalog:category' category_slug='trucks' %}">Коммерческий ▾</a>
+                        <div class="nav-dropdown-menu glass-panel">
+                            <a href="{% url 'catalog:category' category_slug='trucks' %}">Весь транспорт</a>
+                            <a href="{% url 'catalog:category' category_slug='trucks_trucks' %}">Грузовики</a>
+                            <a href="{% url 'catalog:category' category_slug='trucks_vans' %}">Фургоны</a>
+                            <a href="{% url 'catalog:category' category_slug='trucks_km' %}">Бортовые с КМУ</a>
+                            <a href="{% url 'catalog:category' category_slug='trucks_evac' %}">Эвакуаторы</a>
+                        </div>
+                    </li>
+
+                    <!-- Спецтехника (Dropdown) -->
+                    <li class="nav-dropdown">
+                        <a href="{% url 'catalog:category' category_slug='special' %}">Спецтехника ▾</a>
+                        <div class="nav-dropdown-menu glass-panel">
+                            <a href="{% url 'catalog:category' category_slug='special_lifts' %}">Автовышки</a>
+                            <a href="{% url 'catalog:category' category_slug='special_cranes' %}">Башенные краны</a>
+                        </div>
+                    </li>
+
+                    <li><a href="{% url 'content:faq' %}">FAQ</a></li>
+                    <li><a href="{% url 'about' %}">О компании</a></li>
+                    <li><a href="#leads-section" class="btn-elite nav-cta">Оставить заявку на подбор</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="site-main">
+        {% if messages %}
+            <div class="container" style="padding-top: 20px;">
+                {% for message in messages %}
+                    <div class="glass-panel" style="padding: 15px; margin-bottom: 20px; border-color: var(--accent-yellow); background: rgba(255, 179, 0, 0.12);">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <section id="leads-section" class="leads-cta-section" aria-label="Заявка">
+        <div class="container">
+            <div class="glass-panel" style="max-width: 600px; margin: 0 auto; padding: 40px;">
+                <h2 class="accent-text" style="margin-bottom: 10px; text-align: center;">Оставить заявку</h2>
+                <p style="color: var(--text-muted); text-align: center; margin-bottom: 30px; font-size: 14px;">Свяжемся в течение 15 минут в рабочее время и уточним детали запроса.</p>
+                
+                <form action="{% url 'leads:submit' %}" method="POST" id="lead-form">
+                    {% csrf_token %}
+                    <input type="text" name="website" tabindex="-1" autocomplete="off" style="position: absolute; left: -9999px; opacity: 0; height: 0; width: 0;" aria-hidden="true">
+                    <input type="text" name="company" tabindex="-1" autocomplete="off" style="position: absolute; left: -9999px; opacity: 0; height: 0; width: 0;" aria-hidden="true">
+                    <input type="hidden" name="form_ts" id="lead-form-ts" value="">
+                    <input type="hidden" name="vehicle" id="lead-vehicle-id">
+                    <input type="hidden" name="utm_source" id="lead-utm-source">
+                    <input type="hidden" name="utm_medium" id="lead-utm-medium">
+                    <input type="hidden" name="utm_campaign" id="lead-utm-campaign">
+                    <div style="margin-bottom: 20px;">
+                        <label class="visually-hidden" for="lead-name">Имя</label>
+                        <input type="text" name="name" id="lead-name" class="glass-panel" style="width: 100%;" placeholder="Ваше имя" required autocomplete="name" maxlength="100">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label class="visually-hidden" for="lead-phone">Телефон</label>
+                        <input type="tel" name="phone" id="lead-phone" class="glass-panel" style="width: 100%;" placeholder="+7 (___) ___-__-__" required inputmode="tel" autocomplete="tel" maxlength="18">
+                        <p id="lead-phone-hint" style="display:none; margin-top: 8px; font-size: 12px; color: #b45309;">Нужен российский номер: +7 или 8 и 10 цифр.</p>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label class="visually-hidden" for="lead-city">Город</label>
+                        <input type="text" name="city" id="lead-city" class="glass-panel" style="width: 100%;" placeholder="Ваш город" required autocomplete="address-level2" maxlength="120">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label class="visually-hidden" for="lead-message">Сообщение</label>
+                        <textarea name="message" id="lead-message" class="glass-panel" style="width: 100%;" rows="4" placeholder="Какая техника вас интересует?" maxlength="2000"></textarea>
+                    </div>
+                    <button type="submit" class="btn-elite" style="width: 100%;">Отправить заявку</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="site-footer__grid">
+                <div class="site-footer__brand">
+                    <a href="/" class="site-footer__logo">
+                        <img src="{% static 'images/logo_emblem.webp' %}?v=7" alt="Техника Года" class="site-logo" width="120" height="126">
+                    </a>
+                    <p class="site-footer__name" aria-hidden="true">
+                        <span class="site-footer__name-dark">Техника</span>
+                        <span class="site-footer__name-accent">Года</span>
+                    </p>
+                    <p class="site-footer__tagline">
+                        Нужный вам автомобиль уже на нашей площадке в&nbsp;Китае.<br>
+                        Оставьте заявку&nbsp;— остальное мы сделаем сами.
+                    </p>
+                </div>
+                <div class="site-footer__col">
+                    <h5 class="site-footer__heading">Навигация</h5>
+                    <ul class="site-footer__nav">
+                        <li><a href="{% url 'about' %}">О компании</a></li>
+                        <li><a href="{% url 'catalog:home' %}#how-we-work">Процесс</a></li>
+                        <li><a href="{% url 'catalog:home' %}#inspection">Проверка</a></li>
+                        <li><a href="{% url 'catalog:home' %}#delivery-estimate">Доставка</a></li>
+                        <li><a href="{% url 'leasing' %}">Лизинг</a></li>
+                        <li><a href="{% url 'content:faq' %}">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="site-footer__col site-footer__col--contacts">
+                    <h5 class="site-footer__heading">Контакты</h5>
+                    <div class="site-footer__contacts">
+                        <p>Амурская область, г. Благовещенск, ул. Тенистая, 131, вход №&nbsp;7</p>
+                        <p><a class="site-footer__phone" href="tel:+79241490013">8 (924) 149-00-13</a></p>
+                        <p><a href="mailto:sale@tehnikagoda.ru">sale@tehnikagoda.ru</a></p>
+                        <p>
+                            <a
+                                class="site-footer__telegram"
+                                href="https://t.me/tehnikagoda"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <svg class="site-footer__telegram-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                                    <path fill="currentColor" d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                </svg>
+                                <span>Наша группа в Telegram</span>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="site-footer__bottom">
+                &copy; 2026 Техника Года. Все права защищены. | <a href="/privacy/">Политика конфиденциальности</a>
+                <p class="site-footer__legal">
+                    Вся информация на сайте носит информационный характер и не является публичной офертой (ст. 437 ГК РФ). Параметры в карточках являются ориентировочными, а финальные условия, стоимость, сроки поставки и комплектация фиксируются в договоре до оплаты.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="cookie-consent" class="glass-panel" style="display: none; position: fixed; left: 20px; right: 20px; bottom: 20px; z-index: 10050; padding: 14px 16px; border-radius: 14px; background: #fff; border-color: var(--glass-border); max-width: 920px; margin: 0 auto;">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
+            <p style="margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.45; flex: 1 1 420px;">
+                Мы используем cookie для корректной работы сайта и анализа трафика. Продолжая использование сайта, вы соглашаетесь с обработкой cookie.
+                <a href="/privacy/" style="color: var(--accent-blue); text-decoration: underline; text-underline-offset: 2px;">Подробнее</a>
+            </p>
+            <div style="display: flex; gap: 8px; flex: 0 0 auto;">
+                <button type="button" id="cookie-necessary" class="glass-panel" style="padding: 9px 14px; border-radius: 10px; color: var(--text-main); cursor: pointer; font-size: 12px; border-color: var(--glass-border); background: #f8f9fb;">Только необходимые</button>
+                <button type="button" id="cookie-accept" class="btn-elite" style="padding: 9px 14px; font-size: 12px;">Принять</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-actions">
+        <div class="mobile-actions__grid">
+            <a href="tel:+79241490013"><span class="mobile-actions__label">Звонок</span>Телефон</a>
+            <a href="https://wa.me/79241490013" target="_blank" rel="noopener noreferrer"><span class="mobile-actions__label">Чат</span>WhatsApp</a>
+            <a href="https://t.me/tehnikagoda" target="_blank" rel="noopener noreferrer"><span class="mobile-actions__label">TG</span>Telegram</a>
+        </div>
+    </div>
+
+    <script src="{% static 'js/site.js' %}?v=4"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

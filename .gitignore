@@ -1,0 +1,57 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Environment & secrets
+.env
+.env.*
+!.env.production.example
+!.env.example
+.seed_admin_password
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+*.log
+logs/
+staticfiles/
+media/
+
+# Data dumps / backups (may contain PII)
+datadump.json
+*_dump.json
+*_backup.json
+turbo_sqlite_backup.json
+gallery_dump.json
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Coverage / tests
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Local DB dumps from scripts/backup.*
+backups/
+
+.uptime-kuma-admin
+

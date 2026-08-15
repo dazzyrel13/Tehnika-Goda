@@ -1,0 +1,55 @@
+# Secrets & local env
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# VCS / IDE
+.git
+.gitignore
+.github
+.idea
+.vscode
+*.swp
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__
+**/__pycache__
+*.py[cod]
+*$py.class
+.Python
+.venv
+venv
+env
+*.egg-info
+.eggs
+.pytest_cache
+.mypy_cache
+.coverage
+htmlcov
+
+# Local DB / dumps / backups (PII, password hashes)
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+datadump.json
+gallery_dump.json
+*_dump.json
+*_backup.json
+tehnikagoda_sqlite_backup.json
+
+# Runtime / build artifacts
+logs
+media
+staticfiles
+*.log
+
+# One-off / local tooling (not needed in image)
+scripts
+seed_db.py
+
+# Docs not required at runtime
+README.md
+PRODUCTION_CHECKLIST.md

@@ -1,0 +1,29 @@
+# Infra only: Postgres + Redis.
+# Full local stack:  docker compose -f docker-compose.dev.yml up --build
+# Production stack:  docker compose -f docker-compose.prod.yml up --build -d
+#
+# Variables POSTGRES_* / REDIS_* are read from the project .env (Compose loads it automatically).
+services:
+  db:
+    image: dockerhub.timeweb.cloud/library/postgres:15-alpine
+    container_name: tehnikagoda_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tehnikagoda_db}
+      POSTGRES_USER: ${POSTGRES_USER:-tehnikagoda_prod}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env - see .env.example}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: dockerhub.timeweb.cloud/library/redis:alpine
+    container_name: tehnikagoda_redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:6379:6379"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

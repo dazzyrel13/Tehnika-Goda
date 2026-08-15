@@ -1,0 +1,18 @@
+# Optional fail2ban jail for SSH on the VPS (free, RF-friendly).
+# Requires fail2ban installed on the host (not inside app containers).
+#
+#   apt install fail2ban
+#   cp deploy/fail2ban-sshd.local.example /etc/fail2ban/jail.d/sshd.local
+#   systemctl enable --now fail2ban
+#
+# Do NOT ban Docker bridge traffic to the Django app via fail2ban unless you
+# know what you are doing — Axes + nginx rate limits already cover admin/leads.
+
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+findtime = 10m
+bantime = 1h

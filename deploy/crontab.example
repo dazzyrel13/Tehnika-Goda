@@ -1,0 +1,13 @@
+# Example host crontab for production (Linux VPS).
+# Install:  crontab -e  and paste lines below (adjust paths).
+#
+# Daily Postgres dump at 03:15 MSK (server TZ — set TZ=Europe/Moscow or adjust hour)
+# 15 0 * * *  cd /opt/tehnikagoda && DB_CONTAINER=tehnikagoda_db BACKUP_MEDIA=0 ./scripts/backup.sh >> /var/log/tehnikagoda-backup.log 2>&1
+#
+# Weekly dump + media archive (Sunday 04:00)
+# 0 1 * * 0  cd /opt/tehnikagoda && DB_CONTAINER=tehnikagoda_db BACKUP_MEDIA=1 ./scripts/backup.sh >> /var/log/tehnikagoda-backup.log 2>&1
+#
+# Optional: hit healthz from the host (extra check besides Uptime Kuma)
+# */5 * * * *  curl -sf https://tehnikagoda.ru/healthz/ >/dev/null || echo "healthz fail $(date)" >> /var/log/tehnikagoda-health.log
+#
+# After first backup, test restore once (see scripts/backup.sh footer).

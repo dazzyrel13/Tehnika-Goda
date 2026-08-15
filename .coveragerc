@@ -1,0 +1,27 @@
+[run]
+branch = True
+source =
+    analytics
+    catalog
+    content
+    core
+    leads
+    utils
+omit =
+    */migrations/*
+    */tests.py
+    */tests_*.py
+    manage.py
+    seed_db.py
+    core/compat.py
+    scripts/*
+
+[report]
+show_missing = True
+skip_covered = False
+fail_under = 65
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if TYPE_CHECKING:

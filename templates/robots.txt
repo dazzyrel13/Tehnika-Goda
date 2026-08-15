@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /leads/submit/
+Disallow: /healthz/
+Allow: /
+Sitemap: {{ site_url }}/sitemap.xml

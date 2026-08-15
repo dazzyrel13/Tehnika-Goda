@@ -1,0 +1,91 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section style="padding: 80px 0 40px;">
+    <div class="container">
+        <div style="margin-bottom: 60px;">
+            <span class="accent-text" style="font-weight: bold; text-transform: uppercase; letter-spacing: 4px; font-size: 13px;">Финансирование</span>
+            <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); margin-top: 15px; margin-bottom: 15px;">Лизинг<br><span class="accent-text">коммерческого транспорта и спецтехники</span></h1>
+            <p style="color: var(--text-muted); font-size: 18px; max-width: 720px;">Оформляем лизинг только на коммерческий транспорт и спецтехнику с площадки в Китае. Легковые автомобили в лизинг не берём. Считаем ориентировочный платёж и помогаем подобрать программу у лизинговых компаний.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 60px;">
+            <div class="glass-panel" style="padding: 32px;">
+                <div class="info-feature-mark" aria-hidden="true">01</div>
+                <h4 style="margin-bottom: 12px; font-size: 18px;">Для кого</h4>
+                <p style="color: var(--text-muted); font-size: 14px;">Юрлица и ИП: грузовики, фургоны, КМУ, автовышки и башенные краны.</p>
+            </div>
+            <div class="glass-panel" style="padding: 32px;">
+                <div class="info-feature-mark" aria-hidden="true">02</div>
+                <h4 style="margin-bottom: 12px; font-size: 18px;">Условия</h4>
+                <p style="color: var(--text-muted); font-size: 14px;">Аванс от 10%, срок до 5 лет. Учёт НДС и налога на прибыль — по условиям выбранной программы.</p>
+            </div>
+            <div class="glass-panel" style="padding: 32px;">
+                <div class="info-feature-mark" aria-hidden="true">03</div>
+                <h4 style="margin-bottom: 12px; font-size: 18px;">Не подходит</h4>
+                <p style="color: var(--text-muted); font-size: 14px;">Легковые автомобили в лизинг через нас не оформляются.</p>
+            </div>
+        </div>
+
+        <!-- Leasing Calculator -->
+        <div class="glass-panel" style="padding: 50px; margin-bottom: 60px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center;">
+                <div>
+                    <h3 style="margin-bottom: 10px; font-size: 24px;">Калькулятор лизинга</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px;">Ориентир по ежемесячному платежу для коммерческого транспорта и спецтехники.</p>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="color: var(--text-muted); font-size: 13px; display: block; margin-bottom: 8px;">Стоимость техники (₽)</label>
+                        <input type="range" id="priceRange" min="1000000" max="50000000" step="100000" value="5000000"
+                            style="width: 100%; accent-color: var(--accent-red);">
+                        <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 5px;">
+                            <span id="priceVal">5 000 000</span><span>₽</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="color: var(--text-muted); font-size: 13px; display: block; margin-bottom: 8px;">Аванс (%)</label>
+                        <input type="range" id="prepayRange" min="10" max="50" step="5" value="20"
+                            style="width: 100%; accent-color: var(--accent-red);">
+                        <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 5px;">
+                            <span id="prepayVal">20</span><span>%</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="color: var(--text-muted); font-size: 13px; display: block; margin-bottom: 8px;">Срок (мес.)</label>
+                        <input type="range" id="termRange" min="12" max="60" step="12" value="36"
+                            style="width: 100%; accent-color: var(--accent-red);">
+                        <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 5px;">
+                            <span id="termVal">36</span><span>мес.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel" style="padding: 50px; text-align: center; border-color: rgba(255, 179, 0, 0.25); background: rgba(255, 179, 0, 0.05);">
+                    <div style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">Ежемесячный платёж</div>
+                    <div id="monthlyResult" class="accent-text" style="font-size: 40px; font-weight: 900; margin-bottom: 10px;">121 450 ₽</div>
+                    <div style="color: var(--text-muted); font-size: 13px;">При ставке лизинга от 10,5% годовых</div>
+                </div>
+            </div>
+
+            <p style="margin: 28px 0 0; padding-top: 22px; border-top: 1px solid var(--glass-border); color: var(--text-muted); font-size: 13px; line-height: 1.55; max-width: 920px;">
+                Расчёт носит ознакомительный характер и показывает только примерные значения.
+                Для получения точных условий, графика платежей и одобрения нужно подать заявку в лизинговую компанию.
+            </p>
+        </div>
+
+        <!-- CTA -->
+        <div class="glass-panel" style="padding: 50px; text-align: center; border-color: rgba(255, 179, 0, 0.2); background: linear-gradient(135deg, rgba(255, 179, 0, 0.06), transparent);">
+            <h3 style="font-size: 28px; margin-bottom: 15px;">Нужен точный расчёт?</h3>
+            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto 30px;">Подберём лизинговую программу под ваш бюджет и срок для коммерческого транспорта или спецтехники.</p>
+            <a href="#leads-section" class="btn-elite" style="padding: 15px 40px; font-size: 16px;">Запросить расчёт лизинга</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/leasing.js' %}?v=1"></script>
+{% endblock %}

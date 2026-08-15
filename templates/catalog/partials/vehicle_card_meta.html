@@ -1,0 +1,44 @@
+<div class="vehicle-meta-grid">
+    <div class="vehicle-meta-item">
+        <span class="vehicle-meta-label">Коробка</span>
+        <span class="vehicle-meta-value">
+            {% if vehicle.transmission %}{{ vehicle.transmission }}
+            {% elif vehicle.specs.transmission %}{{ vehicle.specs.transmission }}
+            {% elif vehicle.specs.gearbox %}{{ vehicle.specs.gearbox }}
+            {% else %}-{% endif %}
+        </span>
+    </div>
+    <div class="vehicle-meta-item">
+        <span class="vehicle-meta-label">Кузов</span>
+        <span class="vehicle-meta-value">
+            {% if vehicle.body_type %}{{ vehicle.body_type }}
+            {% elif vehicle.category %}{{ vehicle.category.name }}
+            {% else %}-{% endif %}
+        </span>
+    </div>
+    <div class="vehicle-meta-item">
+        <span class="vehicle-meta-label">Цвет</span>
+        <span class="vehicle-meta-value">
+            {% if vehicle.color %}{{ vehicle.color }}
+            {% elif vehicle.specs.color %}{{ vehicle.specs.color }}
+            {% else %}-{% endif %}
+        </span>
+    </div>
+    <div class="vehicle-meta-item">
+        <span class="vehicle-meta-label">Год</span>
+        <span class="vehicle-meta-value">{{ vehicle.year|default:"-" }}</span>
+    </div>
+    <div class="vehicle-meta-item">
+        <span class="vehicle-meta-label">Пробег</span>
+        <span class="vehicle-meta-value">{% if vehicle.mileage != None %}{{ vehicle.mileage }} км{% else %}уточняется{% endif %}</span>
+    </div>
+    <div class="vehicle-meta-item">
+        <span class="vehicle-meta-label">Мощность</span>
+        <span class="vehicle-meta-value">
+            {% if vehicle.horsepower %}{{ vehicle.horsepower }} л.с.
+            {% elif vehicle.specs.horsepower %}{{ vehicle.specs.horsepower }}
+            {% elif vehicle.specs.power %}{{ vehicle.specs.power }}
+            {% else %}-{% endif %}
+        </span>
+    </div>
+</div>
