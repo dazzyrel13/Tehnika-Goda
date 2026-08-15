@@ -1,7 +1,7 @@
 from django.urls import path
+from django.views.generic import RedirectView
 
 from .views import (
-    HomeView,
     VehicleDetailView,
     VehicleDossierView,
     VehicleListView,
@@ -12,7 +12,8 @@ from .views import (
 app_name = "catalog"
 
 urlpatterns = [
-    path("", HomeView.as_view(), name="home"),
+    # Old bookmark URL /catalog/ → site root
+    path("", RedirectView.as_view(pattern_name="home", permanent=True)),
     path("cars/", VehicleListView.as_view(), name="index"),
     path(
         "category/<slug:category_slug>/",
@@ -25,7 +26,6 @@ urlpatterns = [
         name="brand",
     ),
     path("search-ajax/", search_ajax, name="search_ajax"),
-
     path("vehicle/<slug:slug>/", VehicleDetailView.as_view(), name="vehicle_detail"),
     path(
         "vehicle/<slug:slug>/dossier/",

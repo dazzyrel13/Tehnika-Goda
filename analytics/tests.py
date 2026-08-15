@@ -30,20 +30,20 @@ class VisitAnalyticsMiddlewareTests(TestCase):
 
     def test_html_get_creates_visit_event(self):
         response = self.client.get(
-            reverse("catalog:home"),
+            reverse("home"),
             HTTP_USER_AGENT="Mozilla/5.0 TestBrowser",
             HTTP_ACCEPT="text/html",
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(VisitEvent.objects.count(), 1)
         event = VisitEvent.objects.get()
-        self.assertTrue(event.path.startswith("/catalog"))
+        self.assertEqual(event.path, "/")
         self.assertIsNone(event.ip_address)
         self.assertEqual(Session.objects.count(), 0)
 
     def test_bots_are_skipped(self):
         response = self.client.get(
-            reverse("catalog:home"),
+            reverse("home"),
             HTTP_USER_AGENT="Googlebot/2.1",
             HTTP_ACCEPT="text/html",
         )
@@ -72,7 +72,7 @@ class VisitAnalyticsMiddlewareTests(TestCase):
 
     def test_utm_captured(self):
         self.client.get(
-            reverse("catalog:home") + "?utm_source=yandex&utm_medium=cpc",
+            reverse("home") + "?utm_source=yandex&utm_medium=cpc",
             HTTP_USER_AGENT="Mozilla/5.0 TestBrowser",
             HTTP_ACCEPT="text/html",
         )
@@ -84,7 +84,7 @@ class VisitAnalyticsMiddlewareTests(TestCase):
     @override_settings(ANALYTICS_ASYNC=True)
     def test_async_enqueue_called(self, mock_delay):
         self.client.get(
-            reverse("catalog:home"),
+            reverse("home"),
             HTTP_USER_AGENT="Mozilla/5.0 TestBrowser",
             HTTP_ACCEPT="text/html",
         )
@@ -98,7 +98,7 @@ class VisitAnalyticsMiddlewareTests(TestCase):
     @override_settings(ANALYTICS_ASYNC=True)
     def test_async_fallback_to_sync(self, mock_delay):
         self.client.get(
-            reverse("catalog:home"),
+            reverse("home"),
             HTTP_USER_AGENT="Mozilla/5.0 TestBrowser",
             HTTP_ACCEPT="text/html",
         )

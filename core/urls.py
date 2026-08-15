@@ -9,6 +9,7 @@ from two_factor.admin import AdminSiteOTPRequired
 from two_factor.urls import urlpatterns as tf_urls
 
 from catalog.sitemaps import BrandSitemap, CategorySitemap, VehicleSitemap
+from catalog.views import HomeView
 from content.sitemaps import StaticViewSitemap
 from core.health import healthz
 
@@ -62,29 +63,29 @@ urlpatterns = [
     # 2FA login/setup lives under the hidden admin prefix (IP allowlist applies).
     path(_admin_url_prefix(), include(tf_urls)),
     path(_admin_url_prefix(), admin.site.urls),
-    # Root Redirect to Catalog
-    path("", RedirectView.as_view(url="/catalog/", permanent=True), name="home"),
-    # Legacy blog URLs → catalog (feature removed)
-    path("blog/", RedirectView.as_view(url="/catalog/", permanent=True)),
-    path("content/blog/", RedirectView.as_view(url="/catalog/", permanent=True)),
+    # Homepage at site root (legacy /catalog/ redirects inside catalog.urls)
+    path("", HomeView.as_view(), name="home"),
+    # Legacy blog URLs → home (feature removed)
+    path("blog/", RedirectView.as_view(url="/", permanent=True)),
+    path("content/blog/", RedirectView.as_view(url="/", permanent=True)),
     path(
         "content/blog/<slug:slug>/",
-        RedirectView.as_view(url="/catalog/", permanent=True),
+        RedirectView.as_view(url="/", permanent=True),
     ),
     # Legacy info pages → blocks on the home page
     path(
         "delivery/",
-        RedirectView.as_view(url="/catalog/#delivery-estimate", permanent=True),
+        RedirectView.as_view(url="/#delivery-estimate", permanent=True),
         name="delivery",
     ),
     path(
         "customs/",
-        RedirectView.as_view(url="/catalog/#customs", permanent=True),
+        RedirectView.as_view(url="/#customs", permanent=True),
         name="customs",
     ),
     path(
         "how-to-buy/",
-        RedirectView.as_view(url="/catalog/#how-we-work", permanent=True),
+        RedirectView.as_view(url="/#how-we-work", permanent=True),
         name="how_to_buy",
     ),
     path(

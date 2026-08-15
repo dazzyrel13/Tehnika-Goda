@@ -454,10 +454,10 @@ class VehicleDetailView(DetailView):
                 "@type": "ListItem",
                 "position": 1,
                 "name": "Главная",
-                "item": absolute_url("/catalog/"),
+                "item": absolute_url("/"),
             }
         ]
-        breadcrumb_links = [{"name": "Главная", "url": reverse("catalog:home")}]
+        breadcrumb_links = [{"name": "Главная", "url": reverse("home")}]
         if self.object.category_id:
             cat = self.object.category
             crumb_items.append(

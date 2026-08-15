@@ -70,7 +70,7 @@ class CatalogPagesTests(TestCase):
         )
 
     def test_home_ok(self):
-        response = self.client.get(reverse("catalog:home"))
+        response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         cache_control = response.get("Cache-Control", "")
         self.assertIn("max-age=30", cache_control)
@@ -89,9 +89,9 @@ class CatalogPagesTests(TestCase):
 
         invalidate_nav_cache()
         invalidate_home_sections_cache()
-        self.client.get(reverse("catalog:home"))
+        self.client.get(reverse("home"))
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.get(reverse("catalog:home"))
+            response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertLess(len(ctx), 8)
 
@@ -113,7 +113,7 @@ class CatalogPagesTests(TestCase):
             defaults={"name": "Башенные краны", "parent": special},
         )
         invalidate_nav_cache()
-        response = self.client.get(reverse("catalog:home"))
+        response = self.client.get(reverse("home"))
         self.assertContains(response, "Подобрать авто")
         self.assertContains(response, "Подобрать коммерческий транспорт")
         self.assertContains(response, "Подобрать спецтехнику")
@@ -520,7 +520,7 @@ class VehicleImageVariantTests(TestCase):
                 variant_storage_name(vehicle.main_image.name, 800)
             )
         )
-        response = self.client.get(reverse("catalog:home"))
+        response = self.client.get(reverse("home"))
         self.assertContains(response, "srcset=")
         self.assertContains(response, ".w800.webp")
 

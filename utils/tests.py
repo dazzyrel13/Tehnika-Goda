@@ -222,13 +222,13 @@ class SitemapDomainTests(TestCase):
     def test_home_has_canonical_and_og(self):
         from django.urls import reverse
 
-        response = self.client.get(reverse("catalog:home"))
+        response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'rel="canonical"')
         self.assertContains(response, 'property="og:title"')
         self.assertContains(response, 'property="og:image"')
         self.assertContains(response, 'name="twitter:card"')
-        self.assertContains(response, "https://tehnikagoda.ru/catalog/")
+        self.assertContains(response, 'href="https://tehnikagoda.ru/"')
 
 
 class ImageProcessingTests(SimpleTestCase):

@@ -8,7 +8,7 @@ class StaticViewSitemap(SiteUrlSitemap):
 
     _pages = (
         # (url_name, priority, changefreq)
-        ("catalog:home", 1.0, "daily"),
+        ("home", 1.0, "daily"),
         ("catalog:category", 0.9, "daily", {"category_slug": "cars"}),
         ("content:faq", 0.65, "weekly"),
         ("about", 0.6, "monthly"),

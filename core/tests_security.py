@@ -89,13 +89,13 @@ class SecurityHeadersTests(TestCase):
 
     def test_home_exposes_metrika_data_attr_when_configured(self):
         with override_settings(YANDEX_METRIKA_ID="87654321"):
-            response = self.client.get(reverse("catalog:home"))
+            response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'data-yandex-metrika-id="87654321"')
 
     def test_public_html_has_no_inline_javascript(self):
         urls = [
-            reverse("catalog:home"),
+            reverse("home"),
             reverse("leasing"),
         ]
         for url in urls:
