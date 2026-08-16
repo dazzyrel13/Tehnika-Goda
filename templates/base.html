@@ -35,7 +35,7 @@
     <link rel="preload" href="{% static 'fonts/unbounded-cyrillic-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
     {% block font_preload %}{% endblock %}
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.62">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.63">
     
     <!-- PWA Core Meta -->
     <link rel="manifest" href="/manifest.json">
@@ -87,7 +87,7 @@
                 </a>
             </div>
             
-            <nav class="site-nav">
+            <nav class="site-nav" id="site-nav" aria-label="Основное меню">
                 <!-- Modern Search Bar (AJAX) -->
                 <div class="desktop-search">
                     <input type="text" id="global-search" class="desktop-search__input" placeholder="Быстрый поиск" data-search-url="{% url 'catalog:search_ajax' %}">
@@ -141,6 +141,19 @@
                     <li><a href="#leads-section" class="btn-elite nav-cta">Оставить заявку на подбор</a></li>
                 </ul>
             </nav>
+
+            <button
+                type="button"
+                class="nav-burger"
+                id="nav-burger"
+                aria-controls="site-nav"
+                aria-expanded="false"
+                aria-label="Открыть меню"
+            >
+                <span class="nav-burger__line" aria-hidden="true"></span>
+                <span class="nav-burger__line" aria-hidden="true"></span>
+                <span class="nav-burger__line" aria-hidden="true"></span>
+            </button>
         </div>
     </header>
 
@@ -277,7 +290,7 @@
         </div>
     </div>
 
-    <script src="{% static 'js/site.js' %}?v=4"></script>
+    <script src="{% static 'js/site.js' %}?v=5"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

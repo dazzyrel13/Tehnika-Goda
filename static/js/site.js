@@ -288,6 +288,66 @@
             }
         })();
 
+        (function initMobileNav() {
+            const burger = document.getElementById("nav-burger");
+            const nav = document.getElementById("site-nav");
+            if (!burger || !nav) return;
+
+            const mq = window.matchMedia("(max-width: 991px)");
+
+            const setOpen = (open) => {
+                document.body.classList.toggle("is-nav-open", open);
+                burger.classList.toggle("is-open", open);
+                burger.setAttribute("aria-expanded", open ? "true" : "false");
+                burger.setAttribute("aria-label", open ? "Закрыть меню" : "Открыть меню");
+                if (!open) {
+                    nav.querySelectorAll(".nav-dropdown.is-open").forEach((el) => {
+                        el.classList.remove("is-open");
+                    });
+                }
+            };
+
+            burger.addEventListener("click", () => {
+                setOpen(!document.body.classList.contains("is-nav-open"));
+            });
+
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape") setOpen(false);
+            });
+
+            nav.querySelectorAll(".nav-dropdown > a").forEach((link) => {
+                link.addEventListener("click", (event) => {
+                    if (!mq.matches) return;
+                    event.preventDefault();
+                    const item = link.parentElement;
+                    const willOpen = !item.classList.contains("is-open");
+                    nav.querySelectorAll(".nav-dropdown.is-open").forEach((el) => {
+                        if (el !== item) el.classList.remove("is-open");
+                    });
+                    item.classList.toggle("is-open", willOpen);
+                });
+            });
+
+            nav.querySelectorAll(".nav-links a").forEach((link) => {
+                link.addEventListener("click", () => {
+                    if (!mq.matches) return;
+                    if (link.parentElement.classList.contains("nav-dropdown") && link.parentElement.querySelector(":scope > a") === link) {
+                        return;
+                    }
+                    setOpen(false);
+                });
+            });
+
+            const onMqChange = () => {
+                if (!mq.matches) setOpen(false);
+            };
+            if (typeof mq.addEventListener === "function") {
+                mq.addEventListener("change", onMqChange);
+            } else if (typeof mq.addListener === "function") {
+                mq.addListener(onMqChange);
+            }
+        })();
+
         (function initHeaderAndReveal() {
             const header = document.querySelector("header");
             const onScroll = () => {
