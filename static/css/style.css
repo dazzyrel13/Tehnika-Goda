@@ -4202,7 +4202,7 @@ body.bg-faq .leads-cta-section {
     .desktop-search__input,
     .home-deep-search__grid input,
     .home-deep-search__grid select,
-    .home-deep-search__grid .tdv-select-trigger {
+    .tdv-select__trigger {
         font-size: 16px !important;
     }
 }
