@@ -25,10 +25,7 @@
 
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-            navigator.serviceWorker
-                .register("/sw.js")
-                .then((reg) => console.log("Техника Года PWA: Active.", reg))
-                .catch((err) => console.error("PWA Failed.", err));
+            navigator.serviceWorker.register("/sw.js").catch(() => {});
         });
     }
 
@@ -98,8 +95,6 @@
     }
 
     ready(function () {
-        console.log("Техника Года ready.");
-
         const searchInput = document.getElementById("global-search");
         const searchResults = document.getElementById("search-results");
 

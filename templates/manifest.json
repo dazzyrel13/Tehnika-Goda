@@ -3,8 +3,8 @@
   "short_name": "Техника Года",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1a1c24",
+  "background_color": "#ebebeb",
+  "theme_color": "#ebebeb",
   "description": "Техника Года — автомобили и спецтехника с площадки в Китае.",
   "lang": "ru",
   "icons": [

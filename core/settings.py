@@ -27,6 +27,10 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 TESTING = "test" in sys.argv
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
+# Docker healthchecks call http://127.0.0.1 — keep loopback hosts even in prod.
+for _loopback in ("127.0.0.1", "localhost"):
+    if _loopback not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_loopback)
 SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000")
 TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="")
