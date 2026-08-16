@@ -2511,16 +2511,22 @@ header.is-scrolled {
     }
 
     .ed-warranty__write {
-        top: 1%;
-        right: 0.5%;
-        width: min(40%, 170px);
-        height: min(26%, 110px);
+        top: 3%;
+        right: 2%;
+        width: min(32%, 128px);
+        height: auto;
+        max-height: 22%;
+        overflow: hidden;
+        transform: rotate(-7deg);
+        transform-origin: 100% 0;
     }
 
     .ed-warranty__write-word {
-        font-size: clamp(1.25rem, 5vw, 1.6rem);
-        padding-bottom: 8px;
-        white-space: normal;
+        font-size: clamp(0.92rem, 3.6vw, 1.12rem);
+        padding: 2px 0 2px 2px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        white-space: nowrap;
     }
 
     /* Keep diagnostic copy below the image — no white-on-photo overlay on phones */
@@ -2641,6 +2647,16 @@ header.is-scrolled {
         width: calc(100% - 20px);
         margin-top: 14px;
         border-radius: 10px;
+    }
+
+    .ed-warranty__write {
+        top: 3.5%;
+        right: 2.5%;
+        width: min(34%, 118px);
+    }
+
+    .ed-warranty__write-word {
+        font-size: clamp(0.85rem, 3.4vw, 1.02rem);
     }
 
     .process-grid,
