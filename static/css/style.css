@@ -2,6 +2,8 @@ html {
     scroll-behavior: smooth;
     overflow-x: clip;
     scroll-padding-top: 96px;
+    /* Match header chrome so mobile top/overscroll isn't a white strip */
+    background-color: var(--bg-chrome);
 }
 
 :root {
@@ -140,7 +142,6 @@ h1, h2, h3 {
 }
 
 header {
-    height: 80px;
     display: flex;
     align-items: center;
     position: sticky;
@@ -151,6 +152,8 @@ header {
     -webkit-backdrop-filter: none;
     border-bottom: 3px solid var(--accent-yellow);
     overflow: visible;
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(80px + env(safe-area-inset-top, 0px));
 }
 
 .nav-links {
@@ -621,8 +624,8 @@ header {
 @media (max-width: 768px) {
     h1 { font-size: 1.5rem; }
     .container { padding: 0 16px; }
-    header { height: 70px; }
-    .site-nav { top: 70px; }
+    header { height: calc(70px + env(safe-area-inset-top, 0px)); }
+    .site-nav { top: calc(70px + env(safe-area-inset-top, 0px)); }
     section:not(.home-page) {
         padding: 40px 0 !important;
     }
@@ -4188,7 +4191,7 @@ body.bg-faq .leads-cta-section {
 
     header .site-nav#site-nav {
         position: fixed !important;
-        top: 80px !important;
+        top: calc(80px + env(safe-area-inset-top, 0px)) !important;
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
@@ -4282,6 +4285,6 @@ body.bg-faq .leads-cta-section {
 
 @media (max-width: 768px) {
     header .site-nav#site-nav {
-        top: 70px !important;
+        top: calc(70px + env(safe-area-inset-top, 0px)) !important;
     }
 }

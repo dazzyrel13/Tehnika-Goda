@@ -3,7 +3,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{% block title %}{{ seo_title|default:"Техника Года | Автомобили и спецтехника из Китая" }}{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}{{ seo_description|default:"Техника Года — автомобили и спецтехника с площадки в Китае. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
     <meta name="robots" content="{% block meta_robots %}{{ meta_robots|default:'index, follow' }}{% endblock %}">
@@ -35,11 +35,11 @@
     <link rel="preload" href="{% static 'fonts/unbounded-cyrillic-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
     {% block font_preload %}{% endblock %}
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.64">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.65">
     
     <!-- PWA Core Meta -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#1a1c24">
+    <meta name="theme-color" content="#ebebeb">
     <link rel="apple-touch-icon" href="{% static 'images/favicon-180.png' %}?v=9">
     <link rel="icon" href="{% static 'images/favicon.ico' %}?v=9" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32.png' %}?v=9">
