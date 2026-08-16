@@ -2510,22 +2510,23 @@ header.is-scrolled {
         max-width: none;
     }
 
+    /* Anchor to top-right of the yellow plate, then scale in so the word fits */
     .ed-warranty__write {
-        top: 3%;
-        right: 2%;
-        width: min(32%, 128px);
+        top: 0.5%;
+        right: 0;
+        width: auto;
         height: auto;
-        max-height: 22%;
-        overflow: hidden;
-        transform: rotate(-7deg);
-        transform-origin: 100% 0;
+        max-height: none;
+        overflow: visible;
+        transform: rotate(-8deg) scale(0.52);
+        transform-origin: top right;
     }
 
     .ed-warranty__write-word {
-        font-size: clamp(0.92rem, 3.6vw, 1.12rem);
-        padding: 2px 0 2px 2px;
-        line-height: 1;
-        letter-spacing: -0.02em;
+        font-size: 1.45rem;
+        padding: 6px 10px 4px 0;
+        line-height: 0.95;
+        letter-spacing: 0;
         white-space: nowrap;
     }
 
@@ -2650,13 +2651,12 @@ header.is-scrolled {
     }
 
     .ed-warranty__write {
-        top: 3.5%;
-        right: 2.5%;
-        width: min(34%, 118px);
+        transform: rotate(-8deg) scale(0.46);
     }
 
     .ed-warranty__write-word {
-        font-size: clamp(0.85rem, 3.4vw, 1.02rem);
+        font-size: 1.35rem;
+        padding-right: 8px;
     }
 
     .process-grid,
