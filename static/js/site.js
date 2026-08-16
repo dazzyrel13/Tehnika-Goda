@@ -318,13 +318,17 @@
             nav.querySelectorAll(".nav-dropdown > a").forEach((link) => {
                 link.addEventListener("click", (event) => {
                     if (!mq.matches) return;
-                    event.preventDefault();
                     const item = link.parentElement;
-                    const willOpen = !item.classList.contains("is-open");
+                    // Second tap on an open section follows the link.
+                    if (item.classList.contains("is-open")) {
+                        setOpen(false);
+                        return;
+                    }
+                    event.preventDefault();
                     nav.querySelectorAll(".nav-dropdown.is-open").forEach((el) => {
                         if (el !== item) el.classList.remove("is-open");
                     });
-                    item.classList.toggle("is-open", willOpen);
+                    item.classList.add("is-open");
                 });
             });
 

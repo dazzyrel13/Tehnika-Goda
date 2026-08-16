@@ -626,6 +626,13 @@ header {
     .container { padding: 0 16px; }
     header { height: calc(70px + env(safe-area-inset-top, 0px)); }
     .site-nav { top: calc(70px + env(safe-area-inset-top, 0px)); }
+    .site-header-inner {
+        min-height: 0;
+        height: 100%;
+    }
+    .site-logo {
+        height: 48px;
+    }
     section:not(.home-page) {
         padding: 40px 0 !important;
     }
@@ -4151,7 +4158,7 @@ body.bg-faq .leads-cta-section {
     backdrop-filter: none;
     border-top: 3px solid var(--accent-yellow);
     z-index: 9999;
-    padding: 12px 10px;
+    padding: 12px 10px calc(12px + env(safe-area-inset-bottom, 0px));
     box-shadow: 0 -8px 24px rgba(20, 24, 32, 0.08);
 }
 .mobile-actions a {
@@ -4180,7 +4187,24 @@ body.bg-faq .leads-cta-section {
 }
 @media (max-width: 768px) {
     .mobile-actions { display: block; }
-    body { padding-bottom: 75px; }
+    body { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)); }
+    .cookie-consent {
+        left: 12px !important;
+        right: 12px !important;
+        bottom: calc(82px + env(safe-area-inset-bottom, 0px) + 12px) !important;
+    }
+    .leads-form-panel {
+        padding: 24px 18px !important;
+    }
+}
+
+@media (max-width: 991px) {
+    .desktop-search__input,
+    .home-deep-search__grid input,
+    .home-deep-search__grid select,
+    .home-deep-search__grid .tdv-select-trigger {
+        font-size: 16px !important;
+    }
 }
 
 /* Mobile nav must win over later desktop header rules */

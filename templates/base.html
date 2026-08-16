@@ -35,7 +35,7 @@
     <link rel="preload" href="{% static 'fonts/unbounded-cyrillic-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
     {% block font_preload %}{% endblock %}
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.65">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.66">
     
     <!-- PWA Core Meta -->
     <link rel="manifest" href="/manifest.json">
@@ -175,7 +175,7 @@
     <!-- Footer -->
     <section id="leads-section" class="leads-cta-section" aria-label="Заявка">
         <div class="container">
-            <div class="glass-panel" style="max-width: 600px; margin: 0 auto; padding: 40px;">
+            <div class="glass-panel leads-form-panel" style="max-width: 600px; margin: 0 auto; padding: 40px;">
                 <h2 class="accent-text" style="margin-bottom: 10px; text-align: center;">Оставить заявку</h2>
                 <p style="color: var(--text-muted); text-align: center; margin-bottom: 30px; font-size: 14px;">Свяжемся в течение 15 минут в рабочее время и уточним детали запроса.</p>
                 
@@ -269,7 +269,7 @@
         </div>
     </footer>
 
-    <div id="cookie-consent" class="glass-panel" style="display: none; position: fixed; left: 20px; right: 20px; bottom: 20px; z-index: 10050; padding: 14px 16px; border-radius: 14px; background: #fff; border-color: var(--glass-border); max-width: 920px; margin: 0 auto;">
+    <div id="cookie-consent" class="glass-panel cookie-consent" style="display: none; position: fixed; left: 20px; right: 20px; bottom: 20px; z-index: 10050; padding: 14px 16px; border-radius: 14px; background: #fff; border-color: var(--glass-border); max-width: 920px; margin: 0 auto;">
         <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
             <p style="margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.45; flex: 1 1 420px;">
                 Мы используем cookie для корректной работы сайта и анализа трафика. Продолжая использование сайта, вы соглашаетесь с обработкой cookie.
@@ -290,7 +290,7 @@
         </div>
     </div>
 
-    <script src="{% static 'js/site.js' %}?v=5"></script>
+    <script src="{% static 'js/site.js' %}?v=6"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
