@@ -21,7 +21,7 @@ def _valid_payload(**overrides):
 
 
 @override_settings(RATELIMIT_ENABLE=False, TELEGRAM_BOT_TOKEN="", TELEGRAM_CHAT_ID="")
-@patch("leads.views.send_inquiry_notification", return_value=False)
+@patch("leads.tasks.send_inquiry_telegram_task.delay")
 class LeadsViewsTests(TestCase):
     def setUp(self):
         from django.core.cache import cache
@@ -40,6 +40,8 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(payload["status"], "success")
         self.assertEqual(Inquiry.objects.count(), 1)
         self.assertEqual(Inquiry.objects.get().phone, "+79991234567")
+        _notify.assert_called_once()
+        self.assertEqual(_notify.call_args.args[0], Inquiry.objects.get().pk)
 
     def test_submit_inquiry_ajax_validation_error(self, _notify):
         response = self.client.post(

@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 
 import requests
 from django.conf import settings
@@ -29,6 +30,63 @@ def _redact_secrets(text: str, token: str = "") -> str:
     return _BOT_URL_SECRET.sub("/bot***/", out)
 
 
+def _build_messages(inquiry) -> tuple[str, str]:
+    """Return (html_text, plain_text) for the inquiry notification."""
+    safe_name = escape(inquiry.name or "Без имени")
+    safe_phone = escape(inquiry.phone or "Без телефона")
+    safe_city = escape(getattr(inquiry, "city", "") or "")
+    safe_message = escape(inquiry.message or "")
+    safe_source = escape(inquiry.source or "")
+
+    html_lines = [
+        "🔥 <b>Новая заявка с сайта</b>",
+        "",
+        f"👤 <b>Имя:</b> {safe_name}",
+        f"📞 <b>Телефон:</b> {safe_phone}",
+    ]
+    if safe_city:
+        html_lines.append(f"📍 <b>Город:</b> {safe_city}")
+    if safe_message:
+        html_lines.append(f"💬 <b>Комментарий:</b> {safe_message}")
+    if safe_source:
+        html_lines.append(f"🔗 <b>Источник:</b> {safe_source}")
+
+    plain_lines = [
+        "Новая заявка с сайта",
+        "",
+        f"Имя: {inquiry.name or 'Без имени'}",
+        f"Телефон: {inquiry.phone or 'Без телефона'}",
+    ]
+    city = getattr(inquiry, "city", "") or ""
+    if city:
+        plain_lines.append(f"Город: {city}")
+    if inquiry.message:
+        plain_lines.append(f"Комментарий: {inquiry.message}")
+    if inquiry.source:
+        plain_lines.append(f"Источник: {inquiry.source}")
+
+    return "\n".join(html_lines), "\n".join(plain_lines)
+
+
+def _post_telegram(token: str, chat_id: str, text: str, parse_mode: str | None) -> tuple[bool, str]:
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": text}
+    if parse_mode:
+        payload["parse_mode"] = parse_mode
+    try:
+        response = requests.post(url, json=payload, timeout=15)
+        body = (response.text or "")[:400]
+        try:
+            data = response.json()
+        except Exception:
+            data = {}
+        if response.ok and data.get("ok") is True:
+            return True, body
+        return False, body or f"http {response.status_code}"
+    except Exception as exc:
+        return False, _redact_secrets(str(exc), token)
+
+
 def send_inquiry_notification(inquiry) -> bool:
     """Send lead notification to Telegram; fail safe on any error."""
     if not _is_configured():
@@ -37,37 +95,32 @@ def send_inquiry_notification(inquiry) -> bool:
 
     token = settings.TELEGRAM_BOT_TOKEN
     chat_id = settings.TELEGRAM_CHAT_ID
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    html_text, plain_text = _build_messages(inquiry)
 
-    safe_name = escape(inquiry.name or "Без имени")
-    safe_phone = escape(inquiry.phone or "Без телефона")
-    safe_city = escape(getattr(inquiry, "city", "") or "")
-    safe_message = escape(inquiry.message or "")
-    safe_source = escape(inquiry.source or "")
+    # HTML first, then plain fallback; brief retry for transient network blips.
+    attempts = (
+        (html_text, "HTML"),
+        (plain_text, None),
+        (plain_text, None),
+    )
+    last_detail = ""
+    for index, (text, parse_mode) in enumerate(attempts):
+        if index:
+            time.sleep(0.8)
+        ok, detail = _post_telegram(token, chat_id, text, parse_mode)
+        if ok:
+            logger.info(
+                "Telegram send ok (inquiry_id=%s parse_mode=%s)",
+                getattr(inquiry, "pk", None),
+                parse_mode or "plain",
+            )
+            return True
+        last_detail = detail
+        logger.error(
+            "Telegram send failed (inquiry_id=%s parse_mode=%s): %s",
+            getattr(inquiry, "pk", None),
+            parse_mode or "plain",
+            _redact_secrets(detail, token),
+        )
 
-    lines = [
-        "🔥 <b>Новая заявка с сайта</b>",
-        "",
-        f"👤 <b>Имя:</b> {safe_name}",
-        f"📞 <b>Телефон:</b> {safe_phone}",
-    ]
-    if safe_city:
-        lines.append(f"📍 <b>Город:</b> {safe_city}")
-    if safe_message:
-        lines.append(f"💬 <b>Комментарий:</b> {safe_message}")
-    if safe_source:
-        lines.append(f"🔗 <b>Источник:</b> {safe_source}")
-
-    payload = {
-        "chat_id": chat_id,
-        "text": "\n".join(lines),
-        "parse_mode": "HTML",
-    }
-
-    try:
-        response = requests.post(url, json=payload, timeout=15)
-        response.raise_for_status()
-        return True
-    except Exception as exc:
-        logger.error("Telegram send failed: %s", _redact_secrets(str(exc), token))
-        return False
+    return False

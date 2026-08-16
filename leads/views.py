@@ -138,8 +138,19 @@ def submit_inquiry(request):
         cache.delete(cooldown_key)
         logger.exception("Inquiry save failed (ip=%s)", client_ip)
         raise
-    send_inquiry_notification(inquiry)
-    logger.info("New inquiry saved (id=%s)", inquiry.pk)
+
+    # Prefer Celery so a slow/failed Telegram call cannot block or drop the lead UX.
+    try:
+        from .tasks import send_inquiry_telegram_task
+
+        send_inquiry_telegram_task.delay(inquiry.pk)
+        logger.info("New inquiry saved (id=%s); telegram queued", inquiry.pk)
+    except Exception:
+        logger.exception(
+            "Telegram queue failed (id=%s); sending inline", inquiry.pk
+        )
+        send_inquiry_notification(inquiry)
+        logger.info("New inquiry saved (id=%s)", inquiry.pk)
 
     if _is_ajax(request):
         return JsonResponse({"status": "success", "message": SUCCESS_MESSAGE})
