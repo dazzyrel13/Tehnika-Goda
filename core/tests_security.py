@@ -174,6 +174,29 @@ class CsrfTrustedOriginsTests(TestCase):
             origin = f"{parsed.scheme}://{parsed.netloc}"
             self.assertIn(origin, settings.CSRF_TRUSTED_ORIGINS)
 
+    def test_login_post_passes_csrf_with_session(self):
+        import re
+
+        client = self.client_class(enforce_csrf_checks=True)
+        login_url = reverse("two_factor:login")
+        get_response = client.get(login_url)
+        self.assertEqual(get_response.status_code, 200)
+        match = re.search(
+            rb'name="csrfmiddlewaretoken" value="([^"]+)"',
+            get_response.content,
+        )
+        self.assertIsNotNone(match)
+        post_response = client.post(
+            login_url,
+            {
+                "csrfmiddlewaretoken": match.group(1).decode(),
+                "auth-username": "nobody",
+                "auth-password": "wrong-password-12",
+                "login_view-current_step": "auth",
+            },
+        )
+        self.assertNotEqual(post_response.status_code, 403)
+
 
 @override_settings(ADMIN_ALLOWED_IPS=["203.0.113.50"], TRUST_PROXY_HEADERS=True)
 class TwoFactorLoginAllowlistTests(TestCase):

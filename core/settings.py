@@ -204,6 +204,10 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_HTTPONLY = False  # Django admin JS reads csrftoken
+# Store token in the session cookie — avoids a separate csrftoken cookie
+# failing behind nginx TLS (Django otherwise sees the request as HTTP).
+CSRF_USE_SESSIONS = True
+CSRF_FAILURE_VIEW = "core.csrf.csrf_failure"
 
 TWO_FACTOR_PATCH_ADMIN = True
 TWO_FACTOR_LOGIN_TIMEOUT = 600
@@ -336,11 +340,11 @@ from urllib.parse import urlparse as _urlparse
 _site = _urlparse(SITE_URL or "")
 if _site.scheme and _site.netloc:
     _add_csrf_origin(f"{_site.scheme}://{_site.netloc}")
-_use_https = bool(env("USE_HTTPS"))
 for _host in ALLOWED_HOSTS:
     if not _host or _host.startswith(".") or _host in {"*", "localhost", "127.0.0.1"}:
         continue
-    _add_csrf_origin(f"{'https' if _use_https or not DEBUG else 'http'}://{_host}")
+    _add_csrf_origin(f"https://{_host}")
+    _add_csrf_origin(f"http://{_host}")
 
 # Logging
 Path(os.path.join(BASE_DIR, "logs")).mkdir(exist_ok=True)
@@ -395,6 +399,8 @@ else:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
     X_FRAME_OPTIONS = "SAMEORIGIN"
+    if BEHIND_HTTPS_PROXY or TRUST_PROXY_HEADERS:
+        SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 if not DEBUG and not env("USE_HTTPS"):
     if env.bool("ALLOW_INSECURE_PRODUCTION", default=False):
