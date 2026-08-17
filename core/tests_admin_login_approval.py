@@ -10,7 +10,6 @@ from core.tests_security import _admin_path
 
 @override_settings(
     ADMIN_LOGIN_EMAIL_APPROVAL=True,
-    ADMIN_LOGIN_APPROVAL_VIA="email",
     ADMIN_LOGIN_APPROVAL_EMAIL="owner@example.com",
     ADMIN_ALLOWED_IPS=[],
     ALLOW_OPEN_ADMIN=True,

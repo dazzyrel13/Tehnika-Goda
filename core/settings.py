@@ -47,8 +47,6 @@ ADMIN_ALLOWED_IPS = env.list("ADMIN_ALLOWED_IPS", default=[])
 # When True, staff must confirm login via email link (ADMIN_LOGIN_APPROVAL_EMAIL).
 ADMIN_LOGIN_EMAIL_APPROVAL = env.bool("ADMIN_LOGIN_EMAIL_APPROVAL", default=False)
 ADMIN_LOGIN_APPROVAL_EMAIL = (env("ADMIN_LOGIN_APPROVAL_EMAIL", default="") or "").strip()
-# email | telegram | both — telegram uses TELEGRAM_* (HTTPS, works when SMTP is blocked).
-ADMIN_LOGIN_APPROVAL_VIA = (env("ADMIN_LOGIN_APPROVAL_VIA", default="email") or "email").strip().lower()
 
 _default_email_backend = "django.core.mail.backends.smtp.EmailBackend"
 if TESTING:
@@ -434,25 +432,15 @@ if not DEBUG and not TESTING and not ADMIN_ALLOWED_IPS and not ADMIN_LOGIN_EMAIL
         )
 
 if not DEBUG and not TESTING and ADMIN_LOGIN_EMAIL_APPROVAL:
-    via = ADMIN_LOGIN_APPROVAL_VIA
-    if via not in {"email", "telegram", "both"}:
+    if not ADMIN_LOGIN_APPROVAL_EMAIL:
         raise ImproperlyConfigured(
-            "ADMIN_LOGIN_APPROVAL_VIA must be one of: email, telegram, both."
+            "ADMIN_LOGIN_EMAIL_APPROVAL=True requires ADMIN_LOGIN_APPROVAL_EMAIL."
         )
-    if via in {"email", "both"}:
-        if not ADMIN_LOGIN_APPROVAL_EMAIL:
-            raise ImproperlyConfigured(
-                "ADMIN_LOGIN_APPROVAL_VIA includes email but ADMIN_LOGIN_APPROVAL_EMAIL is empty."
-            )
-        if not EMAIL_HOST or not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
-            raise ImproperlyConfigured(
-                "ADMIN_LOGIN_APPROVAL_VIA includes email but EMAIL_HOST/USER/PASSWORD are missing."
-            )
-    if via in {"telegram", "both"}:
-        if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-            raise ImproperlyConfigured(
-                "ADMIN_LOGIN_APPROVAL_VIA includes telegram but TELEGRAM_BOT_TOKEN/CHAT_ID are missing."
-            )
+    if not EMAIL_HOST or not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+        raise ImproperlyConfigured(
+            "ADMIN_LOGIN_EMAIL_APPROVAL=True requires EMAIL_HOST, EMAIL_HOST_USER, "
+            "and EMAIL_HOST_PASSWORD (e.g. smtp.mail.ru)."
+        )
 
 _invalid_admin_ips = []
 for _raw in ADMIN_ALLOWED_IPS:

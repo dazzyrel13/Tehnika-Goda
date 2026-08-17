@@ -1,4 +1,4 @@
-"""Out-of-band approval for staff admin sessions (replaces IP allowlist when enabled)."""
+"""Email approval for staff admin sessions (replaces IP allowlist when enabled)."""
 
 from __future__ import annotations
 
@@ -23,10 +23,6 @@ CACHE_META = "admin_login_meta:"
 
 def approval_enabled() -> bool:
     return bool(getattr(settings, "ADMIN_LOGIN_EMAIL_APPROVAL", False))
-
-
-def approval_via() -> str:
-    return (getattr(settings, "ADMIN_LOGIN_APPROVAL_VIA", "email") or "email").strip().lower()
 
 
 def _approved_key(session_key: str) -> str:
@@ -84,55 +80,30 @@ def parse_approval_token(token: str) -> tuple[str, int] | None:
     return session_key, int(user_id_str)
 
 
-def build_approve_url(*, session_key: str, user, request) -> str:
-    token = make_approval_token(session_key, user.pk)
-    approve_path = reverse("admin_login_approve", kwargs={"token": token})
-    site_url = (getattr(settings, "SITE_URL", "") or "").rstrip("/")
-    if site_url:
-        return f"{site_url}{approve_path}"
-    return request.build_absolute_uri(approve_path)
-
-
 def queue_approval_email(*, session_key: str, user, request) -> bool:
+    """Queue approval email via Celery so login/2FA is not blocked on SMTP."""
     recipient = (getattr(settings, "ADMIN_LOGIN_APPROVAL_EMAIL", "") or "").strip()
     if not recipient:
         logger.error("ADMIN_LOGIN_APPROVAL_EMAIL is not configured")
         return False
+
+    token = make_approval_token(session_key, user.pk)
+    approve_path = reverse("admin_login_approve", kwargs={"token": token})
+    site_url = (getattr(settings, "SITE_URL", "") or "").rstrip("/")
+    if site_url:
+        approve_url = f"{site_url}{approve_path}"
+    else:
+        approve_url = request.build_absolute_uri(approve_path)
 
     from core.tasks import send_admin_login_approval_email_task
 
     send_admin_login_approval_email_task.delay(
         session_key=session_key,
         user_id=user.pk,
-        approve_url=build_approve_url(session_key=session_key, user=user, request=request),
+        approve_url=approve_url,
         client_ip=get_client_ip(request) or "unknown",
     )
     return True
-
-
-def queue_approval_telegram(*, session_key: str, user, request) -> bool:
-    from core.tasks import send_admin_login_approval_telegram_task
-
-    send_admin_login_approval_telegram_task.delay(
-        session_key=session_key,
-        user_id=user.pk,
-        approve_url=build_approve_url(session_key=session_key, user=user, request=request),
-        client_ip=get_client_ip(request) or "unknown",
-    )
-    return True
-
-
-def queue_approval_notification(*, session_key: str, user, request) -> bool:
-    """Queue approval message via configured channel(s)."""
-    via = approval_via()
-    ok = False
-    if via in {"email", "both"}:
-        ok = queue_approval_email(session_key=session_key, user=user, request=request) or ok
-    if via in {"telegram", "both"}:
-        ok = queue_approval_telegram(session_key=session_key, user=user, request=request) or ok
-    if via not in {"email", "telegram", "both"}:
-        logger.error("Unknown ADMIN_LOGIN_APPROVAL_VIA=%r", via)
-    return ok
 
 
 def _should_gate_user(user) -> bool:
@@ -147,10 +118,8 @@ def request_admin_login_approval(sender, request, user, **kwargs):
         request.session.save()
     session_key = request.session.session_key
     mark_session_pending(session_key, user, request)
-    queued = queue_approval_notification(
-        session_key=session_key, user=user, request=request
-    )
-    request.session["admin_login_notice_sent"] = queued
+    queued = queue_approval_email(session_key=session_key, user=user, request=request)
+    request.session["admin_login_email_sent"] = queued
 
 
 @receiver(user_logged_out)
