@@ -1895,7 +1895,8 @@ section.home-page {
 .car-card__price-sub {
     color: var(--text-muted);
     font-size: 12px;
-    margin-top: 2px;
+    line-height: 1.4;
+    margin: 2px 0 0;
 }
 
 .vehicle-meta-grid {

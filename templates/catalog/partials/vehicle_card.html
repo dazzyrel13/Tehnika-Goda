@@ -27,6 +27,7 @@
     <div class="car-card__body">
         <h3 class="car-card__title">{{ vehicle.title }}</h3>
         <div class="car-card__price">{{ vehicle.price_rub|price_rub_display }}</div>
+        <p class="car-card__price-sub">{{ vehicle.turnkey_price_note }}</p>
         {% include "catalog/partials/vehicle_card_meta.html" %}
         <a href="{{ vehicle.get_absolute_url }}" class="btn-elite car-card__cta">Подробнее</a>
     </div>

@@ -87,7 +87,13 @@ class VehicleAdminForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["title"].help_text = "Например: Zeekr 001 2024 FR"
         self.fields["price_rub"].label = "Цена, ₽"
-        self.fields["price_rub"].help_text = "Цена для сайта — только в рублях"
+        self.fields["price_rub"].help_text = (
+            "Цена для сайта в рублях. Рядом укажите курс юаня — он выводится под ценой."
+        )
+        self.fields["cny_rate"].label = "Курс юаня"
+        self.fields["cny_rate"].help_text = (
+            "Сколько рублей за 1 юань. На сайте: «по курсу 12.48»."
+        )
         self.fields["main_image"].label = "Основное фото (обложка)"
         self.fields["main_image"].help_text = (
             "Крупное фото на карточке и первое в галерее внутри объявления. "
@@ -219,11 +225,12 @@ class VehicleAdmin(admin.ModelAdmin):
             "Цена и статус",
             {
                 "fields": (
-                    "price_rub",
+                    ("price_rub", "cny_rate"),
                     ("is_published", "is_featured"),
                 ),
                 "description": (
                     "Новые карточки и импорт по URL по умолчанию скрыты. "
+                    "Курс юаня меняйте, когда цена в рублях уже не совпадает с расчётом. "
                     "«Выкупленный» — тёмная плашка на сайте и попадание в фильтр "
                     "«Выкупленные». При пробеге 0 км автоматически показывается "
                     "плашка «Новый»."

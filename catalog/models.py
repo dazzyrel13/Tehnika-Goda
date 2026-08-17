@@ -1,5 +1,6 @@
 import os
 import uuid
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 from django.core.validators import FileExtensionValidator, MinValueValidator
 from django.db import IntegrityError, models
@@ -200,6 +201,14 @@ class Vehicle(models.Model):
         help_text="Цена для сайта в рублях",
         db_index=True,
     )
+    cny_rate = models.DecimalField(
+        "Курс юаня",
+        max_digits=8,
+        decimal_places=4,
+        default=Decimal("12.48"),
+        validators=[MinValueValidator(Decimal("0.01"))],
+        help_text="Рублей за 1 юань. Показывается под ценой на сайте.",
+    )
     is_currency_fixed = models.BooleanField("Зафиксировать цену", default=False)
 
     # Specs & Description
@@ -275,6 +284,23 @@ class Vehicle(models.Model):
 
     def get_absolute_url(self):
         return reverse("catalog:vehicle_detail", kwargs={"slug": self.slug})
+
+    @property
+    def cny_rate_display(self) -> str:
+        try:
+            quantized = Decimal(self.cny_rate).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+        except (InvalidOperation, TypeError):
+            quantized = Decimal("12.48")
+        return f"{quantized:.2f}"
+
+    @property
+    def turnkey_price_note(self) -> str:
+        return (
+            f"Цена под ключ до Благовещенска по курсу {self.cny_rate_display}. "
+            "Актуальную цену на день заявки уточняйте у менеджера."
+        )
 
     def _sync_color_from_specs(self) -> None:
         """Fill empty color from specs JSON so filters/facets stay index-friendly."""

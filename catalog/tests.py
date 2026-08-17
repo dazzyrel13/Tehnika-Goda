@@ -145,6 +145,7 @@ class CatalogPagesTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Published Car")
         self.assertNotContains(response, "Hidden Car")
+        self.assertContains(response, "по курсу 12.48")
 
     def test_list_redirects_to_default_category(self):
         response = self.client.get(reverse("catalog:index"))
@@ -208,6 +209,18 @@ class CatalogPagesTests(TestCase):
         self.assertContains(response, '"Car"')
         self.assertContains(response, "mileageFromOdometer")
         self.assertContains(response, 'aria-label="Хлебные крошки"')
+        self.assertContains(
+            response,
+            "Цена под ключ до Благовещенска по курсу 12.48. "
+            "Актуальную цену на день заявки уточняйте у менеджера.",
+        )
+        self.assertNotContains(response, "Цена в карточке ориентировочная")
+
+    def test_detail_uses_vehicle_cny_rate(self):
+        self.vehicle.cny_rate = "13.10"
+        self.vehicle.save(update_fields=["cny_rate"])
+        response = self.client.get(self.vehicle.get_absolute_url())
+        self.assertContains(response, "по курсу 13.10")
 
     def test_category_has_h1_and_indexable(self):
         response = self.client.get(
