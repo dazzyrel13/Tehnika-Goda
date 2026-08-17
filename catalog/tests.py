@@ -236,6 +236,18 @@ class CatalogPagesTests(TestCase):
         self.assertContains(response, "30 000 километров")
         self.assertNotContains(response, "Топ-опции")
 
+    def test_detail_merges_empty_spec_label(self):
+        self.vehicle.description = (
+            "[Цвет] серый\n"
+            "【Дополнительно】\n"
+            "[Пробег] 30 000 километров"
+        )
+        self.vehicle.save(update_fields=["description"])
+        response = self.client.get(self.vehicle.get_absolute_url())
+        self.assertContains(response, "vehicle-spec-sheet__heading")
+        self.assertContains(response, "Дополнительно")
+        self.assertNotContains(response, "vehicle-spec-sheet__value\">—")
+
     def test_category_has_h1_and_indexable(self):
         response = self.client.get(
             reverse("catalog:category", kwargs={"category_slug": "cars"})
@@ -761,5 +773,14 @@ class SpecSheetParseTests(TestCase):
 
         sheet = parse_spec_sheet("Топ-опции:\n- Электролюк | Камера")
         self.assertFalse(sheet.has_rows)
+
+    def test_empty_value_stays_empty_for_section_heading(self):
+        from catalog.spec_sheet import parse_spec_sheet
+
+        sheet = parse_spec_sheet("[Цвет] серый\n【Дополнительно】\n[Ключ] 2шт")
+        self.assertEqual(
+            sheet.rows,
+            [("Цвет", "серый"), ("Дополнительно", ""), ("Ключ", "2шт")],
+        )
 
 

@@ -3925,8 +3925,13 @@ body.bg-faq .leads-cta-section {
     background: #f7f8fa;
 }
 
+.vehicle-spec-sheet__row--span {
+    grid-template-columns: 1fr;
+}
+
 .vehicle-spec-sheet__key,
-.vehicle-spec-sheet__value {
+.vehicle-spec-sheet__value,
+.vehicle-spec-sheet__heading {
     padding: 10px 12px;
     font-size: 13px;
     line-height: 1.4;
@@ -3942,6 +3947,13 @@ body.bg-faq .leads-cta-section {
 
 .vehicle-spec-sheet__value {
     color: var(--text-main);
+}
+
+.vehicle-spec-sheet__heading {
+    text-align: center;
+    font-weight: 800;
+    color: var(--text-main);
+    background: rgba(255, 179, 0, 0.16);
 }
 
 .vehicle-description__rest {
@@ -4055,8 +4067,13 @@ body.bg-faq .leads-cta-section {
         grid-template-columns: minmax(100px, 42%) minmax(0, 1fr);
     }
 
+    .vehicle-spec-sheet__row--span {
+        grid-template-columns: 1fr;
+    }
+
     .vehicle-spec-sheet__key,
-    .vehicle-spec-sheet__value {
+    .vehicle-spec-sheet__value,
+    .vehicle-spec-sheet__heading {
         padding: 8px 10px;
         font-size: 12px;
     }

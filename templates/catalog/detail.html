@@ -185,10 +185,16 @@
                     {% if sheet.has_rows %}
                         <div class="vehicle-spec-sheet">
                             {% for key, value in sheet.rows %}
+                            {% if value %}
                             <div class="vehicle-spec-sheet__row">
                                 <div class="vehicle-spec-sheet__key">{{ key }}</div>
-                                <div class="vehicle-spec-sheet__value">{% if value %}{{ value }}{% else %}—{% endif %}</div>
+                                <div class="vehicle-spec-sheet__value">{{ value }}</div>
                             </div>
+                            {% else %}
+                            <div class="vehicle-spec-sheet__row vehicle-spec-sheet__row--span">
+                                <div class="vehicle-spec-sheet__heading">{{ key }}</div>
+                            </div>
+                            {% endif %}
                             {% endfor %}
                         </div>
                         {% if sheet.rest %}
