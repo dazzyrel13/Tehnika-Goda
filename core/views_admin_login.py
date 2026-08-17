@@ -9,10 +9,11 @@ from django.views import View
 
 from core.admin_login_approval import (
     approval_enabled,
+    approval_via,
     approve_session,
     is_session_approved,
     parse_approval_token,
-    queue_approval_email,
+    queue_approval_notification,
 )
 from core.admin_url import DEFAULT_ADMIN_URL_PREFIX
 
@@ -39,7 +40,8 @@ class AdminLoginPendingView(View):
             request,
             "admin_login_pending.html",
             {
-                "email_sent": request.session.get("admin_login_email_sent", True),
+                "notice_sent": request.session.get("admin_login_notice_sent", True),
+                "approval_via": approval_via(),
                 "approval_email": getattr(
                     settings, "ADMIN_LOGIN_APPROVAL_EMAIL", ""
                 ),
@@ -94,10 +96,10 @@ class AdminLoginResendView(View):
             return JsonResponse({"ok": False, "error": "auth"}, status=403)
         if is_session_approved(request.session.session_key):
             return JsonResponse({"ok": True, "approved": True})
-        sent = queue_approval_email(
+        sent = queue_approval_notification(
             session_key=request.session.session_key,
             user=user,
             request=request,
         )
-        request.session["admin_login_email_sent"] = sent
+        request.session["admin_login_notice_sent"] = sent
         return JsonResponse({"ok": sent})

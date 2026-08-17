@@ -52,3 +52,32 @@ def send_admin_login_approval_email_task(
     except Exception as exc:
         logger.exception("Failed to send admin login approval email")
         raise self.retry(exc=exc) from exc
+
+
+@shared_task(
+    bind=True,
+    name="core.send_admin_login_approval_telegram",
+    max_retries=2,
+    default_retry_delay=10,
+)
+def send_admin_login_approval_telegram_task(
+    self,
+    *,
+    session_key: str,
+    user_id: int,
+    approve_url: str,
+    client_ip: str,
+) -> bool:
+    from leads.telegram import send_admin_login_approval
+
+    user = get_user_model().objects.filter(pk=user_id).first()
+    username = user.get_username() if user else f"user#{user_id}"
+
+    ok = send_admin_login_approval(
+        approve_url=approve_url,
+        username=username,
+        client_ip=client_ip,
+    )
+    if not ok:
+        raise self.retry()
+    return True
