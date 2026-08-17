@@ -110,6 +110,52 @@ class AdminIPAllowlistMiddleware:
         return self.get_response(request)
 
 
+class AdminEmailApprovalMiddleware:
+    """
+    When ADMIN_LOGIN_EMAIL_APPROVAL is on, staff sessions need an email link click
+    before any admin URL (except login flow / approve / logout) is accessible.
+    """
+
+    _EXEMPT_PREFIXES = (
+        "account/login/pending/",
+        "account/login/status/",
+        "account/login/resend/",
+        "account/login/approve/",
+        "account/logout/",
+    )
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from core.admin_login_approval import approval_enabled, is_session_approved
+
+        if not approval_enabled():
+            return self.get_response(request)
+
+        admin_prefix = _admin_prefix()
+        if not request.path.startswith(admin_prefix):
+            return self.get_response(request)
+
+        rel = request.path[len(admin_prefix) :].lstrip("/")
+        if any(rel.startswith(exempt) for exempt in self._EXEMPT_PREFIXES):
+            return self.get_response(request)
+
+        user = getattr(request, "user", None)
+        if user is None or not user.is_authenticated:
+            return self.get_response(request)
+        if not (user.is_staff or user.is_superuser):
+            return self.get_response(request)
+
+        if is_session_approved(request.session.session_key):
+            return self.get_response(request)
+
+        from django.shortcuts import redirect
+
+        pending_url = admin_prefix + "account/login/pending/"
+        return redirect(pending_url)
+
+
 def _ip_allowed(ip_str: str, networks) -> bool:
     try:
         ip = ipaddress.ip_address(ip_str)

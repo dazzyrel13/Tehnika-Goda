@@ -1,0 +1,8 @@
+{% extends "two_factor/_base.html" %}
+
+{% block title %}Подтверждение входа | Техника Года{% endblock %}
+
+{% block content %}
+<h1 class="tf-title">{% if ok %}Готово{% else %}Ошибка{% endif %}</h1>
+<p class="tf-lead">{{ message }}</p>
+{% endblock %}

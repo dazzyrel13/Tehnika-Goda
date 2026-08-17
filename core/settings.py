@@ -44,6 +44,24 @@ BEHIND_HTTPS_PROXY = env.bool("BEHIND_HTTPS_PROXY", default=False)
 ADMIN_URL_PREFIX = env("ADMIN_URL_PREFIX", default=DEFAULT_ADMIN_URL_PREFIX)
 # Non-empty = only these IPs/CIDRs may open the admin. Empty = disabled.
 ADMIN_ALLOWED_IPS = env.list("ADMIN_ALLOWED_IPS", default=[])
+# When True, staff must confirm login via email link (ADMIN_LOGIN_APPROVAL_EMAIL).
+ADMIN_LOGIN_EMAIL_APPROVAL = env.bool("ADMIN_LOGIN_EMAIL_APPROVAL", default=False)
+ADMIN_LOGIN_APPROVAL_EMAIL = (env("ADMIN_LOGIN_APPROVAL_EMAIL", default="") or "").strip()
+
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.smtp.EmailBackend",
+)
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=465)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=True)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
+DEFAULT_FROM_EMAIL = env(
+    "DEFAULT_FROM_EMAIL",
+    default=EMAIL_HOST_USER or "noreply@tehnikagoda.ru",
+)
 
 if (
     DEBUG
@@ -97,6 +115,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    "core.apps.CoreConfig",
     "analytics.apps.AnalyticsConfig",
     "catalog.apps.CatalogConfig",
     "leads.apps.LeadsConfig",
@@ -118,6 +137,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "core.security_middleware.SlidingAuthSessionMiddleware",
     "django_otp.middleware.OTPMiddleware",
+    "core.security_middleware.AdminEmailApprovalMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_user_agents.middleware.UserAgentMiddleware",
@@ -157,12 +177,19 @@ if (
 
 # Cache (Redis — shared across workers and Celery)
 # Uses REDIS_CACHE_URL (DB 1). Separate from Celery Broker (DB 0) to avoid key collisions.
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": env("REDIS_CACHE_URL", default="redis://localhost:6379/1"),
+if TESTING:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": env("REDIS_CACHE_URL", default="redis://localhost:6379/1"),
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -384,7 +411,7 @@ if not DEBUG and not env("USE_HTTPS"):
             "only for exceptional non-HTTPS deployments."
         )
 
-if not DEBUG and not TESTING and not ADMIN_ALLOWED_IPS:
+if not DEBUG and not TESTING and not ADMIN_ALLOWED_IPS and not ADMIN_LOGIN_EMAIL_APPROVAL:
     if env.bool("ALLOW_OPEN_ADMIN", default=False):
         warnings.warn(
             "DEBUG=False with empty ADMIN_ALLOWED_IPS and ALLOW_OPEN_ADMIN=True — "
@@ -394,8 +421,19 @@ if not DEBUG and not TESTING and not ADMIN_ALLOWED_IPS:
         )
     else:
         raise ImproperlyConfigured(
-            "Production mode requires ADMIN_ALLOWED_IPS (office/VPN CIDRs), "
+            "Production mode requires ADMIN_ALLOWED_IPS, ADMIN_LOGIN_EMAIL_APPROVAL=True, "
             "or set ALLOW_OPEN_ADMIN=True only as a temporary exception."
+        )
+
+if not DEBUG and not TESTING and ADMIN_LOGIN_EMAIL_APPROVAL:
+    if not ADMIN_LOGIN_APPROVAL_EMAIL:
+        raise ImproperlyConfigured(
+            "ADMIN_LOGIN_EMAIL_APPROVAL=True requires ADMIN_LOGIN_APPROVAL_EMAIL."
+        )
+    if not EMAIL_HOST or not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+        raise ImproperlyConfigured(
+            "ADMIN_LOGIN_EMAIL_APPROVAL=True requires EMAIL_HOST, EMAIL_HOST_USER, "
+            "and EMAIL_HOST_PASSWORD (e.g. smtp.mail.ru)."
         )
 
 _invalid_admin_ips = []

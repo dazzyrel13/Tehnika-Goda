@@ -1,0 +1,67 @@
+{% extends "two_factor/_base.html" %}
+
+{% block title %}Подтверждение входа | Техника Года{% endblock %}
+
+{% block content %}
+<h1 class="tf-title">Подтвердите вход</h1>
+<p class="tf-lead">
+    {% if email_sent %}
+        Мы отправили письмо на <strong>{{ approval_email }}</strong>.
+        Откройте его и нажмите ссылку «Подтвердить вход» — эта страница обновится автоматически.
+    {% else %}
+        Не удалось отправить письмо. Проверьте настройки почты на сервере или нажмите «Отправить снова».
+    {% endif %}
+</p>
+<p class="tf-muted">Ссылка действует 20 минут. Можно войти с любого IP.</p>
+<button type="button" class="tf-btn" id="resend-btn">Отправить снова</button>
+<p class="tf-muted" id="resend-status" hidden></p>
+<script>
+(function () {
+  var statusUrl = "{{ status_url|escapejs }}";
+  var resendUrl = "{{ resend_url|escapejs }}";
+  var adminUrl = "{{ request.scheme }}://{{ request.get_host }}{% url 'admin:index' %}";
+  var csrf = "{{ csrf_token }}";
+
+  function poll() {
+    fetch(statusUrl, { credentials: "same-origin" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.approved) {
+          window.location.href = adminUrl;
+        }
+      })
+      .catch(function () {});
+  }
+
+  setInterval(poll, 3000);
+  poll();
+
+  var btn = document.getElementById("resend-btn");
+  var note = document.getElementById("resend-status");
+  if (btn) {
+    btn.addEventListener("click", function () {
+      btn.disabled = true;
+      fetch(resendUrl, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "X-CSRFToken": csrf },
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          note.hidden = false;
+          note.textContent = data.ok
+            ? "Письмо отправлено повторно."
+            : "Не удалось отправить. Попробуйте позже.";
+        })
+        .catch(function () {
+          note.hidden = false;
+          note.textContent = "Ошибка отправки.";
+        })
+        .finally(function () {
+          btn.disabled = false;
+        });
+    });
+  }
+})();
+</script>
+{% endblock %}
