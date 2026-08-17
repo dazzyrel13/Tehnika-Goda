@@ -48,13 +48,10 @@ ADMIN_ALLOWED_IPS = env.list("ADMIN_ALLOWED_IPS", default=[])
 ADMIN_LOGIN_EMAIL_APPROVAL = env.bool("ADMIN_LOGIN_EMAIL_APPROVAL", default=False)
 ADMIN_LOGIN_APPROVAL_EMAIL = (env("ADMIN_LOGIN_APPROVAL_EMAIL", default="") or "").strip()
 
-_default_email_backend = "django.core.mail.backends.smtp.EmailBackend"
-if TESTING:
-    _default_email_backend = "django.core.mail.backends.locmem.EmailBackend"
-elif ADMIN_LOGIN_EMAIL_APPROVAL:
-    _default_email_backend = "core.email_backend.IPv4SMTPBackend"
-
-EMAIL_BACKEND = env("EMAIL_BACKEND", default=_default_email_backend)
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.smtp.EmailBackend",
+)
 EMAIL_HOST = env("EMAIL_HOST", default="")
 EMAIL_PORT = env.int("EMAIL_PORT", default=465)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
