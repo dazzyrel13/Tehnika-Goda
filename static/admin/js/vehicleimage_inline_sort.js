@@ -1,5 +1,6 @@
 /**
  * Горизонтальная сетка фото: тяните за само превью.
+ * Формсет называется gallery (related_name), не vehicleimage_set.
  */
 (function () {
   function ready(fn) {
@@ -8,7 +9,7 @@
   }
 
   ready(function () {
-    const group = document.getElementById("vehicleimage_set-group");
+    const group = document.querySelector(".tg-photo-inline");
     if (!group) return;
     const grid = group.querySelector(".tg-photo-grid") || group;
 

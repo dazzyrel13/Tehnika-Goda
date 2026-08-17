@@ -686,8 +686,11 @@ class VehicleAdminGalleryGridTests(TestCase):
         )
         response.render()
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="gallery-group"')
+        self.assertContains(response, "tg-photo-inline")
         self.assertContains(response, "tg-photo-grid")
         self.assertContains(response, "tg-photo-card__preview")
+        self.assertContains(response, 'width="160"')
         self.assertContains(response, "vehicleimage_inline_sort.js")
 
 

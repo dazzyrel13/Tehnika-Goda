@@ -1798,7 +1798,7 @@ input[type="submit"]:not(.default),
     font-size: 12.5px !important;
 }
 
-#vehicleimage_set-group::before {
+.tg-photo-inline::before {
     margin: 8px 12px !important;
     padding: 8px 10px !important;
     font-size: 12px !important;

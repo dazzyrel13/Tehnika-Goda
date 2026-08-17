@@ -1,4 +1,5 @@
-/* Галерея авто в админке: горизонтальная сетка, drag за само фото */
+/* Галерея авто в админке: горизонтальная сетка, drag за само фото.
+   Префикс формсета — related_name «gallery», id будет gallery-group. */
 
 .tg-gallery-multi-input {
     min-height: 48px !important;
@@ -16,7 +17,7 @@
     background: #fff4d6 !important;
 }
 
-#vehicleimage_set-group::before {
+.tg-photo-inline::before {
     content: "Схватите само фото и перетащите на нужное место. Галочка «Удалить» + Сохранить убирает снимок. Новые фото — полем «Галерея — загрузить пачкой» выше.";
     display: block;
     margin: 0 16px 14px;
@@ -29,22 +30,24 @@
     line-height: 1.45;
 }
 
-#vehicleimage_set-group .tg-photo-grid {
-    display: flex;
-    flex-wrap: wrap;
+.tg-photo-inline .tg-photo-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start;
     gap: 12px;
     padding: 0 16px 16px;
 }
 
-#vehicleimage_set-group .inline-related.tg-photo-card {
+.tg-photo-inline .inline-related.tg-photo-card {
     position: relative;
     float: none !important;
     clear: none !important;
     display: flex !important;
     flex-direction: column;
-    flex: 0 0 176px;
+    flex: 0 0 176px !important;
     width: 176px !important;
     max-width: 176px !important;
+    min-width: 0 !important;
     margin: 0 !important;
     padding: 8px !important;
     border: 1px solid rgba(15, 20, 25, 0.12) !important;
@@ -52,37 +55,43 @@
     background: #fff !important;
     box-shadow: 0 4px 14px rgba(15, 20, 25, 0.06);
     overflow: hidden;
+    box-sizing: border-box !important;
 }
 
-#vehicleimage_set-group .tg-photo-card.empty-form {
+.tg-photo-inline .tg-photo-card.empty-form {
     display: none !important;
 }
 
-#vehicleimage_set-group .tg-photo-card.tg-row-dragging {
+.tg-photo-inline .tg-photo-card.tg-row-dragging {
     opacity: 0.4;
 }
 
-#vehicleimage_set-group .tg-photo-card.tg-row-drag-over {
+.tg-photo-inline .tg-photo-card.tg-row-drag-over {
     outline: 3px solid #ffb300;
 }
 
-#vehicleimage_set-group .tg-photo-card__preview {
+.tg-photo-inline .tg-photo-card__preview {
     position: relative;
+    width: 160px;
+    height: 120px;
     cursor: grab;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
 }
 
-#vehicleimage_set-group .tg-photo-card.tg-row-dragging .tg-photo-card__preview {
+.tg-photo-inline .tg-photo-card.tg-row-dragging .tg-photo-card__preview {
     cursor: grabbing;
 }
 
-#vehicleimage_set-group .tg-gallery-thumb {
-    display: block;
-    width: 100%;
-    height: 124px;
-    object-fit: cover;
+.tg-photo-inline .tg-gallery-thumb,
+.tg-photo-inline img.tg-gallery-thumb {
+    display: block !important;
+    width: 160px !important;
+    height: 120px !important;
+    max-width: 160px !important;
+    max-height: 120px !important;
+    object-fit: cover !important;
     border-radius: 10px;
     background: #f0f1f3;
     -webkit-user-drag: none;
@@ -90,22 +99,22 @@
     pointer-events: none;
 }
 
-#vehicleimage_set-group .tg-gallery-thumb--empty {
-    display: flex;
+.tg-photo-inline .tg-gallery-thumb--empty {
+    display: flex !important;
     align-items: center;
     justify-content: center;
     font-size: 12px;
     color: #667;
 }
 
-#vehicleimage_set-group .tg-photo-card__django-fields,
-#vehicleimage_set-group .tg-photo-card h3,
-#vehicleimage_set-group .tg-photo-card h4,
-#vehicleimage_set-group .add-row {
+.tg-photo-inline .tg-photo-card__django-fields,
+.tg-photo-inline .tg-photo-card h3,
+.tg-photo-inline .tg-photo-card h4,
+.tg-photo-inline .add-row {
     display: none !important;
 }
 
-#vehicleimage_set-group .tg-photo-card__delete {
+.tg-photo-inline .tg-photo-card__delete {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -115,6 +124,6 @@
     user-select: none;
 }
 
-#vehicleimage_set-group .tg-photo-card a {
+.tg-photo-inline .tg-photo-card a {
     -webkit-user-drag: none;
 }
