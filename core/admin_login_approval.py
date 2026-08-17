@@ -8,7 +8,6 @@ from django.conf import settings
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.core import signing
 from django.core.cache import cache
-from django.core.mail import send_mail
 from django.dispatch import receiver
 from django.urls import reverse
 
@@ -81,7 +80,8 @@ def parse_approval_token(token: str) -> tuple[str, int] | None:
     return session_key, int(user_id_str)
 
 
-def send_approval_email(*, session_key: str, user, request) -> bool:
+def queue_approval_email(*, session_key: str, user, request) -> bool:
+    """Queue approval email via Celery so login/2FA is not blocked on SMTP."""
     recipient = (getattr(settings, "ADMIN_LOGIN_APPROVAL_EMAIL", "") or "").strip()
     if not recipient:
         logger.error("ADMIN_LOGIN_APPROVAL_EMAIL is not configured")
@@ -94,30 +94,16 @@ def send_approval_email(*, session_key: str, user, request) -> bool:
         approve_url = f"{site_url}{approve_path}"
     else:
         approve_url = request.build_absolute_uri(approve_path)
-    ip = get_client_ip(request) or "unknown"
-    username = user.get_username()
 
-    subject = f"Техника Года — подтвердите вход ({username})"
-    message = (
-        f"Запрос входа в админку.\n\n"
-        f"Пользователь: {username}\n"
-        f"IP: {ip}\n\n"
-        f"Подтвердить вход (действует 20 мин):\n{approve_url}\n\n"
-        f"Если это не вы — просто проигнорируйте письмо."
+    from core.tasks import send_admin_login_approval_email_task
+
+    send_admin_login_approval_email_task.delay(
+        session_key=session_key,
+        user_id=user.pk,
+        approve_url=approve_url,
+        client_ip=get_client_ip(request) or "unknown",
     )
-
-    try:
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[recipient],
-            fail_silently=False,
-        )
-        return True
-    except Exception:
-        logger.exception("Failed to send admin login approval email")
-        return False
+    return True
 
 
 def _should_gate_user(user) -> bool:
@@ -132,8 +118,8 @@ def request_admin_login_approval(sender, request, user, **kwargs):
         request.session.save()
     session_key = request.session.session_key
     mark_session_pending(session_key, user, request)
-    sent = send_approval_email(session_key=session_key, user=user, request=request)
-    request.session["admin_login_email_sent"] = sent
+    queued = queue_approval_email(session_key=session_key, user=user, request=request)
+    request.session["admin_login_email_sent"] = queued
 
 
 @receiver(user_logged_out)

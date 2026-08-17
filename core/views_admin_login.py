@@ -12,7 +12,7 @@ from core.admin_login_approval import (
     approve_session,
     is_session_approved,
     parse_approval_token,
-    send_approval_email,
+    queue_approval_email,
 )
 from core.admin_url import DEFAULT_ADMIN_URL_PREFIX
 
@@ -94,7 +94,7 @@ class AdminLoginResendView(View):
             return JsonResponse({"ok": False, "error": "auth"}, status=403)
         if is_session_approved(request.session.session_key):
             return JsonResponse({"ok": True, "approved": True})
-        sent = send_approval_email(
+        sent = queue_approval_email(
             session_key=request.session.session_key,
             user=user,
             request=request,
