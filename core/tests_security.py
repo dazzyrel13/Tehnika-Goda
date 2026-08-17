@@ -163,6 +163,18 @@ class AdminTwoFactorTests(TestCase):
         self.assertContains(response, "Техника Года")
 
 
+class CsrfTrustedOriginsTests(TestCase):
+    def test_site_url_origin_is_trusted(self):
+        from urllib.parse import urlparse
+
+        from django.conf import settings
+
+        parsed = urlparse(settings.SITE_URL)
+        if parsed.scheme and parsed.netloc:
+            origin = f"{parsed.scheme}://{parsed.netloc}"
+            self.assertIn(origin, settings.CSRF_TRUSTED_ORIGINS)
+
+
 @override_settings(ADMIN_ALLOWED_IPS=["203.0.113.50"], TRUST_PROXY_HEADERS=True)
 class TwoFactorLoginAllowlistTests(TestCase):
     def test_login_blocked_for_other_ip(self):

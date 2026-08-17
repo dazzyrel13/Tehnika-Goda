@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.templatetags.static import static as static_url
@@ -12,6 +11,7 @@ from catalog.sitemaps import BrandSitemap, CategorySitemap, VehicleSitemap
 from catalog.views import HomeView
 from content.sitemaps import StaticViewSitemap
 from core.health import healthz
+from core.media import serve_media
 
 sitemaps = {
     "static": StaticViewSitemap,
@@ -160,7 +160,6 @@ urlpatterns = [
     path("content/", include("content.urls", namespace="content")),
     # CKEditor 5 image upload endpoint (required by admin widgets)
     path("ckeditor5/", include("django_ckeditor_5.urls")),
+    # Always serve uploads: production host nginx proxies /media/ to Gunicorn.
+    path("media/<path:path>", serve_media, name="serve_media"),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

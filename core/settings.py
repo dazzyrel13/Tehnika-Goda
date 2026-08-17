@@ -248,9 +248,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Upload limits (anti-abuse)
-DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB total POST
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB per file in-memory threshold
+# Upload limits (anti-abuse). A gallery batch of JPEGs easily exceeds 50MB.
+DATA_UPLOAD_MAX_MEMORY_SIZE = 150 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 15 * 1024 * 1024
+DATA_UPLOAD_MAX_NUMBER_FILES = 40
 
 # Site Configuration
 SITE_ID = 1
@@ -323,6 +324,24 @@ CSRF_TRUSTED_ORIGINS = env.list(
     ],
 )
 
+
+def _add_csrf_origin(origin: str) -> None:
+    origin = (origin or "").strip().rstrip("/")
+    if origin and origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
+
+
+from urllib.parse import urlparse as _urlparse
+
+_site = _urlparse(SITE_URL or "")
+if _site.scheme and _site.netloc:
+    _add_csrf_origin(f"{_site.scheme}://{_site.netloc}")
+_use_https = bool(env("USE_HTTPS"))
+for _host in ALLOWED_HOSTS:
+    if not _host or _host.startswith(".") or _host in {"*", "localhost", "127.0.0.1"}:
+        continue
+    _add_csrf_origin(f"{'https' if _use_https or not DEBUG else 'http'}://{_host}")
+
 # Logging
 Path(os.path.join(BASE_DIR, "logs")).mkdir(exist_ok=True)
 Path(os.path.join(BASE_DIR, "staticfiles")).mkdir(exist_ok=True)
@@ -369,7 +388,7 @@ if env("USE_HTTPS") and not TESTING:
     SECURE_HSTS_PRELOAD = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
-    if BEHIND_HTTPS_PROXY:
+    if BEHIND_HTTPS_PROXY or TRUST_PROXY_HEADERS:
         SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 else:
     SECURE_SSL_REDIRECT = False
