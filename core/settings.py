@@ -157,12 +157,19 @@ if (
 
 # Cache (Redis — shared across workers and Celery)
 # Uses REDIS_CACHE_URL (DB 1). Separate from Celery Broker (DB 0) to avoid key collisions.
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": env("REDIS_CACHE_URL", default="redis://localhost:6379/1"),
+if TESTING:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": env("REDIS_CACHE_URL", default="redis://localhost:6379/1"),
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
