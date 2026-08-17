@@ -68,7 +68,7 @@ class VehicleAdminForm(forms.ModelForm):
                     "Зажмите Ctrl (⌘ на Mac) или Shift и выберите сразу много фото. "
                     "Либо выделите пачку в проводнике мышкой. "
                     "Не больше ~30 снимков за раз (тяжёлые JPEG лучше пачками). "
-                    "После сохранения порядок меняется перетаскиванием ниже."
+                    "После сохранения порядок меняется перетаскиванием фото ниже."
         ),
     )
 
@@ -148,14 +148,14 @@ class BrandAdmin(admin.ModelAdmin):
     display_logo.short_description = "Лого"
 
 
-class VehicleImageInline(admin.TabularInline):
+class VehicleImageInline(admin.StackedInline):
     model = VehicleImage
     extra = 0
-    fields = ("move_handle", "display_image", "image", "order")
-    readonly_fields = ("move_handle", "display_image")
+    template = "admin/edit_inline/vehicleimage_grid.html"
+    fields = ("image", "order")
     ordering = ("order", "id")
     verbose_name = "Фото"
-    verbose_name_plural = "Галерея — тяните за ⠿ или превью, затем Сохранить"
+    verbose_name_plural = "Галерея"
 
     class Media:
         js = ("admin/js/vehicleimage_inline_sort.js",)
@@ -165,24 +165,6 @@ class VehicleImageInline(admin.TabularInline):
         if db_field.name == "order":
             kwargs["widget"] = forms.HiddenInput()
         return super().formfield_for_dbfield(db_field, request, **kwargs)
-
-    def display_image(self, obj):
-        if obj.pk and obj.image:
-            return format_html(
-                '<img src="{}" class="tg-gallery-thumb" width="120" height="80" alt="" draggable="false" />',
-                obj.image.url,
-            )
-        return "—"
-
-    display_image.short_description = "Превью"
-
-    def move_handle(self, obj):
-        return format_html(
-            '<span class="drag-handle" title="Зажмите и перетащите фото вверх или вниз" '
-            'role="button" tabindex="0">⠿</span>'
-        )
-
-    move_handle.short_description = "Порядок"
 
 
 @admin.register(Vehicle)
@@ -259,7 +241,7 @@ class VehicleAdmin(admin.ModelAdmin):
                 "description": (
                     "Сначала загрузите пачку фото в «Галерея». "
                     "Обложку можно не указывать — подставится первое фото. "
-                    "Порядок на сайте: после сохранения перетащите строки галереи мышкой."
+                    "Порядок на сайте: после сохранения схватите фото в сетке и перетащите."
                 ),
             },
         ),

@@ -633,3 +633,61 @@ class VehicleAdminAddFormTests(TestCase):
         self.assertContains(response, "ckeditor5")
 
 
+class VehicleAdminGalleryGridTests(TestCase):
+    def test_change_form_renders_horizontal_photo_grid(self):
+        import tempfile
+        from io import BytesIO
+
+        from django.contrib.admin.sites import AdminSite
+        from django.contrib.auth import get_user_model
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.test import RequestFactory, override_settings
+        from PIL import Image
+
+        from catalog.admin import VehicleAdmin
+
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        media = override_settings(MEDIA_ROOT=tmp.name)
+        media.enable()
+        self.addCleanup(media.disable)
+
+        brand = Brand.objects.create(name="GridBrand", slug="gridbrand")
+        category, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Cars"}
+        )
+        vehicle = Vehicle.objects.create(
+            title="Grid Car",
+            brand=brand,
+            category=category,
+            year=2024,
+            slug="grid-car",
+        )
+        buf = BytesIO()
+        Image.new("RGB", (400, 300), (20, 20, 20)).save(buf, format="JPEG")
+        buf.seek(0)
+        VehicleImage.objects.create(
+            vehicle=vehicle,
+            image=SimpleUploadedFile("g.jpg", buf.read(), content_type="image/jpeg"),
+            order=1,
+        )
+
+        user = get_user_model().objects.create_superuser(
+            "gallery-admin", "ga@example.com", "pass-not-used"
+        )
+        request = RequestFactory().get(f"/admin/catalog/vehicle/{vehicle.pk}/change/")
+        request.user = user
+        request.session = {}
+        request._messages = FallbackStorage(request)
+
+        response = VehicleAdmin(Vehicle, AdminSite()).change_view(
+            request, str(vehicle.pk)
+        )
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "tg-photo-grid")
+        self.assertContains(response, "tg-photo-card__preview")
+        self.assertContains(response, "vehicleimage_inline_sort.js")
+
+
