@@ -24,8 +24,9 @@
         <div class="vehicle-detail-layout">
             <div>
                 <div class="glass-panel glass-shadow vehicle-gallery-main">
-                    {% if vehicle.main_image %}
-                    {% responsive_image vehicle.main_image 800 as main_img %}
+                    {% vehicle_gallery_images vehicle as gallery_images %}
+                    {% if gallery_images %}
+                    {% responsive_image gallery_images.0 800 as main_img %}
                     <img
                         id="vehicle-main-image"
                         class="vehicle-gallery-main__img"
@@ -62,10 +63,10 @@
                     {% endif %}
                 </div>
 
-                {% if vehicle.gallery.all %}
+                {% if gallery_images %}
                 <div class="vehicle-thumbs-grid">
-                    {% for item in vehicle.gallery.all %}
-                        {% responsive_image item.image 400 as thumb %}
+                    {% for photo in gallery_images %}
+                        {% responsive_image photo 400 as thumb %}
                         <button
                             type="button"
                             class="glass-panel vehicle-gallery-thumb"
@@ -206,5 +207,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/detail.js' %}?v=3"></script>
+<script src="{% static 'js/detail.js' %}?v=4"></script>
 {% endblock %}

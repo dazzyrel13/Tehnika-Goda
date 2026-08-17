@@ -90,7 +90,8 @@ class VehicleAdminForm(forms.ModelForm):
         self.fields["price_rub"].help_text = "Цена для сайта — только в рублях"
         self.fields["main_image"].label = "Основное фото (обложка)"
         self.fields["main_image"].help_text = (
-            "Карточка в каталоге. Если пусто — возьмём первое фото из галереи."
+            "Крупное фото на карточке и первое в галерее внутри объявления. "
+            "Если пусто — возьмём первое фото из пачки ниже."
         )
         self.fields["mileage"].help_text = "0 — для новых авто"
         self.fields["description"].help_text = "Кратко: комплектация, состояние, доставка"

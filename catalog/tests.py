@@ -2,7 +2,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .cache_helpers import invalidate_nav_cache
-from .models import Brand, Category, Vehicle
+from .models import Brand, Category, Vehicle, VehicleImage
 
 
 class RemovedDealerOfferTests(TestCase):
@@ -523,6 +523,41 @@ class VehicleImageVariantTests(TestCase):
         response = self.client.get(reverse("home"))
         self.assertContains(response, "srcset=")
         self.assertContains(response, ".w800.webp")
+
+    def test_cover_is_included_in_detail_gallery(self):
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+
+        from catalog.templatetags.catalog_extras import vehicle_gallery_images
+
+        def _jpeg(name):
+            buf = BytesIO()
+            Image.new("RGB", (800, 600), (10, 10, 10)).save(buf, format="JPEG")
+            buf.seek(0)
+            return SimpleUploadedFile(name, buf.read(), content_type="image/jpeg")
+
+        vehicle = Vehicle.objects.create(
+            title="Cover Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            mileage=100,
+            price_rub=1500000,
+            is_published=True,
+            slug="cover-car",
+        )
+        vehicle.main_image = _jpeg("cover.jpg")
+        vehicle.save()
+        VehicleImage.objects.create(vehicle=vehicle, image=_jpeg("gallery.jpg"), order=1)
+        vehicle.refresh_from_db()
+        slides = vehicle_gallery_images(vehicle)
+        self.assertGreaterEqual(len(slides), 2)
+        self.assertEqual(slides[0].name, vehicle.main_image.name)
+        response = self.client.get(vehicle.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, vehicle.main_image.url)
 
 
 @override_settings(RATELIMIT_ENABLE=False)

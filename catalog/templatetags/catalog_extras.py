@@ -75,3 +75,24 @@ def responsive_image(image_field, default_width=800):
     except (TypeError, ValueError):
         width = 800
     return responsive_attrs(image_field, default_width=width)
+
+
+@register.simple_tag
+def vehicle_gallery_images(vehicle):
+    """Cover first, then unique gallery photos (cover is stored separately)."""
+    images = []
+    seen = set()
+    cover = getattr(vehicle, "main_image", None)
+    cover_name = (getattr(cover, "name", None) or "").strip()
+    if cover_name:
+        images.append(cover)
+        seen.add(cover_name)
+    gallery = getattr(vehicle, "gallery", None)
+    items = gallery.all() if gallery is not None else []
+    for item in items:
+        photo = getattr(item, "image", None)
+        name = (getattr(photo, "name", None) or "").strip()
+        if name and name not in seen:
+            images.append(photo)
+            seen.add(name)
+    return images
