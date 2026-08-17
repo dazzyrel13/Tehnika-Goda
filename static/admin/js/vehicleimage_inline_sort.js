@@ -1,11 +1,15 @@
 /**
- * Drag-and-drop порядок фото в инлайне VehicleImage.
- * Перетаскивание только за ручку ⠿.
+ * Порядок фото галереи в админке: тяните карточку за ⠿ или за превью.
+ * Не за ссылку «На данный момент» — браузер тогда открывает «искать в новой вкладке».
  */
 (function () {
   function ready(fn) {
     if (document.readyState !== "loading") fn();
     else document.addEventListener("DOMContentLoaded", fn);
+  }
+
+  function isControl(el) {
+    return !!(el && el.closest && el.closest("input, select, textarea, button, a, .delete"));
   }
 
   ready(function () {
@@ -14,11 +18,21 @@
 
     const tbody =
       group.querySelector("fieldset table tbody") || group.querySelector("tbody");
-    if (!tbody) return;
 
-    let dragRow = null;
-
-    function allDataRows() {
+    function allItems() {
+      const stacked = Array.from(group.querySelectorAll(".inline-related")).filter(
+        (el) =>
+          !el.classList.contains("empty-form") &&
+          !(el.id && String(el.id).endsWith("-empty")) &&
+          !el.querySelector("table")
+      );
+      if (stacked.length) {
+        return stacked.filter((el) => {
+          const del = el.querySelector("input[name$='-DELETE']");
+          return !(del && del.checked);
+        });
+      }
+      if (!tbody) return [];
       return Array.from(tbody.querySelectorAll("tr.form-row")).filter((row) => {
         if (row.classList.contains("empty-form")) return false;
         if (row.id && String(row.id).endsWith("-empty")) return false;
@@ -27,86 +41,104 @@
       });
     }
 
+    function parentOf(item) {
+      return item.parentNode;
+    }
+
     function syncOrder() {
-      allDataRows().forEach((row, index) => {
-        const orderInput = row.querySelector("input[name$='-order']");
+      allItems().forEach((item, index) => {
+        const orderInput = item.querySelector("input[name$='-order']");
         if (orderInput) orderInput.value = String(index + 1);
       });
     }
 
-    function prepare(row) {
-      if (row.dataset.tgSortReady === "1") return;
-      row.dataset.tgSortReady = "1";
-      row.classList.add("tg-sortable-row");
-      row.draggable = false;
-
-      const handle = row.querySelector(".drag-handle");
-      if (handle) {
-        handle.addEventListener("mousedown", function () {
-          row.draggable = true;
+    function disableNativeFileDrag(root) {
+      root.querySelectorAll("img, a").forEach((el) => {
+        el.setAttribute("draggable", "false");
+        el.addEventListener("dragstart", function (event) {
+          event.preventDefault();
         });
-        handle.addEventListener("mouseup", function () {
-          row.draggable = false;
-        });
-      }
+      });
+    }
 
-      row.addEventListener("dragstart", function (event) {
-        if (!row.draggable) {
+    let dragItem = null;
+
+    function prepare(item) {
+      if (item.dataset.tgSortReady === "1") return;
+      item.dataset.tgSortReady = "1";
+      item.classList.add("tg-sortable-row");
+      item.draggable = false;
+      disableNativeFileDrag(item);
+
+      item.addEventListener("mousedown", function (event) {
+        if (event.button !== 0) return;
+        if (isControl(event.target)) {
+          item.draggable = false;
+          return;
+        }
+        item.draggable = true;
+      });
+      item.addEventListener("mouseup", function () {
+        item.draggable = false;
+      });
+
+      item.addEventListener("dragstart", function (event) {
+        if (isControl(event.target) || !item.draggable) {
           event.preventDefault();
           return;
         }
-        dragRow = row;
-        row.classList.add("tg-row-dragging");
+        dragItem = item;
+        item.classList.add("tg-row-dragging");
         event.dataTransfer.effectAllowed = "move";
         try {
-          event.dataTransfer.setData("text/plain", row.id || "row");
+          event.dataTransfer.setData("text/plain", item.id || "row");
         } catch (e) {}
+        if (event.dataTransfer.setDragImage) {
+          event.dataTransfer.setDragImage(item, 24, 24);
+        }
       });
 
-      row.addEventListener("dragend", function () {
-        row.classList.remove("tg-row-dragging");
-        row.draggable = false;
-        tbody.querySelectorAll(".tg-row-drag-over").forEach(function (el) {
+      item.addEventListener("dragend", function () {
+        item.classList.remove("tg-row-dragging");
+        item.draggable = false;
+        group.querySelectorAll(".tg-row-drag-over").forEach(function (el) {
           el.classList.remove("tg-row-drag-over");
         });
-        dragRow = null;
+        dragItem = null;
         syncOrder();
       });
 
-      row.addEventListener("dragover", function (event) {
-        if (!dragRow || dragRow === row) return;
+      item.addEventListener("dragover", function (event) {
+        if (!dragItem || dragItem === item) return;
         event.preventDefault();
         event.dataTransfer.dropEffect = "move";
-        row.classList.add("tg-row-drag-over");
+        item.classList.add("tg-row-drag-over");
       });
 
-      row.addEventListener("dragleave", function () {
-        row.classList.remove("tg-row-drag-over");
+      item.addEventListener("dragleave", function () {
+        item.classList.remove("tg-row-drag-over");
       });
 
-      row.addEventListener("drop", function (event) {
+      item.addEventListener("drop", function (event) {
         event.preventDefault();
-        row.classList.remove("tg-row-drag-over");
-        if (!dragRow || dragRow === row) return;
-
-        const rect = row.getBoundingClientRect();
+        item.classList.remove("tg-row-drag-over");
+        if (!dragItem || dragItem === item) return;
+        const rect = item.getBoundingClientRect();
         const after = event.clientY > rect.top + rect.height / 2;
-        if (after) {
-          row.parentNode.insertBefore(dragRow, row.nextSibling);
-        } else {
-          row.parentNode.insertBefore(dragRow, row);
-        }
+        const parent = parentOf(item);
+        if (after) parent.insertBefore(dragItem, item.nextSibling);
+        else parent.insertBefore(dragItem, item);
         syncOrder();
       });
     }
 
     function init() {
-      allDataRows().forEach(prepare);
+      allItems().forEach(prepare);
       syncOrder();
     }
 
     init();
-    new MutationObserver(init).observe(tbody, { childList: true });
+    new MutationObserver(init).observe(group, { childList: true, subtree: true });
 
     const form = group.closest("form");
     if (form) form.addEventListener("submit", syncOrder);

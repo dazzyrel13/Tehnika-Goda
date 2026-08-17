@@ -155,7 +155,7 @@ class VehicleImageInline(admin.TabularInline):
     readonly_fields = ("move_handle", "display_image")
     ordering = ("order", "id")
     verbose_name = "Фото"
-    verbose_name_plural = "Галерея — перетащите ↕ за ручку, чтобы изменить порядок"
+    verbose_name_plural = "Галерея — тяните за ⠿ или превью, затем Сохранить"
 
     class Media:
         js = ("admin/js/vehicleimage_inline_sort.js",)
@@ -169,7 +169,7 @@ class VehicleImageInline(admin.TabularInline):
     def display_image(self, obj):
         if obj.pk and obj.image:
             return format_html(
-                '<img src="{}" class="tg-gallery-thumb" width="120" height="80" alt="" />',
+                '<img src="{}" class="tg-gallery-thumb" width="120" height="80" alt="" draggable="false" />',
                 obj.image.url,
             )
         return "—"
@@ -178,7 +178,7 @@ class VehicleImageInline(admin.TabularInline):
 
     def move_handle(self, obj):
         return format_html(
-            '<span class="drag-handle" title="Зажмите и перетащите строку" '
+            '<span class="drag-handle" title="Зажмите и перетащите фото вверх или вниз" '
             'role="button" tabindex="0">⠿</span>'
         )
 

@@ -43,18 +43,30 @@
     border-radius: 8px;
     display: block;
     border: 1px solid rgba(15, 20, 25, 0.08);
+    -webkit-user-drag: none;
+    user-drag: none;
+    pointer-events: none;
 }
 
-#vehicleimage_set-group tr.tg-sortable-row {
+#vehicleimage_set-group a {
+    -webkit-user-drag: none;
+}
+
+#vehicleimage_set-group tr.tg-sortable-row,
+#vehicleimage_set-group .inline-related.tg-sortable-row {
     transition: background 0.12s ease;
+    cursor: grab;
 }
 
-#vehicleimage_set-group tr.tg-row-dragging {
+#vehicleimage_set-group tr.tg-row-dragging,
+#vehicleimage_set-group .inline-related.tg-row-dragging {
     opacity: 0.45;
     background: #f0f1f3 !important;
+    cursor: grabbing;
 }
 
-#vehicleimage_set-group tr.tg-row-drag-over {
+#vehicleimage_set-group tr.tg-row-drag-over,
+#vehicleimage_set-group .inline-related.tg-row-drag-over {
     box-shadow: inset 0 3px 0 #ffb300;
     background: #fff4d6 !important;
 }
@@ -66,7 +78,7 @@
 
 /* Подсказка над инлайном */
 #vehicleimage_set-group::before {
-    content: "Зажмите ⠿ слева и перетащите строку — так задаётся порядок фото на сайте. Не забудьте сохранить.";
+    content: "Порядок на сайте: зажмите квадрат ⠿ слева или само превью и перетащите карточку вверх/вниз. Не тяните ссылку на файл — браузер тогда предлагает «искать в новой вкладке». После этого нажмите «Сохранить».";
     display: block;
     margin: 0 0 14px;
     padding: 12px 14px;
