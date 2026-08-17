@@ -10,7 +10,7 @@
 - Configure `CORS_ALLOWED_ORIGINS` with trusted origins only.
 - Rotate Telegram bot token if used, and keep it out of VCS.
 - Set `REDIS_PASSWORD` and matching `REDIS_BROKER_URL` / `REDIS_CACHE_URL`.
-- Prefer `ADMIN_LOGIN_EMAIL_APPROVAL=True` with `ADMIN_LOGIN_APPROVAL_EMAIL` and SMTP (login from any IP; confirm via email link). Or use `ADMIN_ALLOWED_IPS` (office/VPN CIDRs only — never Docker `172.16.0.0/12` in production).
+- Prefer `ADMIN_ALLOWED_IPS` (office/VPN CIDRs only — never Docker `172.16.0.0/12` in production) for the admin path (`ADMIN_URL_PREFIX`). Empty list is rejected when `DEBUG=False` unless `ALLOW_OPEN_ADMIN=True`.
 - Set a unique `ADMIN_URL_PREFIX` (do not ship the example default). Never reuse a local DEBUG `.env` as the production env file.
 - Production `ALLOWED_HOSTS` must be the real domains only (`tehnikagoda.ru`, `www.tehnikagoda.ru`) — no `localhost`.
 - After deploy: open the admin URL, sign in, scan the TOTP QR (Google Authenticator / Yandex Ключ) and save backup codes. Admin will not open without 2FA.

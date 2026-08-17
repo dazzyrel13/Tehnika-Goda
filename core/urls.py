@@ -12,12 +12,6 @@ from catalog.sitemaps import BrandSitemap, CategorySitemap, VehicleSitemap
 from catalog.views import HomeView
 from content.sitemaps import StaticViewSitemap
 from core.health import healthz
-from core.views_admin_login import (
-    AdminLoginApproveView,
-    AdminLoginPendingView,
-    AdminLoginResendView,
-    AdminLoginStatusView,
-)
 
 sitemaps = {
     "static": StaticViewSitemap,
@@ -66,28 +60,7 @@ _INFO_SEO = {
 
 urlpatterns = [
     path("healthz/", healthz, name="healthz"),
-    # Email approval for admin login (before 2FA routes)
-    path(
-        _admin_url_prefix() + "account/login/pending/",
-        AdminLoginPendingView.as_view(),
-        name="admin_login_pending",
-    ),
-    path(
-        _admin_url_prefix() + "account/login/status/",
-        AdminLoginStatusView.as_view(),
-        name="admin_login_status",
-    ),
-    path(
-        _admin_url_prefix() + "account/login/resend/",
-        AdminLoginResendView.as_view(),
-        name="admin_login_resend",
-    ),
-    path(
-        _admin_url_prefix() + "account/login/approve/<str:token>/",
-        AdminLoginApproveView.as_view(),
-        name="admin_login_approve",
-    ),
-    # 2FA login/setup lives under the hidden admin prefix.
+    # 2FA login/setup lives under the hidden admin prefix (IP allowlist applies).
     path(_admin_url_prefix(), include(tf_urls)),
     path(_admin_url_prefix(), admin.site.urls),
     # Homepage at site root (legacy /catalog/ redirects inside catalog.urls)

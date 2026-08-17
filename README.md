@@ -24,7 +24,7 @@ Health: http://localhost:8000/healthz/
 Админка: http://localhost:8000/<ADMIN_URL_PREFIX>/  
 (значение `ADMIN_URL_PREFIX` из `.env` — в проде задайте уникальный префикс)
 
-Вход в админку: пароль + код из приложения-аутентификатора + подтверждение по ссылке в письме (если включено `ADMIN_LOGIN_EMAIL_APPROVAL`). Если логин заблокирован: `python manage.py axes_reset`.
+Вход в админку: пароль + одноразовый код из приложения-аутентификатора. Если логин заблокирован: `python manage.py axes_reset`.
 
 В dev-стеке: `web` (runserver), `db`, `redis`, `celery_worker`.
 
@@ -90,4 +90,4 @@ docker exec tehnikagoda_web_dev python manage.py test
 ## Переменные окружения
 
 Обязательные: `SECRET_KEY`, `REDIS_PASSWORD` (Docker).  
-Опциональные: `TELEGRAM_*`, `YANDEX_METRIKA_ID`, `ANALYTICS_ASYNC`, `ANALYTICS_RETENTION_DAYS`, `ADMIN_ALLOWED_IPS`, `ADMIN_LOGIN_EMAIL_APPROVAL`, `EMAIL_*`.
+Опциональные: `TELEGRAM_*`, `YANDEX_METRIKA_ID`, `ANALYTICS_ASYNC`, `ANALYTICS_RETENTION_DAYS`, `ADMIN_ALLOWED_IPS`.
