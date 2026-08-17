@@ -181,11 +181,25 @@
 
                 <div class="vehicle-description">
                     <h4>Описание комплектации:</h4>
-                    {% if vehicle.description %}
+                    {% with sheet=vehicle.spec_sheet %}
+                    {% if sheet.has_rows %}
+                        <div class="vehicle-spec-sheet">
+                            {% for key, value in sheet.rows %}
+                            <div class="vehicle-spec-sheet__row">
+                                <div class="vehicle-spec-sheet__key">{{ key }}</div>
+                                <div class="vehicle-spec-sheet__value">{% if value %}{{ value }}{% else %}—{% endif %}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if sheet.rest %}
+                            <div class="vehicle-description__rest">{{ sheet.rest|linebreaksbr }}</div>
+                        {% endif %}
+                    {% elif vehicle.description %}
                         {{ vehicle.description|sanitized_html }}
                     {% else %}
                         <p style="color: var(--text-muted); margin: 0;">Описание уточняется, запросите расчёт под ключ — подготовим детали по комплектации и срокам.</p>
                     {% endif %}
+                    {% endwith %}
                 </div>
 
                 <a href="#leads-section" class="btn-elite vehicle-consult-btn js-price-key-btn"

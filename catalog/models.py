@@ -302,6 +302,12 @@ class Vehicle(models.Model):
             "Актуальную цену на день заявки уточняйте у менеджера."
         )
 
+    @property
+    def spec_sheet(self):
+        from .spec_sheet import parse_spec_sheet
+
+        return parse_spec_sheet(self.description or "")
+
     def _sync_color_from_specs(self) -> None:
         """Fill empty color from specs JSON so filters/facets stay index-friendly."""
         if (self.color or "").strip():

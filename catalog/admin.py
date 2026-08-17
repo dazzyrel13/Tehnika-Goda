@@ -4,13 +4,11 @@ from io import BytesIO
 from django import forms
 from django.contrib import admin, messages
 from django.core.files.base import ContentFile
-from django.db import models
 from django.db.models import Max
 from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.text import slugify
-from django_ckeditor_5.widgets import CKEditor5Widget
 from PIL import Image
 from unidecode import unidecode
 
@@ -100,7 +98,15 @@ class VehicleAdminForm(forms.ModelForm):
             "Если пусто — возьмём первое фото из пачки ниже."
         )
         self.fields["mileage"].help_text = "0 — для новых авто"
-        self.fields["description"].help_text = "Кратко: комплектация, состояние, доставка"
+        self.fields["description"].label = "Описание комплектации"
+        self.fields["description"].help_text = (
+            "Вставьте текст строками, как в коммерческом предложении. "
+            "Слева поле в скобках, справа значение — на сайте станет таблица. "
+            "Пример:\n"
+            "[Название автомобиля] Volkswagen Bora\n"
+            "【Цвет】 серый\n"
+            "[Пробег] 30 000 километров"
+        )
 
 
 @admin.register(InspectionReport)
@@ -248,7 +254,8 @@ class VehicleAdmin(admin.ModelAdmin):
                 "description": (
                     "Сначала загрузите пачку фото в «Галерея». "
                     "Обложку можно не указывать — подставится первое фото. "
-                    "Порядок на сайте: после сохранения схватите фото в сетке и перетащите."
+                    "Порядок на сайте: после сохранения схватите фото в сетке и перетащите. "
+                    "Описание — вставьте строки «[Поле] значение», сайт сам сделает два столбца."
                 ),
             },
         ),
@@ -267,9 +274,22 @@ class VehicleAdmin(admin.ModelAdmin):
     class Media:
         css = {"all": ("admin/css/vehicleimage_inline.css",)}
 
-    formfield_overrides = {
-        models.TextField: {"widget": CKEditor5Widget(config_name="default")},
-    }
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "description":
+            kwargs["widget"] = forms.Textarea(
+                attrs={
+                    "rows": 20,
+                    "cols": 80,
+                    "class": "vLargeTextField tg-spec-paste",
+                    "placeholder": (
+                        "[Название автомобиля] Volkswagen Bora (099526)\n"
+                        "[Модель] Версия 2023 200TSI DSG Smart Travel PRO\n"
+                        "【Режим привода】 2WD\n"
+                        "【Цвет】 серый"
+                    ),
+                }
+            )
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)

@@ -222,6 +222,20 @@ class CatalogPagesTests(TestCase):
         response = self.client.get(self.vehicle.get_absolute_url())
         self.assertContains(response, "по курсу 13.10")
 
+    def test_detail_renders_pasted_spec_sheet(self):
+        self.vehicle.description = (
+            "[Название автомобиля] Volkswagen Bora (099526)\n"
+            "【Цвет】 серый\n"
+            "[Пробег] 30 000 километров"
+        )
+        self.vehicle.save(update_fields=["description"])
+        response = self.client.get(self.vehicle.get_absolute_url())
+        self.assertContains(response, "vehicle-spec-sheet")
+        self.assertContains(response, "Название автомобиля")
+        self.assertContains(response, "Volkswagen Bora (099526)")
+        self.assertContains(response, "30 000 километров")
+        self.assertNotContains(response, "Топ-опции")
+
     def test_category_has_h1_and_indexable(self):
         response = self.client.get(
             reverse("catalog:category", kwargs={"category_slug": "cars"})
@@ -643,7 +657,8 @@ class VehicleAdminAddFormTests(TestCase):
         response = VehicleAdmin(Vehicle, AdminSite()).add_view(request)
         response.render()
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "ckeditor5")
+        self.assertContains(response, "tg-spec-paste")
+        self.assertContains(response, "[Название автомобиля]")
 
 
 class VehicleAdminGalleryGridTests(TestCase):
@@ -705,5 +720,46 @@ class VehicleAdminGalleryGridTests(TestCase):
         self.assertContains(response, "tg-photo-card__preview")
         self.assertContains(response, 'width="160"')
         self.assertContains(response, "vehicleimage_inline_sort.js")
+
+
+class SpecSheetParseTests(TestCase):
+    SAMPLE = (
+        "[Название автомобиля] Volkswagen Bora (099526)\n"
+        "[Модель] Версия 2023 200TSI DSG Smart Travel PRO\n"
+        "【Режим привода】 2WD\n"
+        "【Цвет】 серый\n"
+        "【Дата производства】 Август 2022\n"
+        "[Пробег] 30 000 километров\n"
+        "【Объем двигателя】 1,2т\n"
+        "【Мощность двигателя】85 кВт/116 л.с.\n"
+        "【Коробка Передач】Робот DSG\n"
+        "【Ключ】 2шт\n"
+        "【Состояние автомобиля】 Оригинальная краска\n"
+        "[Комплектация автомобиля] Smart Travel PRO"
+    )
+
+    def test_parses_mixed_brackets(self):
+        from catalog.spec_sheet import parse_spec_sheet
+
+        sheet = parse_spec_sheet(self.SAMPLE)
+        self.assertTrue(sheet.has_rows)
+        as_dict = dict(sheet.rows)
+        self.assertEqual(as_dict["Название автомобиля"], "Volkswagen Bora (099526)")
+        self.assertEqual(as_dict["Цвет"], "серый")
+        self.assertEqual(as_dict["Мощность двигателя"], "85 кВт/116 л.с.")
+        self.assertEqual(len(sheet.rows), 12)
+
+    def test_parses_html_paragraphs(self):
+        from catalog.spec_sheet import parse_spec_sheet
+
+        html = "<p>[Модель] 200TSI</p><p>【Цвет】 серый</p>"
+        sheet = parse_spec_sheet(html)
+        self.assertEqual(sheet.rows, [("Модель", "200TSI"), ("Цвет", "серый")])
+
+    def test_plain_text_without_labels_is_not_a_sheet(self):
+        from catalog.spec_sheet import parse_spec_sheet
+
+        sheet = parse_spec_sheet("Топ-опции:\n- Электролюк | Камера")
+        self.assertFalse(sheet.has_rows)
 
 

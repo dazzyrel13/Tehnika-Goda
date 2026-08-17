@@ -127,3 +127,12 @@
 .tg-photo-inline .tg-photo-card a {
     -webkit-user-drag: none;
 }
+
+.tg-spec-paste {
+    font-family: Consolas, "Courier New", monospace !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    min-height: 280px !important;
+    width: 100% !important;
+    max-width: 720px;
+}
