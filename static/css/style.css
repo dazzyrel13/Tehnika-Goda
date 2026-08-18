@@ -1083,12 +1083,13 @@ section.home-page {
 
 .ed-hero__title {
     font-family: var(--font-body);
-    font-size: clamp(1.15rem, 2vw, 1.45rem);
+    font-size: clamp(1.05rem, 2vw, 1.45rem);
     font-weight: 700;
     line-height: 1.35;
     letter-spacing: 0;
     margin: 0 0 10px;
-    max-width: 22ch;
+    max-width: none;
+    white-space: nowrap;
     color: var(--text-main);
     border-left: 3px solid var(--accent-yellow);
     padding-left: 12px;
@@ -2625,7 +2626,8 @@ header.is-scrolled {
 
     .ed-hero__title {
         max-width: none;
-        font-size: 1.15rem;
+        font-size: 1.05rem;
+        white-space: nowrap;
     }
 
     .ed-hero__lead {
