@@ -222,6 +222,39 @@ class CatalogPagesTests(TestCase):
         )
         self.assertNotContains(response, "Цена в карточке ориентировочная")
 
+    def test_detail_hides_duplicate_english_spec_cards(self):
+        cars, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Легковые автомобили"}
+        )
+        sedan, _ = Category.objects.get_or_create(
+            slug="cars_sedan",
+            defaults={"name": "Седаны", "parent": cars},
+        )
+        if sedan.parent_id != cars.id:
+            sedan.parent = cars
+            sedan.save(update_fields=["parent"])
+        self.vehicle.category = sedan
+        self.vehicle.color = "Белый"
+        self.vehicle.transmission = "Робот"
+        self.vehicle.body_type = "Минивэн"
+        self.vehicle.horsepower = 159
+        self.vehicle.specs = {
+            "color": "Белый",
+            "gearbox": "Робот",
+            "transmission": "Робот",
+            "bodyType": "Минивэн",
+            "engine_vol": "1.5",
+        }
+        self.vehicle.save()
+        response = self.client.get(self.vehicle.get_absolute_url())
+        self.assertContains(response, "Цвет")
+        self.assertContains(response, "Коробка передач")
+        self.assertContains(response, "Объём двигателя")
+        self.assertNotContains(response, ">color<")
+        self.assertNotContains(response, ">gearbox<")
+        self.assertNotContains(response, ">transmission<")
+        self.assertNotContains(response, ">bodyType<")
+
     def test_detail_uses_vehicle_cny_rate(self):
         self.vehicle.cny_rate = "13.10"
         self.vehicle.save(update_fields=["cny_rate"])
@@ -823,6 +856,7 @@ class ListingIngestTests(TestCase):
         self.assertEqual(data.color, "Серый")
         self.assertEqual(data.transmission, "Робот DSG")
         self.assertEqual(data.body_type, "Седан")
+        self.assertEqual(data.specs, {})
 
     def test_ingest_creates_brand_and_reuses_category(self):
         from catalog.listing_ingest import ingest_listing

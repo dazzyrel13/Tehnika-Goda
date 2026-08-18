@@ -229,13 +229,6 @@ def parse_listing_text(raw: str) -> ListingData:
         bits = [data.brand_name, data.model, str(data.year or "")]
         data.title = _clean(" ".join(bit for bit in bits if bit)) or "Автомобиль"
 
-    if data.color:
-        data.specs["color"] = data.color
-    if data.transmission:
-        data.specs["transmission"] = data.transmission
-        data.specs["gearbox"] = data.transmission
-    if data.body_type:
-        data.specs["bodyType"] = data.body_type
     return data
 
 

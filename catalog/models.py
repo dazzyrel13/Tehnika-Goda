@@ -308,6 +308,47 @@ class Vehicle(models.Model):
 
         return parse_spec_sheet(self.description or "")
 
+    EXTRA_SPEC_SKIP = frozenset(
+        {
+            "color",
+            "colour",
+            "transmission",
+            "gearbox",
+            "vehicletransmission",
+            "bodytype",
+            "body",
+            "horsepower",
+            "power",
+            "mileage",
+            "year",
+            "brand",
+            "model",
+            "title",
+        }
+    )
+    EXTRA_SPEC_LABELS = {
+        "enginevol": "Объём двигателя",
+        "fueltype": "Топливо",
+        "vehicleengine": "Двигатель",
+        "range": "Запас хода",
+    }
+
+    @property
+    def extra_spec_cards(self) -> list[tuple[str, str]]:
+        """Spec cards that are not already shown as dedicated Russian fields."""
+        specs = self.specs if isinstance(self.specs, dict) else {}
+        cards: list[tuple[str, str]] = []
+        for key, value in specs.items():
+            text = str(value or "").strip()
+            if not text:
+                continue
+            norm = "".join(ch for ch in str(key).lower() if ch.isalnum())
+            if norm in self.EXTRA_SPEC_SKIP:
+                continue
+            label = self.EXTRA_SPEC_LABELS.get(norm) or str(key)
+            cards.append((label, text))
+        return cards
+
     def _sync_color_from_specs(self) -> None:
         """Fill empty color from specs JSON so filters/facets stay index-friendly."""
         if (self.color or "").strip():

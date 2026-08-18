@@ -111,15 +111,9 @@
                         <div class="vehicle-spec-label">Пробег</div>
                         <div class="vehicle-spec-value vehicle-spec-value--lg">{{ vehicle.mileage|mileage_display }}</div>
                     </div>
-                    {% for key, value in vehicle.specs.items %}
+                    {% for key, value in vehicle.extra_spec_cards %}
                     <div class="glass-panel vehicle-spec-card">
-                        <div class="vehicle-spec-label">
-                            {% if key == "engine_vol" %}
-                                Объём двигателя
-                            {% else %}
-                                {{ key }}
-                            {% endif %}
-                        </div>
+                        <div class="vehicle-spec-label">{{ key }}</div>
                         <div class="vehicle-spec-value">{{ value }}</div>
                     </div>
                     {% endfor %}
