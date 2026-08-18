@@ -108,7 +108,7 @@
                     </div>
                     <div class="glass-panel vehicle-spec-card">
                         <div class="vehicle-spec-label">Пробег</div>
-                        <div class="vehicle-spec-value vehicle-spec-value--lg">{% if vehicle.mileage != None %}{{ vehicle.mileage }} км{% else %}уточняется{% endif %}</div>
+                        <div class="vehicle-spec-value vehicle-spec-value--lg">{{ vehicle.mileage|mileage_display }}</div>
                     </div>
                     {% for key, value in vehicle.specs.items %}
                     <div class="glass-panel vehicle-spec-card">

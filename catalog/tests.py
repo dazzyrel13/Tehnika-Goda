@@ -146,6 +146,8 @@ class CatalogPagesTests(TestCase):
         self.assertContains(response, "Published Car")
         self.assertNotContains(response, "Hidden Car")
         self.assertContains(response, "по курсу 12.48")
+        self.assertContains(response, "1 000 км")
+        self.assertNotContains(response, ">1000 км")
 
     def test_list_redirects_to_default_category(self):
         response = self.client.get(reverse("catalog:index"))
@@ -207,6 +209,8 @@ class CatalogPagesTests(TestCase):
         self.assertContains(response, "Published Car")
         self.assertContains(response, "<h1")
         self.assertContains(response, '"Car"')
+        self.assertContains(response, "1 000 км")
+        self.assertNotContains(response, ">1000 км")
         self.assertContains(response, "mileageFromOdometer")
         self.assertContains(response, 'aria-label="Хлебные крошки"')
         self.assertContains(
@@ -470,6 +474,14 @@ class VehicleFilterAndBadgeTests(TestCase):
         titles = [v.title for v in response.context["vehicles"]]
         self.assertNotIn("Featured Truck", titles)
         self.assertIn("Bought Flag", titles)
+
+    def test_mileage_display_groups_thousands(self):
+        from catalog.templatetags.catalog_extras import mileage_display
+
+        self.assertEqual(mileage_display(30000), "30 000 км")
+        self.assertEqual(mileage_display(0), "0 км")
+        self.assertEqual(mileage_display(None), "уточняется")
+        self.assertEqual(mileage_display("abc"), "уточняется")
 
     def test_badge_items_new_and_bought(self):
         from catalog.templatetags.catalog_extras import vehicle_badge_items

@@ -39,6 +39,18 @@ def price_rub_display(value):
 
 
 @register.filter
+def mileage_display(value):
+    """Форматирует пробег: 30000 → «30 000 км»."""
+    if value is None or value == "":
+        return "уточняется"
+    try:
+        grouped = f"{int(value):,}".replace(",", " ")
+        return f"{grouped} км"
+    except (TypeError, ValueError):
+        return "уточняется"
+
+
+@register.filter
 def sanitized_html(value):
     """Always re-sanitize HTML before |safe rendering (defense in depth)."""
     if not value:
