@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">Главная</a>
+&rsaquo; <a href="{% url 'admin:catalog_vehicle_changelist' %}">Автомобили</a>
+&rsaquo; Из комплектации
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="tg-parse tg-parse--wide">
+  <h1>Заполнить из комплектации</h1>
+  <p class="tg-parse__lead">
+    Вставьте текст коммерческого предложения и при желании сразу пачку фото.
+    Система разберёт марку, год, пробег, цвет, коробку и мощность, создаст марку
+    или категорию, если их ещё нет, и откроет черновик для проверки.
+  </p>
+
+  <form method="POST" class="tg-parse__form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="description">Текст комплектации</label>
+    <textarea name="description" id="description" rows="16" required autofocus
+              placeholder="[Название автомобиля] Volkswagen Bora (099526)
+[Модель] Версия 2023 200TSI DSG Smart Travel PRO
+【Цвет】 серый
+【Дата производства】 Август 2022
+[Пробег] 30 000 километров
+【Мощность двигателя】85 кВт/116 л.с.
+【Коробка Передач】Робот DSG
+【Тип кузова】 Седан"></textarea>
+    <p class="tg-parse__hint">
+      Строки вида «[Поле] значение» или «【Поле】 значение». Этот же текст останется описанием на сайте.
+    </p>
+
+    <label for="photos">Фото автомобиля</label>
+    <input type="file" name="photos" id="photos" accept="image/*" multiple
+           class="tg-gallery-multi-input">
+    <p class="tg-parse__hint">
+      Не обязательно. Зажмите Ctrl или Shift и выберите пачку — первое станет обложкой.
+    </p>
+
+    <label for="category">Категория (если не указана в тексте)</label>
+    <select name="category" id="category">
+      <option value="">Определить автоматически</option>
+      {% for category in categories %}
+      <option value="{{ category.pk }}">{{ category }}</option>
+      {% endfor %}
+    </select>
+    <p class="tg-parse__hint">
+      Если оставить «автоматически», подставится существующая категория по кузову
+      или пробегу. Новой имя из текста создастся само.
+    </p>
+
+    <div class="tg-parse__actions">
+      <button type="submit" class="tg-parse__submit">Заполнить и создать черновик</button>
+      <a href="{% url 'admin:catalog_vehicle_changelist' %}" class="tg-parse__cancel">Отмена</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

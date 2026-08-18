@@ -22,6 +22,7 @@ from .models import (
     Vehicle,
     VehicleImage,
 )
+from .listing_ingest import ingest_listing
 from .parser_service import EliteVehicleParser
 
 
@@ -384,6 +385,11 @@ class VehicleAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.parse_url_view),
                 name="catalog_vehicle_parse_url",
             ),
+            path(
+                "ingest-listing/",
+                self.admin_site.admin_view(self.ingest_listing_view),
+                name="catalog_vehicle_ingest_listing",
+            ),
         ]
         return custom_urls + urls
 
@@ -488,3 +494,56 @@ class VehicleAdmin(admin.ModelAdmin):
             return redirect(reverse("admin:catalog_vehicle_changelist"))
 
         return render(request, "admin/catalog/parse_form.html")
+
+    def ingest_listing_view(self, request):
+        if request.method == "POST":
+            raw = (request.POST.get("description") or "").strip()
+            if not raw:
+                messages.error(
+                    request,
+                    "Вставьте текст комплектации — по нему заполняются марка, год, пробег и цвет.",
+                )
+            else:
+                category = None
+                category_id = request.POST.get("category")
+                if category_id and str(category_id).isdigit():
+                    category = Category.objects.filter(pk=int(category_id)).first()
+                result = ingest_listing(
+                    raw,
+                    uploads=request.FILES.getlist("photos"),
+                    category=category,
+                )
+                bits = [f"Авто «{result.vehicle.title}» создано как черновик."]
+                if result.brand_created:
+                    bits.append(f"Добавлена марка «{result.vehicle.brand.name}».")
+                else:
+                    bits.append(f"Марка «{result.vehicle.brand.name}» уже была в справочнике.")
+                if result.vehicle.category_id:
+                    if result.category_created:
+                        bits.append(f"Добавлена категория «{result.vehicle.category}».")
+                    else:
+                        bits.append(f"Категория: {result.vehicle.category}.")
+                if result.photos_added:
+                    bits.append(f"В галерею добавлено фото: {result.photos_added}.")
+                if result.photos_skipped:
+                    self.message_user(
+                        request,
+                        f"Пропущено файлов (не изображение): {result.photos_skipped}.",
+                        level=messages.WARNING,
+                    )
+                messages.success(
+                    request,
+                    " ".join(bits) + " Проверьте поля и опубликуйте.",
+                )
+                return redirect(
+                    reverse("admin:catalog_vehicle_change", args=[result.vehicle.id])
+                )
+
+        categories = Category.objects.select_related("parent").order_by(
+            "parent__name", "name"
+        )
+        return render(
+            request,
+            "admin/catalog/ingest_form.html",
+            {"categories": categories},
+        )

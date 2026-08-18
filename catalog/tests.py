@@ -796,3 +796,126 @@ class SpecSheetParseTests(TestCase):
         )
 
 
+class ListingIngestTests(TestCase):
+    SAMPLE = (
+        "[Название автомобиля] Volkswagen Bora (099526)\n"
+        "[Модель] Версия 2023 200TSI DSG Smart Travel PRO\n"
+        "【Цвет】 серый\n"
+        "【Дата производства】 Август 2022\n"
+        "[Пробег] 30 000 километров\n"
+        "【Мощность двигателя】85 кВт/116 л.с.\n"
+        "【Коробка Передач】Робот DSG\n"
+        "【Тип кузова】 Седан\n"
+        "[Комплектация автомобиля] Smart Travel PRO"
+    )
+
+    def test_parse_listing_maps_admin_fields(self):
+        from catalog.listing_ingest import parse_listing_text
+
+        data = parse_listing_text(self.SAMPLE)
+        self.assertEqual(data.title, "Volkswagen Bora (099526)")
+        self.assertEqual(data.brand_name, "Volkswagen")
+        self.assertEqual(data.year, 2022)
+        self.assertEqual(data.mileage, 30000)
+        self.assertEqual(data.horsepower, 116)
+        self.assertEqual(data.color, "Серый")
+        self.assertEqual(data.transmission, "Робот DSG")
+        self.assertEqual(data.body_type, "Седан")
+
+    def test_ingest_creates_brand_and_reuses_category(self):
+        from catalog.listing_ingest import ingest_listing
+
+        Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Легковые автомобили"}
+        )
+        sedan, _ = Category.objects.get_or_create(
+            slug="cars_sedan",
+            defaults={"name": "Седаны"},
+        )
+        result = ingest_listing(self.SAMPLE)
+        self.assertTrue(result.brand_created)
+        self.assertFalse(result.category_created)
+        self.assertEqual(result.vehicle.brand.name, "Volkswagen")
+        self.assertEqual(result.vehicle.category_id, sedan.id)
+        self.assertEqual(result.vehicle.mileage, 30000)
+        self.assertEqual(result.vehicle.year, 2022)
+        self.assertFalse(result.vehicle.is_published)
+
+        second = ingest_listing(self.SAMPLE)
+        self.assertFalse(second.brand_created)
+        self.assertEqual(Brand.objects.filter(name__iexact="Volkswagen").count(), 1)
+
+    def test_ingest_creates_missing_category_under_cars(self):
+        from catalog.listing_ingest import ingest_listing
+
+        Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Легковые автомобили"}
+        )
+        text = (
+            "[Название автомобиля] Zeekr 001\n"
+            "【Марка】 Zeekr\n"
+            "【Категория】 Пикапы\n"
+            "[Пробег] 0 километров"
+        )
+        result = ingest_listing(text)
+        self.assertTrue(result.category_created)
+        self.assertEqual(result.vehicle.category.name, "Пикапы")
+        self.assertEqual(result.vehicle.category.parent.slug, "cars")
+        self.assertEqual(result.vehicle.brand.name, "Zeekr")
+
+        again = ingest_listing(text)
+        self.assertFalse(again.category_created)
+        self.assertEqual(result.vehicle.category_id, again.vehicle.category_id)
+
+    def test_ingest_attaches_photos_as_cover_and_gallery(self):
+        import tempfile
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.test import override_settings
+        from PIL import Image
+
+        from catalog.listing_ingest import ingest_listing
+
+        tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.addCleanup(tmp.cleanup)
+        media = override_settings(MEDIA_ROOT=tmp.name)
+        media.enable()
+        self.addCleanup(media.disable)
+
+        buf = BytesIO()
+        Image.new("RGB", (80, 60), (10, 20, 30)).save(buf, format="JPEG")
+        photo = SimpleUploadedFile(
+            "cover.jpg", buf.getvalue(), content_type="image/jpeg"
+        )
+        result = ingest_listing(self.SAMPLE, uploads=[photo])
+        self.assertEqual(result.photos_added, 1)
+        self.assertTrue(result.vehicle.main_image)
+        self.assertEqual(result.vehicle.gallery.count(), 1)
+        result.vehicle.main_image.close()
+        for item in result.vehicle.gallery.all():
+            item.image.close()
+
+    def test_admin_ingest_page_renders(self):
+        from django.contrib.admin.sites import AdminSite
+        from django.contrib.auth import get_user_model
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.test import RequestFactory
+
+        from catalog.admin import VehicleAdmin
+
+        user = get_user_model().objects.create_superuser(
+            "ingest-admin", "ingest@example.com", "pass-not-used"
+        )
+        request = RequestFactory().get("/admin/catalog/vehicle/ingest-listing/")
+        request.user = user
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        response = VehicleAdmin(Vehicle, AdminSite()).ingest_listing_view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Заполнить из комплектации")
+        self.assertContains(response, 'name="description"')
+        self.assertContains(response, 'name="photos"')
+
+
+

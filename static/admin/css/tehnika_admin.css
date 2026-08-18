@@ -704,6 +704,10 @@ body.login {
     padding: 28px 32px 32px;
 }
 
+.tg-parse--wide {
+    max-width: 760px;
+}
+
 .tg-parse h1 {
     font-family: var(--font-display);
     font-size: 28px;
@@ -725,9 +729,23 @@ body.login {
     color: var(--tg-navy);
 }
 
-.tg-parse__form input[type="url"] {
+.tg-parse__form input[type="url"],
+.tg-parse__form input[type="file"],
+.tg-parse__form select,
+.tg-parse__form textarea {
     width: 100%;
     max-width: 100%;
+}
+
+.tg-parse__form textarea {
+    min-height: 280px;
+    font-family: inherit;
+    line-height: 1.45;
+}
+
+.tg-parse__form label[for="photos"],
+.tg-parse__form label[for="category"] {
+    margin-top: 18px;
 }
 
 .tg-parse__hint {
