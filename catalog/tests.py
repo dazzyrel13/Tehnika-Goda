@@ -212,6 +212,8 @@ class CatalogPagesTests(TestCase):
         self.assertContains(response, "1 000 км")
         self.assertNotContains(response, ">1000 км")
         self.assertContains(response, "mileageFromOdometer")
+        self.assertContains(response, 'id="vehicle-lightbox"')
+        self.assertContains(response, "js/detail.js")
         self.assertContains(response, 'aria-label="Хлебные крошки"')
         self.assertContains(
             response,

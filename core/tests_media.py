@@ -15,6 +15,8 @@ class ServeMediaTests(TestCase):
                 response = self.client.get("/media/cars/bora.webp")
                 try:
                     self.assertEqual(response.status_code, 200)
+                    self.assertEqual(response["Content-Type"], "image/webp")
+                    self.assertIn("inline", response.get("Content-Disposition", ""))
                 finally:
                     getattr(response, "close", lambda: None)()
 

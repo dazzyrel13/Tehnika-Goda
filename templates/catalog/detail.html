@@ -37,6 +37,7 @@
                         alt="{{ vehicle.title }}"
                         fetchpriority="high"
                         decoding="async"
+                        draggable="false"
                     >
                     <button
                         type="button"
@@ -224,8 +225,12 @@
         </div>
     </div>
 </section>
+<div id="vehicle-lightbox" class="vehicle-lightbox" hidden>
+    <button type="button" class="vehicle-lightbox__close" aria-label="Закрыть фото">×</button>
+    <img id="vehicle-lightbox-image" class="vehicle-lightbox__img" alt="">
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/detail.js' %}?v=4"></script>
+<script src="{% static 'js/detail.js' %}?v=5"></script>
 {% endblock %}

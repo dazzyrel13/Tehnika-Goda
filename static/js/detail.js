@@ -67,15 +67,63 @@
             });
         }
 
+        const lightbox = document.getElementById("vehicle-lightbox");
+        const lightboxImage = document.getElementById("vehicle-lightbox-image");
+        const lightboxClose = lightbox
+            ? lightbox.querySelector(".vehicle-lightbox__close")
+            : null;
+
+        const openLightbox = () => {
+            if (!lightbox || !lightboxImage) return;
+            const src =
+                mainImage.dataset.fullSrc ||
+                mainImage.currentSrc ||
+                mainImage.src;
+            if (!src) return;
+            lightboxImage.src = src;
+            lightboxImage.alt = mainImage.alt || "";
+            lightbox.hidden = false;
+            document.body.classList.add("vehicle-lightbox-open");
+            if (lightboxClose) lightboxClose.focus();
+        };
+
+        const closeLightbox = () => {
+            if (!lightbox) return;
+            lightbox.hidden = true;
+            document.body.classList.remove("vehicle-lightbox-open");
+        };
+
+        mainImage.addEventListener("click", (event) => {
+            event.preventDefault();
+            openLightbox();
+        });
+        mainImage.addEventListener("dragstart", (event) => {
+            event.preventDefault();
+        });
+
+        if (lightbox) {
+            lightbox.addEventListener("click", (event) => {
+                if (event.target === lightbox || event.target === lightboxClose) {
+                    closeLightbox();
+                }
+            });
+        }
+
         document.addEventListener("keydown", (event) => {
             const tag = (event.target && event.target.tagName) || "";
             if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
             if (event.target && event.target.isContentEditable) return;
+            if (event.key === "Escape") {
+                closeLightbox();
+                return;
+            }
             if (event.key === "ArrowLeft") {
                 showByIndex(activeIndex < 0 ? thumbList.length - 1 : activeIndex - 1);
+                if (lightbox && !lightbox.hidden) openLightbox();
             }
             if (event.key === "ArrowRight") {
                 showByIndex(activeIndex < 0 ? 0 : activeIndex + 1);
+                if (lightbox && !lightbox.hidden) openLightbox();
             }
         });
 
@@ -112,11 +160,6 @@
             },
             { passive: true }
         );
-
-        mainImage.addEventListener("click", () => {
-            const full = mainImage.dataset.fullSrc || mainImage.src;
-            window.open(full, "_blank", "noopener,noreferrer");
-        });
 
         const initialThumb = Array.from(thumbs).find(
             (thumb) =>

@@ -3772,6 +3772,52 @@ body.bg-faq .leads-cta-section {
     cursor: zoom-in;
 }
 
+.vehicle-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 16px;
+    background: rgba(10, 10, 14, 0.86);
+    cursor: zoom-out;
+}
+
+.vehicle-lightbox[hidden] {
+    display: none !important;
+}
+
+.vehicle-lightbox__img {
+    max-width: min(96vw, 1400px);
+    max-height: 92vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+    cursor: default;
+}
+
+.vehicle-lightbox__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+body.vehicle-lightbox-open {
+    overflow: hidden;
+}
+
 .vehicle-gallery-nav {
     position: absolute;
     top: 50%;
