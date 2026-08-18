@@ -28,6 +28,7 @@ class VisitAnalyticsMiddleware:
         "/sitemap.xml",
         "/robots.txt",
         "/yandex_",
+        "/google",
         "/sw.js",
         "/manifest.json",
     )

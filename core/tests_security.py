@@ -137,6 +137,14 @@ class SecurityHeadersTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Verification: f7ae125bfea8304f", response.content)
 
+    def test_google_search_console_file_is_served(self):
+        response = self.client.get("/google42cb08ac2dabb73c.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            b"google-site-verification: google42cb08ac2dabb73c.html",
+            response.content,
+        )
+
 
 class AdminTwoFactorTests(TestCase):
     def test_login_is_under_hidden_admin_prefix(self):
