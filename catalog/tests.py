@@ -202,6 +202,69 @@ class CatalogPagesTests(TestCase):
         self.assertContains(response, "1 000 км")
         self.assertNotContains(response, ">1000 км")
 
+    def test_body_type_filter_matches_child_category_and_singular_body_type(self):
+        sedan, _ = Category.objects.get_or_create(
+            slug="cars_sedan", defaults={"name": "Седаны", "parent": self.category}
+        )
+        if sedan.parent_id != self.category.id:
+            sedan.parent = self.category
+            sedan.save(update_fields=["parent"])
+        minivan, _ = Category.objects.get_or_create(
+            slug="cars_minivan", defaults={"name": "Минивэны", "parent": self.category}
+        )
+        if minivan.parent_id != self.category.id:
+            minivan.parent = self.category
+            minivan.save(update_fields=["parent"])
+
+        sedan_vehicle = Vehicle.objects.create(
+            title="Sedan Car",
+            brand=self.brand,
+            category=sedan,
+            year=2023,
+            mileage=1100,
+            price_rub=2700000,
+            is_published=True,
+            slug="sedan-car",
+        )
+        minivan_vehicle = Vehicle.objects.create(
+            title="Minivan Car",
+            brand=self.brand,
+            category=self.category,
+            body_type="Минивэн",
+            year=2023,
+            mileage=1200,
+            price_rub=2800000,
+            is_published=True,
+            slug="minivan-car",
+        )
+        other_vehicle = Vehicle.objects.create(
+            title="SUV Car",
+            brand=self.brand,
+            category=self.category,
+            body_type="Внедорожник",
+            year=2023,
+            mileage=1300,
+            price_rub=2900000,
+            is_published=True,
+            slug="suv-car",
+        )
+
+        sedan_response = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars"}),
+            {"body_type": "cars_sedan"},
+        )
+        self.assertContains(sedan_response, sedan_vehicle.title)
+        self.assertNotContains(sedan_response, minivan_vehicle.title)
+        self.assertNotContains(sedan_response, other_vehicle.title)
+
+        minivan_response = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars"}),
+            {"body_type": "cars_minivan"},
+        )
+        self.assertContains(minivan_response, minivan_vehicle.title)
+        self.assertNotContains(minivan_response, sedan_vehicle.title)
+        self.assertNotContains(minivan_response, other_vehicle.title)
+
     def test_list_redirects_to_default_category(self):
         response = self.client.get(reverse("catalog:index"))
         self.assertEqual(response.status_code, 302)

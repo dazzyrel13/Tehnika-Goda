@@ -149,9 +149,17 @@ class VehicleListView(ListView):
         if body_type_slug:
             body_type_category = Category.objects.filter(slug=body_type_slug).first()
             if body_type_category:
+                body_type_terms = {body_type_category.name.strip()}
+                if body_type_category.name:
+                    # "Седаны" -> "Седан", "Минивэны" -> "Минивэн".
+                    if body_type_category.name[-1:].lower() in {"ы", "и"}:
+                        body_type_terms.add(body_type_category.name[:-1].strip())
+                body_type_terms |= {term.lower() for term in body_type_terms}
+                body_type_q = Q()
+                for term in filter(None, body_type_terms):
+                    body_type_q |= Q(body_type__icontains=term)
                 queryset = queryset.filter(
-                    Q(category=body_type_category)
-                    | Q(body_type__icontains=body_type_category.name)
+                    Q(category_id__in=body_type_category.subtree_ids()) | body_type_q
                 )
 
         brand_slug = self.brand_slug()
