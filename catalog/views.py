@@ -60,9 +60,9 @@ class HomeView(ListView):
         context["home_faqs"] = home_faqs()
         context["home_reviews"] = home_reviews(limit=6)
         context["review_platforms"] = review_platforms()
-        context["seo_title"] = "Автомобили с площадки в Китае | Техника Года"
+        context["seo_title"] = "Автомобили под заказ из Китая | Техника Года"
         context["seo_description"] = (
-            "Техника Года — автомобили с площадки в Китае. "
+            "Автомобили под заказ из Китая с площадки Техника Года. "
             "Проверка до оплаты, гарантия 6 месяцев на ДВС и КПП, цена под ключ до Благовещенска."
         )
         return context
@@ -293,12 +293,12 @@ class VehicleListView(ListView):
             context["seo_title"] = f"{h1} | Техника Года"
             context["seo_description"] = intro
         else:
-            context["seo_h1"] = "Каталог автомобилей"
+            context["seo_h1"] = "Автомобили под заказ из Китая"
             context["seo_intro"] = (
-                "Легковые, коммерческий транспорт и спецтехника с площадки в Китае. "
+                "Автомобили под заказ из Китая: легковые, коммерческий транспорт и спецтехника. "
                 "Подбор под задачу, проверка до оплаты и расчёт под ключ до выдачи в Благовещенске."
             )
-            context["seo_title"] = "Каталог автомобилей | Техника Года"
+            context["seo_title"] = "Автомобили под заказ из Китая | Техника Года"
             context["seo_description"] = context["seo_intro"]
 
         # Prefer clean canonical for indexable single-dimension routes.

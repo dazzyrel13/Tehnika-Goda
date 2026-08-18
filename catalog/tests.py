@@ -80,6 +80,8 @@ class CatalogPagesTests(TestCase):
         self.assertNotIn("fonts.googleapis.com", html)
         self.assertNotIn("fonts.gstatic.com", html)
         self.assertIn("fonts/manrope-cyrillic-wght.woff2", html)
+        self.assertIn("Автомобили под заказ из Китая", html)
+        self.assertIn("Автомобили под заказ из Китая | Техника Года", html)
 
     def test_home_repeat_visit_uses_cache(self):
         from django.db import connection
@@ -292,7 +294,7 @@ class CatalogPagesTests(TestCase):
             reverse("catalog:category", kwargs={"category_slug": "cars"})
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Легковые автомобили из Китая")
+        self.assertContains(response, "Автомобили под заказ из Китая")
         self.assertContains(response, "<h1")
         self.assertIn("max-age=30", response.get("Cache-Control", ""))
         self.assertIn("private", response.get("Cache-Control", ""))

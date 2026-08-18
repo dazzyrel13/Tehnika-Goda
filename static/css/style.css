@@ -1083,15 +1083,24 @@ section.home-page {
 
 .ed-hero__title {
     font-family: var(--font-body);
-    font-size: clamp(1rem, 1.6vw, 1.15rem);
-    font-weight: 600;
-    line-height: 1.55;
+    font-size: clamp(1.15rem, 2vw, 1.45rem);
+    font-weight: 700;
+    line-height: 1.35;
     letter-spacing: 0;
-    margin: 0 0 22px;
-    max-width: 42ch;
+    margin: 0 0 10px;
+    max-width: 22ch;
     color: var(--text-main);
     border-left: 3px solid var(--accent-yellow);
     padding-left: 12px;
+}
+
+.ed-hero__lead {
+    margin: 0 0 22px;
+    max-width: 46ch;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    padding-left: 15px;
 }
 
 .ed-hero__features {
@@ -2616,7 +2625,11 @@ header.is-scrolled {
 
     .ed-hero__title {
         max-width: none;
-        font-size: 1rem;
+        font-size: 1.15rem;
+    }
+
+    .ed-hero__lead {
+        max-width: none;
     }
 
     .ed-hero__caption {

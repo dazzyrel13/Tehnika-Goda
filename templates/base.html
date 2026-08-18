@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>{% block title %}{{ seo_title|default:"Техника Года | Автомобили и спецтехника из Китая" }}{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}{{ seo_description|default:"Техника Года — автомобили и спецтехника с площадки в Китае. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
+    <title>{% block title %}{{ seo_title|default:"Автомобили под заказ из Китая | Техника Года" }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ seo_description|default:"Автомобили под заказ из Китая с площадки Техника Года. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
     <meta name="robots" content="{% block meta_robots %}{{ meta_robots|default:'index, follow' }}{% endblock %}">
     <link rel="canonical" href="{% block canonical_url %}{{ canonical_url }}{% endblock %}">
 
@@ -13,15 +13,15 @@
     <meta property="og:site_name" content="Техника Года">
     <meta property="og:locale" content="ru_RU">
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
-    <meta property="og:title" content="{% block og_title %}{{ seo_title|default:"Техника Года | Автомобили и спецтехника из Китая" }}{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}{{ seo_description|default:"Техника Года — автомобили и спецтехника с площадки в Китае. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{{ seo_title|default:"Автомобили под заказ из Китая | Техника Года" }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ seo_description|default:"Автомобили под заказ из Китая с площадки Техника Года. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
     <meta property="og:url" content="{% block og_url %}{{ canonical_url }}{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{{ og_image_url|default:default_og_image_url }}{% endblock %}">
     <meta property="og:image:width" content="{{ og_image_width|default:'512' }}">
     <meta property="og:image:height" content="{{ og_image_height|default:'512' }}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}{{ seo_title|default:"Техника Года | Автомобили и спецтехника из Китая" }}{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}{{ seo_description|default:"Техника Года — автомобили и спецтехника с площадки в Китае. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ seo_title|default:"Автомобили под заказ из Китая | Техника Года" }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ seo_description|default:"Автомобили под заказ из Китая с площадки Техника Года. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
     <meta name="twitter:image" content="{% block twitter_image %}{{ og_image_url|default:default_og_image_url }}{% endblock %}">
     {% if GOOGLE_SITE_VERIFICATION %}
     <meta name="google-site-verification" content="{{ GOOGLE_SITE_VERIFICATION }}">
@@ -35,7 +35,7 @@
     <link rel="preload" href="{% static 'fonts/unbounded-cyrillic-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
     {% block font_preload %}{% endblock %}
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.71">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.72">
     
     <!-- PWA Core Meta -->
     <link rel="manifest" href="/manifest.json">
@@ -55,6 +55,7 @@
       "@type": "AutoDealer",
       "name": "Техника Года",
       "url": "{{ SITE_URL }}",
+      "description": "Автомобили под заказ из Китая. Проверка до оплаты, цена под ключ до Благовещенска.",
       "image": "{{ default_og_image_url }}",
       "telephone": "8 (924) 149-00-13",
       "address": {
