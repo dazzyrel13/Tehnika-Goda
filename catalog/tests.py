@@ -140,6 +140,57 @@ class CatalogPagesTests(TestCase):
             response, reverse("catalog:category", kwargs={"category_slug": "special"})
         )
 
+    def test_home_shows_only_flagged_published_cars(self):
+        from .cache_helpers import invalidate_home_sections_cache
+
+        off_home = Vehicle.objects.create(
+            title="Catalog Only Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            mileage=200,
+            price_rub=1800000,
+            is_published=True,
+            show_on_home=False,
+            slug="catalog-only-car",
+        )
+        on_home = Vehicle.objects.create(
+            title="Home Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            mileage=300,
+            price_rub=1900000,
+            is_published=True,
+            show_on_home=True,
+            slug="home-car",
+        )
+        unpublished_home = Vehicle.objects.create(
+            title="Draft Home Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            mileage=400,
+            price_rub=2000000,
+            is_published=False,
+            show_on_home=True,
+            slug="draft-home-car",
+        )
+        invalidate_home_sections_cache()
+        home = self.client.get(reverse("home"))
+        self.assertContains(home, on_home.title)
+        self.assertNotContains(home, off_home.title)
+        self.assertNotContains(home, unpublished_home.title)
+        self.assertNotContains(home, "Published Car")
+
+        catalog = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars"})
+        )
+        self.assertContains(catalog, on_home.title)
+        self.assertContains(catalog, off_home.title)
+        self.assertContains(catalog, "Published Car")
+        self.assertNotContains(catalog, unpublished_home.title)
+
     def test_list_shows_published_only(self):
         response = self.client.get(
             reverse("catalog:category", kwargs={"category_slug": "cars"})
@@ -561,6 +612,7 @@ class VehiclePublishDefaultTests(TestCase):
             price_rub=1000000,
         )
         self.assertFalse(vehicle.is_published)
+        self.assertFalse(vehicle.show_on_home)
 
 
 @override_settings(RATELIMIT_ENABLE=False)
@@ -598,6 +650,7 @@ class VehicleImageVariantTests(TestCase):
             mileage=100,
             price_rub=2000000,
             is_published=True,
+            show_on_home=True,
             slug="photo-car",
         )
         vehicle.main_image = upload

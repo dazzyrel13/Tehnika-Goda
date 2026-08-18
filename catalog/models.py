@@ -244,6 +244,12 @@ class Vehicle(models.Model):
         db_index=True,
         help_text="Показывать плашку «Выкупленные» и включать в фильтр выкупленных.",
     )
+    show_on_home = models.BooleanField(
+        "На главной",
+        default=False,
+        db_index=True,
+        help_text="Показывать блок на главной. В каталоге видно при включённом «Опубликовано».",
+    )
     badge_text = models.CharField(
         "Текст на бэйдже",
         max_length=20,
@@ -276,6 +282,10 @@ class Vehicle(models.Model):
             ),
             models.Index(
                 fields=["is_published", "mileage"], name="catalog_veh_pub_mile_idx"
+            ),
+            models.Index(
+                fields=["is_published", "show_on_home", "-created_at"],
+                name="catalog_veh_pub_home_idx",
             ),
         ]
 

@@ -190,19 +190,21 @@ class VehicleAdmin(admin.ModelAdmin):
         "year",
         "price_rub",
         "is_published",
+        "show_on_home",
         "is_featured",
     )
     list_filter = (
         "brand",
         "category",
         "is_published",
+        "show_on_home",
         "is_featured",
         "year",
     )
     search_fields = ("title", "brand__name", "model", "description", "color")
     autocomplete_fields = ("brand", "category", "report")
     inlines = [VehicleImageInline]
-    list_editable = ("is_published", "is_featured", "price_rub")
+    list_editable = ("is_published", "show_on_home", "is_featured", "price_rub")
     list_per_page = 25
     save_on_top = False
     actions = [
@@ -210,6 +212,8 @@ class VehicleAdmin(admin.ModelAdmin):
         "unmark_featured",
         "publish_selected",
         "unpublish_selected",
+        "show_on_home_selected",
+        "hide_from_home_selected",
     ]
 
     fieldsets = (
@@ -233,10 +237,12 @@ class VehicleAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     ("price_rub", "cny_rate"),
-                    ("is_published", "is_featured"),
+                    ("is_published", "is_featured", "show_on_home"),
                 ),
                 "description": (
-                    "Новые карточки и импорт по URL по умолчанию скрыты. "
+                    "Новые карточки и импорт по умолчанию скрыты. "
+                    "«Опубликовано» — видно в каталоге. "
+                    "«На главной» — отдельный блок на главной, каталог от этого не зависит. "
                     "Курс юаня меняйте, когда цена в рублях уже не совпадает с расчётом. "
                     "«Выкупленный» — тёмная плашка на сайте и попадание в фильтр "
                     "«Выкупленные». При пробеге 0 км автоматически показывается "
@@ -376,6 +382,18 @@ class VehicleAdmin(admin.ModelAdmin):
         updated = queryset.update(is_published=False)
         invalidate_vehicle_public_caches()
         self.message_user(request, f"Снято с публикации: {updated}")
+
+    @admin.action(description="Показать на главной")
+    def show_on_home_selected(self, request, queryset):
+        updated = queryset.update(show_on_home=True)
+        invalidate_vehicle_public_caches()
+        self.message_user(request, f"На главной: {updated}")
+
+    @admin.action(description="Убрать с главной")
+    def hide_from_home_selected(self, request, queryset):
+        updated = queryset.update(show_on_home=False)
+        invalidate_vehicle_public_caches()
+        self.message_user(request, f"Убрано с главной: {updated}")
 
     def get_urls(self):
         urls = super().get_urls()

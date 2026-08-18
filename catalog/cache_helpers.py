@@ -171,14 +171,18 @@ def _section_vehicles(root_slug: str, limit: int) -> list:
     if not root:
         return []
     return list(
-        Vehicle.objects.filter(is_published=True, category_id__in=root.subtree_ids())
+        Vehicle.objects.filter(
+            is_published=True,
+            show_on_home=True,
+            category_id__in=root.subtree_ids(),
+        )
         .select_related("brand", "category")
         .order_by("-is_featured", "-created_at")[:limit]
     )
 
 
 def home_sections(limit: int = HOME_SECTION_LIMIT) -> dict:
-    """Published vehicles for the three homepage carousels."""
+    """Published homepage vehicles for the three carousels."""
     cache_key = f"{HOME_SECTIONS_CACHE_KEY}:{limit}"
     cached = cache.get(cache_key)
     if cached is not None:
