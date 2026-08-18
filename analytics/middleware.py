@@ -27,6 +27,7 @@ class VisitAnalyticsMiddleware:
         "/healthz/",
         "/sitemap.xml",
         "/robots.txt",
+        "/yandex_",
         "/sw.js",
         "/manifest.json",
     )

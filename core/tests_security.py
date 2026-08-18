@@ -132,6 +132,11 @@ class SecurityHeadersTests(TestCase):
         self.assertNotIn(settings.ADMIN_URL_PREFIX.rstrip("/"), body)
         self.assertNotIn("/catalog/dealer/", body)
 
+    def test_yandex_webmaster_file_is_served(self):
+        response = self.client.get("/yandex_f7ae125bfea8304f.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Verification: f7ae125bfea8304f", response.content)
+
 
 class AdminTwoFactorTests(TestCase):
     def test_login_is_under_hidden_admin_prefix(self):
