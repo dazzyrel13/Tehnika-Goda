@@ -52,6 +52,19 @@ body {
     background-image: none;
 }
 
+/* Chrome strip behind sticky header — hides white safe-area / top gap */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: calc(83px + env(safe-area-inset-top, 0px));
+    background: var(--bg-chrome);
+    z-index: 2999;
+    pointer-events: none;
+}
+
 p,
 li,
 label,
@@ -143,17 +156,28 @@ h1, h2, h3 {
 
 header {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     position: sticky;
     top: 0;
     z-index: 3000;
+    isolation: isolate;
     background: var(--bg-chrome);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     border-bottom: 3px solid var(--accent-yellow);
     overflow: visible;
     padding-top: env(safe-area-inset-top, 0px);
-    height: calc(80px + env(safe-area-inset-top, 0px));
+    min-height: calc(80px + env(safe-area-inset-top, 0px));
+    box-sizing: border-box;
+}
+
+header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--bg-chrome);
+    z-index: -1;
+    pointer-events: none;
 }
 
 .nav-links {
@@ -624,7 +648,13 @@ header {
 @media (max-width: 768px) {
     h1 { font-size: 1.5rem; }
     .container { padding: 0 16px; }
-    header { height: calc(70px + env(safe-area-inset-top, 0px)); }
+    body::before {
+        height: calc(73px + env(safe-area-inset-top, 0px));
+    }
+
+    header {
+        min-height: calc(70px + env(safe-area-inset-top, 0px));
+    }
     .site-nav { top: calc(70px + env(safe-area-inset-top, 0px)); }
     .site-header-inner {
         min-height: 0;
@@ -3502,9 +3532,11 @@ body.bg-faq .leads-cta-section {
 .site-header-inner {
     display: flex;
     width: 100%;
-    align-items: stretch;
-    height: 100%;
+    align-items: center;
+    flex: 1;
     min-height: 77px;
+    position: relative;
+    z-index: 1;
 }
 
 .site-logo-wrap {
