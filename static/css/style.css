@@ -378,29 +378,44 @@ header::after {
 }
 
 .nav-dropdown-menu a.nav-item-new {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: block;
+    position: relative;
     color: var(--text-main) !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em;
+    padding-left: 22px;
 }
 
-.nav-dropdown-menu a.nav-item-new::after {
-    content: "0 км";
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: #0f1419;
+.nav-dropdown-menu a.nav-item-new::before {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0.95em;
+    border-radius: 2px;
     background: var(--accent-yellow);
-    padding: 2px 7px;
-    border-radius: 999px;
-    opacity: 0.9;
+    box-shadow: 0 0 8px rgba(255, 179, 0, 0.45);
+}
+
+.nav-dropdown-menu a.nav-item-new span {
+    background: linear-gradient(
+        transparent 62%,
+        rgba(255, 179, 0, 0.28) 62%,
+        rgba(255, 179, 0, 0.28) 92%,
+        transparent 92%
+    );
 }
 
 .nav-dropdown-menu a.nav-item-new:hover,
 .nav-dropdown-menu a.nav-item-bought:hover {
     background: rgba(255, 179, 0, 0.1);
     color: var(--text-main) !important;
+    padding-left: 22px;
+}
+
+.nav-dropdown-menu a.nav-item-bought:hover {
     padding-left: 16px;
 }
 
