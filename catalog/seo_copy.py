@@ -95,6 +95,7 @@ _FILTER_PARAM_KEYS = frozenset(
         "mileage_to",
         "color",
         "transmission",
+        "engine_type",
         "q",
         "body_type",
         "brand",

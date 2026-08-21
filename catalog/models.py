@@ -160,6 +160,12 @@ class InspectionReport(models.Model):
         super().save(*args, **kwargs)
 
 
+class EngineType(models.TextChoices):
+    PETROL = "petrol", "Бензин"
+    ELECTRIC = "electric", "Электрический"
+    HYBRID = "hybrid", "Гибрид"
+
+
 class Vehicle(models.Model):
     brand = models.ForeignKey(
         Brand, on_delete=models.CASCADE, verbose_name="Марка", related_name="vehicles"
@@ -181,6 +187,14 @@ class Vehicle(models.Model):
     transmission = models.CharField("Коробка передач", max_length=50, blank=True)
     body_type = models.CharField("Тип кузова", max_length=80, blank=True)
     color = models.CharField("Цвет", max_length=60, blank=True, db_index=True)
+    engine_type = models.CharField(
+        "Тип двигателя",
+        max_length=20,
+        blank=True,
+        choices=EngineType.choices,
+        db_index=True,
+        help_text="Бензин, электрический или гибрид — для фильтра на сайте.",
+    )
 
     # Pricing
     price_cny = models.DecimalField(
@@ -277,6 +291,10 @@ class Vehicle(models.Model):
                 fields=["is_published", "color"], name="catalog_veh_pub_color_idx"
             ),
             models.Index(
+                fields=["is_published", "engine_type"],
+                name="catalog_veh_pub_engine_idx",
+            ),
+            models.Index(
                 fields=["is_published", "is_featured", "-created_at"],
                 name="catalog_veh_pub_feat_idx",
             ),
@@ -334,12 +352,14 @@ class Vehicle(models.Model):
             "brand",
             "model",
             "title",
+            "fueltype",
+            "fuel",
+            "enginetype",
+            "vehicleengine",
         }
     )
     EXTRA_SPEC_LABELS = {
         "enginevol": "Объём двигателя",
-        "fueltype": "Топливо",
-        "vehicleengine": "Двигатель",
         "range": "Запас хода",
     }
 
@@ -369,11 +389,29 @@ class Vehicle(models.Model):
         if specs_color:
             self.color = specs_color[:60]
 
+    def _sync_engine_type_from_specs(self) -> None:
+        """Fill empty engine_type from common fuel/engine keys in specs."""
+        if (self.engine_type or "").strip():
+            return
+        if not isinstance(self.specs, dict):
+            return
+        from .engine_type import detect_engine_type
+
+        for key in ("fuelType", "fuel_type", "fuel", "engine_type", "engineType"):
+            raw = str(self.specs.get(key) or "").strip()
+            if not raw:
+                continue
+            detected = detect_engine_type(raw)
+            if detected:
+                self.engine_type = detected
+                return
+
     def save(self, *args, **kwargs):
         if self.description:
             self.description = sanitize_html(self.description)
 
         self._sync_color_from_specs()
+        self._sync_engine_type_from_specs()
 
         # Auto-slug with collision prevention and IntegrityError retry
         if not self.slug:

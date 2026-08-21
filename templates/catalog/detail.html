@@ -171,6 +171,16 @@
                             {% endif %}
                         </div>
                     </div>
+                    <div class="glass-panel vehicle-spec-card">
+                        <div class="vehicle-spec-label">Тип двигателя</div>
+                        <div class="vehicle-spec-value">
+                            {% if vehicle.engine_type %}
+                                {{ vehicle.get_engine_type_display }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
                     {% endif %}
                 </div>
 

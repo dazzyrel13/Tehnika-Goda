@@ -265,6 +265,70 @@ class CatalogPagesTests(TestCase):
         self.assertNotContains(minivan_response, sedan_vehicle.title)
         self.assertNotContains(minivan_response, other_vehicle.title)
 
+    def test_engine_type_filter(self):
+        electric = Vehicle.objects.create(
+            title="Electric Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            mileage=100,
+            price_rub=3500000,
+            engine_type="electric",
+            is_published=True,
+            slug="electric-car",
+        )
+        hybrid = Vehicle.objects.create(
+            title="Hybrid Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            mileage=200,
+            price_rub=3200000,
+            engine_type="hybrid",
+            is_published=True,
+            slug="hybrid-car",
+        )
+        petrol = Vehicle.objects.create(
+            title="Petrol Car",
+            brand=self.brand,
+            category=self.category,
+            year=2023,
+            mileage=300,
+            price_rub=2100000,
+            engine_type="petrol",
+            is_published=True,
+            slug="petrol-car",
+        )
+
+        response = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars"}),
+            {"engine_type": "electric"},
+        )
+        self.assertContains(response, electric.title)
+        self.assertNotContains(response, hybrid.title)
+        self.assertNotContains(response, petrol.title)
+
+        hybrid_response = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars"}),
+            {"engine_type": "hybrid"},
+        )
+        self.assertContains(hybrid_response, hybrid.title)
+        self.assertNotContains(hybrid_response, electric.title)
+
+    def test_engine_type_syncs_from_specs_on_save(self):
+        vehicle = Vehicle.objects.create(
+            title="Fuel Sync Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            mileage=0,
+            price_rub=4000000,
+            specs={"fuelType": "Plug-in Hybrid"},
+            is_published=True,
+            slug="fuel-sync-car",
+        )
+        self.assertEqual(vehicle.engine_type, "hybrid")
+
     def test_list_redirects_to_default_category(self):
         response = self.client.get(reverse("catalog:index"))
         self.assertEqual(response.status_code, 302)
@@ -354,22 +418,27 @@ class CatalogPagesTests(TestCase):
         self.vehicle.transmission = "Робот"
         self.vehicle.body_type = "Минивэн"
         self.vehicle.horsepower = 159
+        self.vehicle.engine_type = "petrol"
         self.vehicle.specs = {
             "color": "Белый",
             "gearbox": "Робот",
             "transmission": "Робот",
             "bodyType": "Минивэн",
+            "fuelType": "Бензин",
             "engine_vol": "1.5",
         }
         self.vehicle.save()
         response = self.client.get(self.vehicle.get_absolute_url())
         self.assertContains(response, "Цвет")
         self.assertContains(response, "Коробка передач")
+        self.assertContains(response, "Тип двигателя")
+        self.assertContains(response, "Бензин")
         self.assertContains(response, "Объём двигателя")
         self.assertNotContains(response, ">color<")
         self.assertNotContains(response, ">gearbox<")
         self.assertNotContains(response, ">transmission<")
         self.assertNotContains(response, ">bodyType<")
+        self.assertNotContains(response, ">fuelType<")
 
     def test_detail_uses_vehicle_cny_rate(self):
         self.vehicle.cny_rate = "13.10"
@@ -974,7 +1043,18 @@ class ListingIngestTests(TestCase):
         self.assertEqual(data.color, "Серый")
         self.assertEqual(data.transmission, "Робот DSG")
         self.assertEqual(data.body_type, "Седан")
+        self.assertEqual(data.engine_type, "")
         self.assertEqual(data.specs, {})
+
+    def test_parse_listing_detects_engine_type(self):
+        from catalog.listing_ingest import parse_listing_text
+
+        data = parse_listing_text(
+            "[Название автомобиля] Zeekr 001\n"
+            "【Тип топлива】 электрический\n"
+            "[Пробег] 0 километров"
+        )
+        self.assertEqual(data.engine_type, "electric")
 
     def test_ingest_creates_brand_and_reuses_category(self):
         from catalog.listing_ingest import ingest_listing

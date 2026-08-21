@@ -23,7 +23,7 @@ from .cache_helpers import (
     nav_context,
     review_platforms,
 )
-from .models import Brand, Category, Vehicle
+from .models import Brand, Category, EngineType, Vehicle
 from .seo_copy import brand_heading, category_heading, has_extra_listing_filters
 
 
@@ -198,6 +198,10 @@ class VehicleListView(ListView):
                 | Q(specs__transmission__icontains=transmission)
                 | Q(specs__gearbox__icontains=transmission)
             )
+
+        engine_type = (params.get("engine_type") or "").strip()
+        if engine_type in {choice.value for choice in EngineType}:
+            queryset = queryset.filter(engine_type=engine_type)
 
         q = (params.get("q") or "").strip()
         if q:
@@ -443,6 +447,8 @@ class VehicleDetailView(DetailView):
             product["vehicleTransmission"] = self.object.transmission
         if self.object.body_type:
             product["bodyType"] = self.object.body_type
+        if self.object.engine_type:
+            product["fuelType"] = self.object.get_engine_type_display()
         if self.object.horsepower:
             product["vehicleEngine"] = {
                 "@type": "EngineSpecification",

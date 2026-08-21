@@ -14,6 +14,7 @@ from PIL import Image
 from unidecode import unidecode
 
 from .models import Brand, Category, Vehicle, VehicleImage
+from .engine_type import detect_engine_type
 from .spec_sheet import parse_spec_sheet
 
 YEAR_RE = re.compile(r"\b(19[89]\d|20[0-3]\d)\b")
@@ -35,6 +36,14 @@ FIELD_ALIASES = {
     "transmission": ("коробка передач", "трансмиссия", "коробка"),
     "body_type": ("тип кузова", "кузов автомобиля", "кузов"),
     "color": ("цвет кузова", "цвет"),
+    "engine_type": (
+        "тип двигателя",
+        "тип топлива",
+        "топливо",
+        "двигатель",
+        "fuel type",
+        "fuel",
+    ),
     "category": ("категория", "тип техники", "раздел"),
     "price_rub": ("цена под ключ", "цена", "стоимость"),
 }
@@ -92,6 +101,7 @@ class ListingData:
     transmission: str = ""
     body_type: str = ""
     color: str = ""
+    engine_type: str = ""
     category_name: str = ""
     price_rub: Decimal | None = None
     description: str = ""
@@ -212,6 +222,7 @@ def parse_listing_text(raw: str) -> ListingData:
     data.body_type = _clean(_lookup_spec(rows, "body_type"), 80)
     data.color = _pretty_color(_lookup_spec(rows, "color"))
     data.transmission = _clean(_lookup_spec(rows, "transmission"), 50)
+    data.engine_type = detect_engine_type(_lookup_spec(rows, "engine_type"))
     data.category_name = _clean(_lookup_spec(rows, "category"), 100)
 
     year_raw = _lookup_spec(rows, "year")
@@ -409,6 +420,7 @@ def ingest_listing(
         transmission=data.transmission,
         body_type=data.body_type,
         color=data.color,
+        engine_type=data.engine_type,
         price_rub=data.price_rub,
         description=data.description,
         specs=data.specs,

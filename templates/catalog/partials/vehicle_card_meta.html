@@ -26,6 +26,13 @@
         </span>
     </div>
     <div class="vehicle-meta-item">
+        <span class="vehicle-meta-label">Двигатель</span>
+        <span class="vehicle-meta-value">
+            {% if vehicle.engine_type %}{{ vehicle.get_engine_type_display }}
+            {% else %}-{% endif %}
+        </span>
+    </div>
+    <div class="vehicle-meta-item">
         <span class="vehicle-meta-label">Год</span>
         <span class="vehicle-meta-value">{{ vehicle.year|default:"-" }}</span>
     </div>

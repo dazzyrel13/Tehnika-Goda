@@ -15,9 +15,11 @@ from unidecode import unidecode
 from utils.safe_http import fetch_url_bytes, is_safe_request_url
 
 from .cache_helpers import invalidate_vehicle_public_caches
+from .engine_type import detect_engine_type
 from .models import (
     Brand,
     Category,
+    EngineType,
     InspectionReport,
     Vehicle,
     VehicleImage,
@@ -81,6 +83,9 @@ class VehicleAdminForm(forms.ModelForm):
             "is_currency_fixed",
             "badge_text",
         )
+        widgets = {
+            "engine_type": forms.RadioSelect,
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -99,6 +104,13 @@ class VehicleAdminForm(forms.ModelForm):
             "Если пусто — возьмём первое фото из пачки ниже."
         )
         self.fields["mileage"].help_text = "0 — для новых авто"
+        self.fields["engine_type"].choices = [("", "Не указан")] + list(
+            EngineType.choices
+        )
+        self.fields["engine_type"].required = False
+        self.fields["engine_type"].help_text = (
+            "Отметьте тип двигателя — по нему работает фильтр «Тип двигателя» на сайте."
+        )
         self.fields["description"].label = "Описание комплектации"
         self.fields["description"].help_text = (
             "Вставьте текст строками, как в коммерческом предложении. "
@@ -196,6 +208,7 @@ class VehicleAdmin(admin.ModelAdmin):
     list_filter = (
         "brand",
         "category",
+        "engine_type",
         "is_published",
         "show_on_home",
         "is_featured",
@@ -225,10 +238,12 @@ class VehicleAdmin(admin.ModelAdmin):
                     "title",
                     ("year", "mileage", "horsepower"),
                     ("transmission", "body_type", "color"),
+                    "engine_type",
                 ),
                 "description": (
                     "Нужной марки нет в списке? Нажмите «+» рядом с полем «Марка» "
-                    "и добавьте её в окне — без ухода со страницы."
+                    "и добавьте её в окне — без ухода со страницы. "
+                    "Тип двигателя отметьте ниже — от этого зависит фильтр на сайте."
                 ),
             },
         ),
@@ -452,6 +467,9 @@ class VehicleAdmin(admin.ModelAdmin):
                         ),
                         body_type=data.get("body_type", ""),
                         color=data.get("specs", {}).get("color", ""),
+                        engine_type=detect_engine_type(
+                            str(data.get("specs", {}).get("fuelType") or "")
+                        ),
                         price_rub=data["price_rub"],
                         description=data["description"],
                         specs=data.get("specs", {}),
