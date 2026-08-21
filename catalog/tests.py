@@ -57,6 +57,7 @@ class CatalogPagesTests(TestCase):
             mileage=1000,
             price_rub=2500000,
             is_published=True,
+            show_on_home=False,
             slug="published-car",
         )
         Vehicle.objects.create(
@@ -643,6 +644,32 @@ class VehicleFilterAndBadgeTests(TestCase):
         self.assertIn("New Zero", titles)
         self.assertNotIn("Used Plain", titles)
 
+    def test_cars_new_includes_explicit_new_category_even_with_mileage(self):
+        cars_new, _ = Category.objects.get_or_create(
+            slug="cars_new",
+            defaults={"name": "Новые", "parent": self.cars},
+        )
+        if cars_new.parent_id != self.cars.id:
+            cars_new.parent = self.cars
+            cars_new.save(update_fields=["parent"])
+        Vehicle.objects.create(
+            title="Labeled New",
+            brand=self.brand,
+            category=cars_new,
+            year=2025,
+            mileage=50,
+            is_published=True,
+            is_featured=False,
+            slug="labeled-new",
+            price_rub=2_800_000,
+        )
+        response = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars_new"})
+        )
+        titles = [v.title for v in response.context["vehicles"]]
+        self.assertIn("Labeled New", titles)
+        self.assertIn("New Zero", titles)
+
     def test_cars_bought_filter(self):
         response = self.client.get(
             reverse("catalog:category", kwargs={"category_slug": "cars_bought"})
@@ -744,7 +771,44 @@ class VehiclePublishDefaultTests(TestCase):
             price_rub=1000000,
         )
         self.assertFalse(vehicle.is_published)
-        self.assertFalse(vehicle.show_on_home)
+        self.assertTrue(vehicle.show_on_home)
+
+    def test_home_shows_newest_even_without_featured_flag(self):
+        from .cache_helpers import HOME_SECTION_LIMIT, invalidate_home_sections_cache
+
+        brand = Brand.objects.create(name="HomeOrderBrand", slug="homeorderbrand")
+        category, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Cars"}
+        )
+        for i in range(HOME_SECTION_LIMIT):
+            Vehicle.objects.create(
+                title=f"Featured Slot {i}",
+                brand=brand,
+                category=category,
+                year=2023,
+                mileage=1000 + i,
+                price_rub=2_000_000 + i,
+                is_published=True,
+                show_on_home=True,
+                is_featured=True,
+                slug=f"featured-slot-{i}",
+            )
+        newest = Vehicle.objects.create(
+            title="Fresh New Car",
+            brand=brand,
+            category=category,
+            year=2025,
+            mileage=0,
+            price_rub=3_500_000,
+            is_published=True,
+            show_on_home=True,
+            is_featured=False,
+            slug="fresh-new-car",
+        )
+        invalidate_home_sections_cache()
+        home = self.client.get(reverse("home"))
+        self.assertContains(home, newest.title)
+        self.assertNotContains(home, "Featured Slot 0")
 
 
 @override_settings(RATELIMIT_ENABLE=False)

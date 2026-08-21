@@ -123,11 +123,16 @@ class VehicleListView(ListView):
 
         category_slug = self.category_slug()
         if category_slug == "cars_new":
+            # Explicit «Новые» category always counts; otherwise 0 km under cars tree.
             queryset = queryset.filter(
                 Q(category__slug="cars_new")
-                | Q(category__parent__slug="cars")
-                | Q(category__slug="cars"),
-                mileage=0,
+                | (
+                    Q(mileage=0)
+                    & (
+                        Q(category__parent__slug="cars")
+                        | Q(category__slug="cars")
+                    )
+                )
             ).exclude(Q(is_featured=True) | Q(category__slug="cars_bought"))
         elif category_slug == "cars_bought":
             cars_root = Category.objects.filter(slug="cars").first()

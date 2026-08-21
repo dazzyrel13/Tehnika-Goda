@@ -260,9 +260,9 @@ class Vehicle(models.Model):
     )
     show_on_home = models.BooleanField(
         "На главной",
-        default=False,
+        default=True,
         db_index=True,
-        help_text="Показывать блок на главной. В каталоге видно при включённом «Опубликовано».",
+        help_text="Показывать в блоке на главной (нужно ещё «Опубликовано»). Снимите, если авто только в каталоге.",
     )
     badge_text = models.CharField(
         "Текст на бэйдже",

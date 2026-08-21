@@ -177,7 +177,7 @@ def _section_vehicles(root_slug: str, limit: int) -> list:
             category_id__in=root.subtree_ids(),
         )
         .select_related("brand", "category")
-        .order_by("-is_featured", "-created_at")[:limit]
+        .order_by("-created_at")[:limit]
     )
 
 
