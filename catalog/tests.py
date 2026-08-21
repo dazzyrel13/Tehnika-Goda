@@ -589,11 +589,18 @@ class VehicleFilterAndBadgeTests(TestCase):
         if self.bought_cat.parent_id != self.cars.id:
             self.bought_cat.parent = self.cars
             self.bought_cat.save(update_fields=["parent"])
+        self.cars_new, _ = Category.objects.get_or_create(
+            slug="cars_new",
+            defaults={"name": "Новые", "parent": self.cars},
+        )
+        if self.cars_new.parent_id != self.cars.id:
+            self.cars_new.parent = self.cars
+            self.cars_new.save(update_fields=["parent"])
         self.brand = Brand.objects.create(name="FilterBrand", slug="filterbrand")
         self.new_car = Vehicle.objects.create(
             title="New Zero",
             brand=self.brand,
-            category=self.cars,
+            category=self.cars_new,
             year=2025,
             mileage=0,
             is_published=True,
@@ -635,40 +642,39 @@ class VehicleFilterAndBadgeTests(TestCase):
             price_rub=900000,
         )
 
-    def test_cars_new_filter_mileage_zero(self):
+    def test_cars_new_is_category_only_not_mileage(self):
+        Vehicle.objects.create(
+            title="Tech Mileage New",
+            brand=self.brand,
+            category=self.cars_new,
+            year=2025,
+            mileage=2500,
+            is_published=True,
+            is_featured=False,
+            slug="tech-mileage-new",
+            price_rub=2_800_000,
+        )
+        # Same mileage under plain cars must not appear in «Новые».
+        Vehicle.objects.create(
+            title="Low Miles But Not New Cat",
+            brand=self.brand,
+            category=self.cars,
+            year=2024,
+            mileage=100,
+            is_published=True,
+            is_featured=False,
+            slug="low-miles-plain",
+            price_rub=1_200_000,
+        )
         response = self.client.get(
             reverse("catalog:category", kwargs={"category_slug": "cars_new"})
         )
         self.assertEqual(response.status_code, 200)
         titles = [v.title for v in response.context["vehicles"]]
         self.assertIn("New Zero", titles)
+        self.assertIn("Tech Mileage New", titles)
         self.assertNotIn("Used Plain", titles)
-
-    def test_cars_new_includes_explicit_new_category_even_with_mileage(self):
-        cars_new, _ = Category.objects.get_or_create(
-            slug="cars_new",
-            defaults={"name": "Новые", "parent": self.cars},
-        )
-        if cars_new.parent_id != self.cars.id:
-            cars_new.parent = self.cars
-            cars_new.save(update_fields=["parent"])
-        Vehicle.objects.create(
-            title="Labeled New",
-            brand=self.brand,
-            category=cars_new,
-            year=2025,
-            mileage=50,
-            is_published=True,
-            is_featured=False,
-            slug="labeled-new",
-            price_rub=2_800_000,
-        )
-        response = self.client.get(
-            reverse("catalog:category", kwargs={"category_slug": "cars_new"})
-        )
-        titles = [v.title for v in response.context["vehicles"]]
-        self.assertIn("Labeled New", titles)
-        self.assertIn("New Zero", titles)
+        self.assertNotIn("Low Miles But Not New Cat", titles)
 
     def test_cars_bought_filter(self):
         response = self.client.get(
@@ -681,13 +687,13 @@ class VehicleFilterAndBadgeTests(TestCase):
         self.assertNotIn("Used Plain", titles)
         self.assertNotIn("New Zero", titles)
 
-    def test_featured_zero_km_not_in_cars_new(self):
+    def test_featured_not_in_cars_new(self):
         Vehicle.objects.create(
             title="New Featured",
             brand=self.brand,
-            category=self.cars,
+            category=self.cars_new,
             year=2025,
-            mileage=0,
+            mileage=1200,
             is_published=True,
             is_featured=True,
             slug="new-featured",
