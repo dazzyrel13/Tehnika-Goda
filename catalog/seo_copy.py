@@ -126,6 +126,23 @@ def brand_heading(brand_name: str) -> tuple[str, str]:
     )
 
 
+def model_heading(brand_name: str, model_name: str) -> tuple[str, str]:
+    full = f"{brand_name} {model_name}".strip()
+    return (
+        f"{full} из Китая",
+        f"{full} под заказ с площадки в Китае: подбор комплектации, проверка до оплаты "
+        "и расчёт под ключ до выдачи в Благовещенске.",
+    )
+
+
+def model_empty_intro(brand_name: str, model_name: str) -> str:
+    full = f"{brand_name} {model_name}".strip()
+    return (
+        f"Сейчас в каталоге нет готовых предложений по {full}. "
+        "Оставьте заявку — подберём комплектацию и рассчитаем цену под ключ."
+    )
+
+
 def has_extra_listing_filters(get_params, *, path_has_category: bool, path_has_brand: bool) -> bool:
     """
     True when the listing is a filtered / paginated variant that should not be indexed.

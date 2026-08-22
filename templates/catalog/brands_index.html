@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body_class %}bg-catalog{% endblock %}
+
+{% block content %}
+<section class="seo-landing-section">
+    <div class="container">
+        <div class="catalog-seo-intro">
+            <h1 class="catalog-seo-intro__title">{{ seo_h1 }}</h1>
+            <p class="catalog-seo-intro__text">{{ seo_intro }}</p>
+        </div>
+
+        <div class="brands-index-grid">
+            {% for brand in brands %}
+            <a href="{{ brand.get_absolute_url }}" class="glass-panel brands-index-card">
+                {% if brand.logo %}
+                <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="brands-index-card__logo" loading="lazy" decoding="async">
+                {% else %}
+                <div class="brands-index-card__placeholder">{{ brand.name|slice:":1" }}</div>
+                {% endif %}
+                <span class="brands-index-card__name">{{ brand.name }}</span>
+                <span class="brands-index-card__cta">Смотреть →</span>
+            </a>
+            {% empty %}
+            <p class="catalog-empty-state__lead">Список марок скоро появится.</p>
+            {% endfor %}
+        </div>
+
+        <p class="brands-index-note">
+            Не нашли нужную марку? <a href="#leads-section">Оставьте заявку</a> — подберём под ваш запрос.
+        </p>
+    </div>
+</section>
+{% endblock %}

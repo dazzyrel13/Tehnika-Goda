@@ -18,6 +18,7 @@ from .cache_helpers import invalidate_vehicle_public_caches
 from .engine_type import detect_engine_type
 from .models import (
     Brand,
+    CarModel,
     Category,
     EngineType,
     InspectionReport,
@@ -155,12 +156,24 @@ class CategoryAdmin(admin.ModelAdmin):
         return form
 
 
+class CarModelInline(admin.TabularInline):
+    model = CarModel
+    extra = 0
+    fields = ("name", "slug", "is_published", "sort_order", "intro")
+    prepopulated_fields = {"slug": ("name",)}
+    ordering = ("sort_order", "name")
+    verbose_name = "Модель (SEO)"
+    verbose_name_plural = "Модели для SEO-страниц"
+
+
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ("display_logo", "name")
+    list_display = ("display_logo", "name", "seo_landing_enabled")
+    list_filter = ("seo_landing_enabled",)
     search_fields = ("name",)
-    fields = ("name", "logo")
+    fields = ("name", "logo", "seo_landing_enabled")
     ordering = ("name",)
+    inlines = [CarModelInline]
 
     def display_logo(self, obj):
         if obj.logo:
@@ -171,6 +184,20 @@ class BrandAdmin(admin.ModelAdmin):
         return "—"
 
     display_logo.short_description = "Лого"
+
+
+@admin.register(CarModel)
+class CarModelAdmin(admin.ModelAdmin):
+    list_display = ("display_name", "brand", "is_published", "sort_order")
+    list_filter = ("is_published", "brand")
+    search_fields = ("name", "brand__name")
+    prepopulated_fields = {"slug": ("name",)}
+    ordering = ("brand__name", "sort_order", "name")
+    autocomplete_fields = ("brand",)
+
+    @admin.display(description="Название")
+    def display_name(self, obj):
+        return obj.display_name
 
 
 class VehicleImageInline(admin.StackedInline):

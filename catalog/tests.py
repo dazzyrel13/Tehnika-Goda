@@ -2,7 +2,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .cache_helpers import invalidate_nav_cache
-from .models import Brand, Category, Vehicle, VehicleImage
+from .models import Brand, CarModel, Category, Vehicle, VehicleImage
 
 
 class RemovedDealerOfferTests(TestCase):
@@ -1257,5 +1257,125 @@ class ListingIngestTests(TestCase):
         self.assertContains(response, 'name="description"')
         self.assertContains(response, 'name="photos"')
 
+
+@override_settings(RATELIMIT_ENABLE=False, SEO_MODEL_PAGES_ENABLED=True)
+class SeoModelPagesTests(TestCase):
+    def setUp(self):
+        self.brand = Brand.objects.create(
+            name="Zeekr",
+            slug="zeekr",
+            seo_landing_enabled=True,
+        )
+        self.other_brand = Brand.objects.create(name="Li Auto", slug="li-auto")
+        self.category, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Cars"}
+        )
+        self.car_model = CarModel.objects.create(
+            brand=self.brand,
+            name="001",
+            slug="001",
+            is_published=True,
+        )
+        CarModel.objects.create(
+            brand=self.brand,
+            name="007",
+            slug="007",
+            is_published=True,
+        )
+        self.vehicle = Vehicle.objects.create(
+            title="Zeekr 001 2024",
+            brand=self.brand,
+            category=self.category,
+            model="001",
+            year=2024,
+            mileage=1200,
+            price_rub=4500000,
+            is_published=True,
+            slug="zeekr-001-stock",
+        )
+        Vehicle.objects.create(
+            title="Zeekr 007 2024",
+            brand=self.brand,
+            category=self.category,
+            model="007",
+            year=2024,
+            mileage=0,
+            price_rub=4000000,
+            is_published=True,
+            slug="zeekr-007-stock",
+        )
+
+    def test_brands_index_lists_seo_brands(self):
+        response = self.client.get(reverse("catalog:brands_index"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Zeekr")
+        self.assertContains(response, "Марки автомобилей из Китая")
+
+    def test_model_page_with_stock(self):
+        url = reverse(
+            "catalog:model",
+            kwargs={"brand_slug": "zeekr", "model_slug": "001"},
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Zeekr 001 из Китая")
+        self.assertContains(response, "Zeekr 001 2024")
+        self.assertContains(response, "007")
+
+    def test_model_page_without_stock(self):
+        empty_model = CarModel.objects.create(
+            brand=self.other_brand,
+            name="L6",
+            slug="l6",
+            is_published=True,
+        )
+        url = reverse(
+            "catalog:model",
+            kwargs={"brand_slug": "li-auto", "model_slug": "l6"},
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Li Auto L6 из Китая")
+        self.assertContains(response, "Сейчас нет в каталоге")
+        self.assertContains(response, empty_model.display_name)
+
+    def test_brand_page_shows_model_chips(self):
+        response = self.client.get(
+            reverse("catalog:brand", kwargs={"brand_slug": "zeekr"})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Модели:")
+        self.assertContains(response, reverse("catalog:model", kwargs={"brand_slug": "zeekr", "model_slug": "001"}))
+
+    def test_footer_link_when_enabled(self):
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, "Марки авто")
+        self.assertContains(response, reverse("catalog:brands_index"))
+
+    @override_settings(SEO_MODEL_PAGES_ENABLED=False)
+    def test_feature_flag_redirects_seo_routes(self):
+        response = self.client.get(reverse("catalog:brands_index"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("catalog:category", kwargs={"category_slug": "cars"}))
+
+        response = self.client.get(
+            reverse(
+                "catalog:model",
+                kwargs={"brand_slug": "zeekr", "model_slug": "001"},
+            )
+        )
+        self.assertEqual(response.status_code, 302)
+
+    @override_settings(SEO_MODEL_PAGES_ENABLED=False)
+    def test_footer_link_hidden_when_disabled(self):
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, "Марки авто")
+
+    def test_model_in_sitemap_when_enabled(self):
+        response = self.client.get("/sitemap.xml")
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn("/catalog/brand/zeekr/model/001/", body)
+        self.assertIn("/catalog/brands/", body)
 
 

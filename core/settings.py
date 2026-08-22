@@ -69,6 +69,10 @@ YANDEX_VERIFICATION = env("YANDEX_VERIFICATION", default="")
 # Public counter id only (digits). Empty = Metrika not loaded.
 YANDEX_METRIKA_ID = (env("YANDEX_METRIKA_ID", default="") or "").strip()
 
+# SEO landing pages: /catalog/brands/, /catalog/brand/<marke>/model/<model>/
+# Set False to hide footer links and redirect those URLs to the catalog (easy rollback).
+SEO_MODEL_PAGES_ENABLED = env.bool("SEO_MODEL_PAGES_ENABLED", default=True)
+
 # Application definition
 DJANGO_APPS = [
     "django.contrib.admin",

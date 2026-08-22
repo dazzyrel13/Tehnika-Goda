@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body_class %}bg-catalog{% endblock %}
+
+{% block content %}
+<section class="seo-landing-section">
+    <div class="container">
+        <nav class="seo-breadcrumbs" aria-label="Хлебные крошки">
+            {% for crumb in breadcrumb_links %}
+                {% if not forloop.last %}
+                <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+                <span class="seo-breadcrumbs__sep" aria-hidden="true">/</span>
+                {% else %}
+                <span aria-current="page">{{ crumb.name }}</span>
+                {% endif %}
+            {% endfor %}
+        </nav>
+
+        <div class="catalog-seo-intro">
+            <h1 class="catalog-seo-intro__title">{{ seo_h1 }}</h1>
+            <p class="catalog-seo-intro__text">{{ seo_intro }}</p>
+        </div>
+
+        {% if brand_models %}
+        {% include "catalog/partials/model_chips.html" %}
+        {% endif %}
+
+        {% if not has_stock %}
+        <div class="glass-panel seo-empty-callout">
+            <p class="seo-empty-callout__title">Сейчас нет в каталоге</p>
+            <p class="seo-empty-callout__text">{{ empty_intro }}</p>
+            <a href="#leads-section" class="btn-elite">Заказать {{ car_model.display_name }}</a>
+        </div>
+        {% endif %}
+
+        {% if has_stock %}
+        <h2 class="seo-landing-section__subtitle">В наличии на площадке</h2>
+        {% include "catalog/partials/vehicle_list_grid.html" with vehicles=vehicles %}
+        {% endif %}
+
+        {% if similar_vehicles %}
+        <h2 class="seo-landing-section__subtitle">Другие {{ car_model.brand.name }} в наличии</h2>
+        <div class="catalog-vehicle-grid catalog-vehicle-grid--compact">
+            {% for vehicle in similar_vehicles %}
+                {% include "catalog/partials/vehicle_card.html" with vehicle=vehicle %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if is_paginated %}
+        <div class="catalog-pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn-elite catalog-pagination__btn">← Назад</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn-elite catalog-pagination__btn">Вперёд →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var msg = document.getElementById('lead-message');
+    if (!msg || msg.value.trim()) return;
+    msg.value = "{{ lead_prefill|escapejs }}";
+})();
+</script>
+{% endblock %}

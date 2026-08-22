@@ -1,0 +1,63 @@
+{% load humanize %}
+{% load catalog_extras %}
+<div class="catalog-vehicle-grid">
+    {% for vehicle in vehicles %}
+        <div class="glass-panel car-card glass-shadow car-card--list {% if vehicle.is_featured %}featured-glare{% endif %}">
+            <a href="{{ vehicle.get_absolute_url }}" class="car-card__media--list">
+                {% if vehicle.main_image %}
+                {% responsive_image vehicle.main_image 800 as img %}
+                <img
+                    src="{{ img.src }}"
+                    srcset="{{ img.srcset }}"
+                    sizes="(max-width: 640px) 92vw, (max-width: 1100px) 45vw, 380px"
+                    alt="{{ vehicle.title }}"
+                    {% if not forloop.first %}loading="lazy"{% else %}fetchpriority="high"{% endif %}
+                    decoding="async"
+                >
+                {% else %}
+                <div class="car-card__no-photo">Нет фото</div>
+                {% endif %}
+
+                <div class="car-card__brand-badge">
+                    {{ vehicle.brand.name }}
+                </div>
+
+                {% vehicle_badge_items vehicle as badges %}
+                {% if badges %}
+                <div class="car-card__badges">
+                    {% for badge in badges %}
+                    <div class="elite-badge {{ badge.class }}">{{ badge.text }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </a>
+
+            <div class="car-card__body">
+                <h3 class="car-card__title">{{ vehicle.title }}</h3>
+                <div class="car-card__price">{{ vehicle.price_rub|price_rub_display }}</div>
+                <p class="car-card__price-sub">{{ vehicle.turnkey_price_note }}</p>
+                {% include "catalog/partials/vehicle_card_meta.html" %}
+                <a href="{{ vehicle.get_absolute_url }}" class="btn-elite car-card__cta">Подробнее</a>
+            </div>
+        </div>
+    {% empty %}
+        {% if empty_message %}
+        <div class="catalog-empty-state">
+            <p class="catalog-empty-state__lead">{{ empty_message }}</p>
+            {% if empty_submessage %}
+            <p class="catalog-empty-state__sub">{{ empty_submessage }}</p>
+            {% endif %}
+            <div class="catalog-empty-state__actions">
+                {% if empty_primary_url %}
+                <a href="{{ empty_primary_url }}" class="btn-elite">{{ empty_primary_label|default:"Оставить заявку" }}</a>
+                {% else %}
+                <a href="#leads-section" class="btn-elite">Оставить заявку на подбор</a>
+                {% endif %}
+                {% if empty_secondary_url %}
+                <a href="{{ empty_secondary_url }}" class="btn-elite btn-elite-ghost">{{ empty_secondary_label }}</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>

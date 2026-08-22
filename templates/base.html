@@ -35,7 +35,7 @@
     <link rel="preload" href="{% static 'fonts/unbounded-cyrillic-wght.woff2' %}" as="font" type="font/woff2" crossorigin>
     {% block font_preload %}{% endblock %}
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.84">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.85">
     
     <!-- PWA Core Meta -->
     <link rel="manifest" href="/manifest.json">
@@ -239,6 +239,9 @@
                         <li><a href="{% url 'home' %}#delivery-estimate">Доставка</a></li>
                         <li><a href="{% url 'leasing' %}">Лизинг</a></li>
                         <li><a href="{% url 'content:faq' %}">FAQ</a></li>
+                        {% if SEO_MODEL_PAGES_ENABLED %}
+                        <li><a href="{% url 'catalog:brands_index' %}">Марки авто</a></li>
+                        {% endif %}
                     </ul>
                 </div>
                 <div class="site-footer__col site-footer__col--contacts">

@@ -2,6 +2,8 @@ from django.urls import path
 from django.views.generic import RedirectView
 
 from .views import (
+    BrandIndexView,
+    ModelLandingView,
     VehicleDetailView,
     VehicleDossierView,
     VehicleListView,
@@ -15,6 +17,12 @@ urlpatterns = [
     # Old bookmark URL /catalog/ → site root
     path("", RedirectView.as_view(pattern_name="home", permanent=True)),
     path("cars/", VehicleListView.as_view(), name="index"),
+    path("brands/", BrandIndexView.as_view(), name="brands_index"),
+    path(
+        "brand/<slug:brand_slug>/model/<slug:model_slug>/",
+        ModelLandingView.as_view(),
+        name="model",
+    ),
     path(
         "category/<slug:category_slug>/",
         VehicleListView.as_view(),

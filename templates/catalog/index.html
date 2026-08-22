@@ -12,6 +12,10 @@
             <h1 class="catalog-seo-intro__title">{{ seo_h1 }}</h1>
             <p class="catalog-seo-intro__text">{{ seo_intro }}</p>
         </div>
+
+        {% if brand_models %}
+        {% include "catalog/partials/model_chips.html" %}
+        {% endif %}
         <!-- Filters -->
         <div class="glass-panel catalog-filters">
             <form action="{% url 'catalog:category' category_slug=catalog_root_slug %}" method="GET">

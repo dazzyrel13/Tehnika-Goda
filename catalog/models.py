@@ -96,6 +96,14 @@ class Brand(models.Model):
     name = models.CharField("Марка", max_length=100)
     slug = models.SlugField(unique=True, blank=True)
     logo = models.ImageField("Логотип", upload_to=brand_logo_path, blank=True)
+    seo_landing_enabled = models.BooleanField(
+        "SEO-страница марки",
+        default=False,
+        help_text=(
+            "Отдельная страница «Марка из Китая» в каталоге и в списке марок, "
+            "даже если сейчас нет объявлений."
+        ),
+    )
 
     class Meta:
         verbose_name = "Марка"
@@ -119,6 +127,60 @@ class Brand(models.Model):
 
     def get_absolute_url(self):
         return reverse("catalog:brand", kwargs={"brand_slug": self.slug})
+
+
+class CarModel(models.Model):
+    """SEO landing for brand + model (with or without stock)."""
+
+    brand = models.ForeignKey(
+        Brand,
+        on_delete=models.CASCADE,
+        verbose_name="Марка",
+        related_name="car_models",
+    )
+    name = models.CharField(
+        "Модель",
+        max_length=100,
+        help_text="Например: 001, L6, 300",
+    )
+    slug = models.SlugField(max_length=120, blank=True)
+    intro = models.TextField(
+        "SEO-текст (необязательно)",
+        blank=True,
+        help_text="Если пусто — подставится стандартный текст на странице модели.",
+    )
+    is_published = models.BooleanField("Опубликовано", default=True, db_index=True)
+    sort_order = models.PositiveIntegerField("Порядок", default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Модель (SEO)"
+        verbose_name_plural = "Модели (SEO)"
+        ordering = ["sort_order", "name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["brand", "slug"],
+                name="catalog_carmodel_brand_slug_uniq",
+            ),
+        ]
+
+    def __str__(self):
+        return self.display_name
+
+    @property
+    def display_name(self) -> str:
+        return f"{self.brand.name} {self.name}".strip()
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(unidecode(self.name)) or "model"
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse(
+            "catalog:model",
+            kwargs={"brand_slug": self.brand.slug, "model_slug": self.slug},
+        )
 
 
 def inspection_report_path(instance, filename):

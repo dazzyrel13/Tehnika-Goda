@@ -1,0 +1,10 @@
+{% if brand_models %}
+<div class="glass-panel catalog-models-bar">
+    <div class="catalog-brands-row">
+        <span class="catalog-brands-label">Модели:</span>
+        {% for item in brand_models %}
+        <a href="{{ item.get_absolute_url }}" class="catalog-brand-chip">{{ item.name }}</a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

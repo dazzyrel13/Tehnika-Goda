@@ -7,7 +7,13 @@ from django.views.generic import RedirectView, TemplateView
 from two_factor.admin import AdminSiteOTPRequired
 from two_factor.urls import urlpatterns as tf_urls
 
-from catalog.sitemaps import BrandSitemap, CategorySitemap, VehicleSitemap
+from catalog.sitemaps import (
+    BrandSitemap,
+    BrandsIndexSitemap,
+    CarModelSitemap,
+    CategorySitemap,
+    VehicleSitemap,
+)
 from catalog.views import HomeView
 from content.sitemaps import StaticViewSitemap
 from core.health import healthz
@@ -17,6 +23,8 @@ sitemaps = {
     "static": StaticViewSitemap,
     "vehicles": VehicleSitemap,
     "brands": BrandSitemap,
+    "brands_index": BrandsIndexSitemap,
+    "models": CarModelSitemap,
     "categories": CategorySitemap,
 }
 

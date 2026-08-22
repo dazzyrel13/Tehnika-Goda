@@ -23,8 +23,20 @@ from .cache_helpers import (
     nav_context,
     review_platforms,
 )
-from .models import Brand, Category, EngineType, Vehicle
-from .seo_copy import brand_heading, category_heading, has_extra_listing_filters
+from .models import Brand, CarModel, Category, EngineType, Vehicle
+from .seo_copy import (
+    brand_heading,
+    category_heading,
+    has_extra_listing_filters,
+    model_empty_intro,
+    model_heading,
+)
+from .seo_pages import (
+    published_car_models_for_brand,
+    seo_brands_queryset,
+    seo_model_pages_enabled,
+    vehicles_for_car_model,
+)
 
 
 def _json_ld(data: dict) -> str:
@@ -337,6 +349,102 @@ class VehicleListView(ListView):
                 reverse("catalog:brand", kwargs={"brand_slug": brand_slug})
             )
 
+        if seo_model_pages_enabled() and brand_slug and not cat_slug:
+            brand = Brand.objects.filter(slug=brand_slug).first()
+            if brand:
+                context["brand_models"] = list(published_car_models_for_brand(brand))
+
+        return context
+
+
+class _SeoPagesFeatureMixin:
+    """Redirect SEO landing routes to catalog when the feature flag is off."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if not seo_model_pages_enabled():
+            return redirect("catalog:category", category_slug="cars")
+        return super().dispatch(request, *args, **kwargs)
+
+
+@method_decorator(
+    cache_control(private=True, max_age=30, must_revalidate=True),
+    name="dispatch",
+)
+class BrandIndexView(_SeoPagesFeatureMixin, ListView):
+    model = Brand
+    template_name = "catalog/brands_index.html"
+    context_object_name = "brands"
+
+    def get_queryset(self):
+        return seo_brands_queryset()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["seo_title"] = "Марки автомобилей из Китая | Техника Года"
+        context["seo_description"] = (
+            "Марки легковых и коммерческих автомобилей, которые привозим с площадки в Китае. "
+            "Подбор под задачу, проверка до оплаты, цена под ключ до Благовещенска."
+        )
+        context["seo_h1"] = "Марки автомобилей из Китая"
+        context["seo_intro"] = context["seo_description"]
+        context["canonical_url"] = absolute_url(reverse("catalog:brands_index"))
+        return context
+
+
+@method_decorator(
+    cache_control(private=True, max_age=30, must_revalidate=True),
+    name="dispatch",
+)
+class ModelLandingView(_SeoPagesFeatureMixin, ListView):
+    model = Vehicle
+    template_name = "catalog/model_landing.html"
+    context_object_name = "vehicles"
+    paginate_by = 10
+
+    def dispatch(self, request, *args, **kwargs):
+        if not seo_model_pages_enabled():
+            return redirect("catalog:category", category_slug="cars")
+        self.car_model = get_object_or_404(
+            CarModel.objects.select_related("brand"),
+            brand__slug=kwargs["brand_slug"],
+            slug=kwargs["model_slug"],
+            is_published=True,
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return vehicles_for_car_model(self.car_model)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        car_model = self.car_model
+        brand = car_model.brand
+        h1, intro = model_heading(brand.name, car_model.name)
+        if car_model.intro.strip():
+            intro = car_model.intro.strip()
+        context["car_model"] = car_model
+        context["brand_models"] = list(
+            published_car_models_for_brand(brand).exclude(pk=car_model.pk)
+        )
+        context["has_stock"] = self.get_queryset().exists()
+        context["empty_intro"] = model_empty_intro(brand.name, car_model.name)
+        context["seo_h1"] = h1
+        context["seo_intro"] = intro
+        context["seo_title"] = f"{h1} | Техника Года"
+        context["seo_description"] = intro
+        context["canonical_url"] = absolute_url(car_model.get_absolute_url())
+        context["lead_prefill"] = f"Интересует {car_model.display_name} под заказ из Китая."
+        context["breadcrumb_links"] = [
+            {"name": "Главная", "url": reverse("home")},
+            {"name": "Марки", "url": reverse("catalog:brands_index")},
+            {"name": brand.name, "url": brand.get_absolute_url()},
+            {"name": car_model.name, "url": car_model.get_absolute_url()},
+        ]
+        if not context["has_stock"]:
+            context["similar_vehicles"] = list(
+                Vehicle.objects.filter(is_published=True, brand=brand)
+                .select_related("brand", "category")[:4]
+            )
         return context
 
 
