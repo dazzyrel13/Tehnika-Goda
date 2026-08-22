@@ -130,9 +130,7 @@ class VehicleListView(ListView):
                 new_q = Q(is_new=True, category_id__in=cars_ids)
                 if new_cat:
                     new_q |= Q(category_id__in=new_cat.subtree_ids())
-                queryset = queryset.filter(new_q).exclude(
-                    Q(is_featured=True) | Q(category__slug="cars_bought")
-                )
+                queryset = queryset.filter(new_q)
             else:
                 queryset = queryset.none()
         elif category_slug == "cars_bought":

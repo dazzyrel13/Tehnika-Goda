@@ -687,7 +687,7 @@ class VehicleFilterAndBadgeTests(TestCase):
         self.assertNotIn("Used Plain", titles)
         self.assertNotIn("New Zero", titles)
 
-    def test_featured_not_in_cars_new(self):
+    def test_featured_and_new_in_both_filters(self):
         Vehicle.objects.create(
             title="New Featured",
             brand=self.brand,
@@ -695,16 +695,22 @@ class VehicleFilterAndBadgeTests(TestCase):
             year=2025,
             mileage=1200,
             is_published=True,
+            is_new=True,
             is_featured=True,
             slug="new-featured",
             price_rub=3000000,
         )
-        response = self.client.get(
+        new_response = self.client.get(
             reverse("catalog:category", kwargs={"category_slug": "cars_new"})
         )
-        titles = [v.title for v in response.context["vehicles"]]
-        self.assertIn("New Zero", titles)
-        self.assertNotIn("New Featured", titles)
+        new_titles = [v.title for v in new_response.context["vehicles"]]
+        self.assertIn("New Featured", new_titles)
+
+        bought_response = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars_bought"})
+        )
+        bought_titles = [v.title for v in bought_response.context["vehicles"]]
+        self.assertIn("New Featured", bought_titles)
 
     def test_featured_truck_not_in_cars_bought(self):
         trucks, _ = Category.objects.get_or_create(
@@ -780,14 +786,14 @@ class VehicleFilterAndBadgeTests(TestCase):
             brand=self.brand,
             category=self.cars,
             year=2024,
-            mileage=0,
+            mileage=2000,
             is_published=True,
+            is_new=True,
             is_featured=True,
             slug="both-badges",
         )
         texts = [b["text"] for b in vehicle_badge_items(both)]
-        self.assertEqual(texts, ["Выкупленные"])
-        self.assertNotIn("Рекомендуем", texts)
+        self.assertEqual(texts, ["Новые", "Выкупленные"])
 
         cat_only = vehicle_badge_items(self.bought_cat_car)
         self.assertEqual([b["text"] for b in cat_only], ["Выкупленные"])

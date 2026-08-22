@@ -263,8 +263,8 @@ class VehicleAdmin(admin.ModelAdmin):
                     "«Опубликовано» — видно в каталоге. "
                     "«На главной» — блок на главной (включается само; снимите, если только каталог). "
                     "«Новые» — плашка и фильтр «Новые» (пробег 0–3 тыс. км ок). "
-                    "«Выкупленный» — плашка и фильтр «Выкупленные», "
-                    "на показ на главной не влияет. "
+                    "«Выкупленный» — плашка и фильтр «Выкупленные». "
+                    "Обе галочки можно включить одновременно — две плашки и оба фильтра. "
                     "Курс юаня меняйте, когда цена в рублях уже не совпадает с расчётом."
                 ),
             },
@@ -385,13 +385,11 @@ class VehicleAdmin(admin.ModelAdmin):
             if not obj.category_id or obj.category_id in cars_root.subtree_ids():
                 if getattr(obj.category, "slug", None) != "cars_bought":
                     obj.category = cars_new
-        if obj.is_featured:
-            obj.is_new = False
         super().save_model(request, obj, form, change)
 
     @admin.action(description="Отметить как новые")
     def mark_new(self, request, queryset):
-        updated = queryset.update(is_new=True, is_featured=False)
+        updated = queryset.update(is_new=True)
         invalidate_vehicle_public_caches()
         self.message_user(request, f"Новые: {updated}")
 
@@ -403,7 +401,7 @@ class VehicleAdmin(admin.ModelAdmin):
 
     @admin.action(description="Отметить как выкупленные")
     def mark_featured(self, request, queryset):
-        updated = queryset.update(is_featured=True, is_new=False)
+        updated = queryset.update(is_featured=True)
         invalidate_vehicle_public_caches()
         self.message_user(request, f"Выкупленные: {updated}")
 
