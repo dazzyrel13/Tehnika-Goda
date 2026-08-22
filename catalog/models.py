@@ -97,11 +97,11 @@ class Brand(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     logo = models.ImageField("Логотип", upload_to=brand_logo_path, blank=True)
     seo_landing_enabled = models.BooleanField(
-        "SEO-страница марки",
+        "В справочнике марок (SEO)",
         default=False,
         help_text=(
-            "Отдельная страница «Марка из Китая» в каталоге и в списке марок, "
-            "даже если сейчас нет объявлений."
+            "Показывать на странице «Марки авто» и в sitemap, "
+            "даже если сейчас нет объявлений в каталоге."
         ),
     )
 

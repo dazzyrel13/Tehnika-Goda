@@ -1261,12 +1261,14 @@ class ListingIngestTests(TestCase):
 @override_settings(RATELIMIT_ENABLE=False, SEO_MODEL_PAGES_ENABLED=True)
 class SeoModelPagesTests(TestCase):
     def setUp(self):
-        self.brand = Brand.objects.create(
-            name="Zeekr",
+        self.brand, _ = Brand.objects.get_or_create(
             slug="zeekr",
-            seo_landing_enabled=True,
+            defaults={"name": "Zeekr", "seo_landing_enabled": True},
         )
-        self.other_brand = Brand.objects.create(name="Li Auto", slug="li-auto")
+        self.other_brand, _ = Brand.objects.get_or_create(
+            slug="li-auto",
+            defaults={"name": "Li Auto", "seo_landing_enabled": True},
+        )
         self.category, _ = Category.objects.get_or_create(
             slug="cars", defaults={"name": "Cars"}
         )
@@ -1377,5 +1379,23 @@ class SeoModelPagesTests(TestCase):
         body = response.content.decode()
         self.assertIn("/catalog/brand/zeekr/model/001/", body)
         self.assertIn("/catalog/brands/", body)
+
+    def test_seeded_directory_brand_without_stock(self):
+        byd, _ = Brand.objects.get_or_create(
+            slug="byd",
+            defaults={"name": "BYD", "seo_landing_enabled": True},
+        )
+        Vehicle.objects.filter(brand=byd, is_published=True).update(is_published=False)
+        response = self.client.get(reverse("catalog:brands_index"))
+        self.assertContains(response, "BYD")
+        response = self.client.get(reverse("catalog:brand", kwargs={"brand_slug": "byd"}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "BYD из Китая")
+
+    def test_unknown_brand_slug_404(self):
+        response = self.client.get(
+            reverse("catalog:brand", kwargs={"brand_slug": "nonexistent-brand"})
+        )
+        self.assertEqual(response.status_code, 404)
 
 

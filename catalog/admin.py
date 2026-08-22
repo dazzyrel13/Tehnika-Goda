@@ -170,6 +170,7 @@ class CarModelInline(admin.TabularInline):
 class BrandAdmin(admin.ModelAdmin):
     list_display = ("display_logo", "name", "seo_landing_enabled")
     list_filter = ("seo_landing_enabled",)
+    list_editable = ("seo_landing_enabled",)
     search_fields = ("name",)
     fields = ("name", "logo", "seo_landing_enabled")
     ordering = ("name",)

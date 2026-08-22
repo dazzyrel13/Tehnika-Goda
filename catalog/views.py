@@ -32,6 +32,7 @@ from .seo_copy import (
     model_heading,
 )
 from .seo_pages import (
+    brand_has_seo_landing,
     published_car_models_for_brand,
     seo_brands_queryset,
     seo_model_pages_enabled,
@@ -101,6 +102,14 @@ class VehicleListView(ListView):
         return self.kwargs.get("brand_slug") or self.request.GET.get("brand")
 
     def dispatch(self, request, *args, **kwargs):
+        brand_slug = kwargs.get("brand_slug")
+        if brand_slug and not kwargs.get("category_slug"):
+            brand = Brand.objects.filter(slug=brand_slug).first()
+            if not brand:
+                raise Http404("Марка не найдена")
+            if seo_model_pages_enabled() and not brand_has_seo_landing(brand):
+                raise Http404("Марка не найдена")
+
         # Clean SEO routes already carry category/brand in the path.
         if kwargs.get("category_slug") or kwargs.get("brand_slug"):
             return super().dispatch(request, *args, **kwargs)
@@ -125,6 +134,7 @@ class VehicleListView(ListView):
                 brand_slug=request.GET["brand"],
                 permanent=True,
             )
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
@@ -380,13 +390,18 @@ class BrandIndexView(_SeoPagesFeatureMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        brands = context["brands"]
+        context["brand_count"] = brands.count() if hasattr(brands, "count") else len(brands)
         context["seo_title"] = "Марки автомобилей из Китая | Техника Года"
         context["seo_description"] = (
-            "Марки легковых и коммерческих автомобилей, которые привозим с площадки в Китае. "
-            "Подбор под задачу, проверка до оплаты, цена под ключ до Благовещенска."
+            "Полный справочник марок легковых автомобилей с китайского рынка: "
+            "подбор под задачу, проверка до оплаты, цена под ключ до Благовещенска."
         )
         context["seo_h1"] = "Марки автомобилей из Китая"
-        context["seo_intro"] = context["seo_description"]
+        context["seo_intro"] = (
+            f"Более {context['brand_count']} марок — выберите интересующую или "
+            "оставьте заявку на подбор, если нужной модели пока нет в каталоге."
+        )
         context["canonical_url"] = absolute_url(reverse("catalog:brands_index"))
         return context
 

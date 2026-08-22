@@ -34,7 +34,7 @@ def vehicles_for_car_model(car_model: CarModel) -> QuerySet:
 
 
 def seo_brands_queryset() -> QuerySet:
-    """Brands shown on /catalog/brands/ and in the brands sitemap."""
+    """Brands on /catalog/brands/ and in the brands sitemap."""
     return (
         Brand.objects.filter(
             Q(seo_landing_enabled=True)
@@ -44,6 +44,15 @@ def seo_brands_queryset() -> QuerySet:
         .distinct()
         .order_by("name")
     )
+
+
+def brand_has_seo_landing(brand: Brand) -> bool:
+    """Whether the brand page is meant to be public for SEO (with or without stock)."""
+    if brand.seo_landing_enabled:
+        return True
+    if brand.car_models.filter(is_published=True).exists():
+        return True
+    return brand.vehicles.filter(is_published=True).exists()
 
 
 def published_car_models_for_brand(brand: Brand) -> QuerySet:
