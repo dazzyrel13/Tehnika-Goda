@@ -1557,9 +1557,13 @@ section.home-page {
     /* Align with .home-section content (max 1280px, 24px gutters). */
     max-width: 1280px;
     width: 100%;
-    margin: 48px auto 0;
+    margin: 32px auto 0;
     padding: 0 24px;
     box-sizing: border-box;
+}
+
+.home-promo-banner + .home-section.home-section--offers {
+    padding-top: 32px;
 }
 
 .home-promo-banner__link {
