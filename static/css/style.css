@@ -1554,8 +1554,12 @@ section.home-page {
 }
 
 .home-promo-banner {
-    width: min(720px, calc(100% - 48px));
+    /* Align with .home-section content (max 1280px, 24px gutters). */
+    max-width: 1280px;
+    width: 100%;
     margin: 48px auto 0;
+    padding: 0 24px;
+    box-sizing: border-box;
 }
 
 .home-promo-banner__link {
@@ -2615,8 +2619,8 @@ header.is-scrolled {
     }
 
     .home-promo-banner {
-        width: calc(100% - 28px);
         margin-top: 32px;
+        padding: 0 16px;
     }
 
     .home-promo-banner__link {
