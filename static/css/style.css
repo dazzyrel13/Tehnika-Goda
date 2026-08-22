@@ -1554,8 +1554,7 @@ section.home-page {
 }
 
 .home-promo-banner {
-    /* Square art: cap width so height stays reasonable and image fills the frame. */
-    width: min(860px, calc(100% - 48px));
+    width: min(1160px, calc(100% - 48px));
     margin: 32px auto 0;
     box-sizing: border-box;
 }
@@ -1566,6 +1565,7 @@ section.home-page {
 
 .home-promo-banner__link {
     display: block;
+    aspect-ratio: 1024 / 530;
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 18px 38px rgba(18, 20, 26, 0.18);
@@ -1580,7 +1580,8 @@ section.home-page {
 .home-promo-banner__media {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: fill;
 }
 
 .home-offer-block {
