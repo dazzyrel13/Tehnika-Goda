@@ -61,17 +61,19 @@ def sanitized_html(value):
 @register.simple_tag
 def vehicle_badge_items(vehicle):
     """
-    Плашки карточки: «Новый» (0 км), «Выкупленные» (флаг/категория),
-    либо кастомный badge_text.
+    Плашки карточки: «Новые» (категория), «Выкупленные» (флаг/категория),
+    «Новый» (0 км без категории), либо кастомный badge_text.
     """
     items = []
-    if getattr(vehicle, "mileage", None) == 0:
+    category = getattr(vehicle, "category", None)
+    cat_slug = getattr(category, "slug", None)
+
+    if cat_slug == "cars_new":
+        items.append({"text": "Новые", "class": "badge-new-category"})
+    elif getattr(vehicle, "mileage", None) == 0:
         items.append({"text": "Новый", "class": "badge-new"})
 
-    category = getattr(vehicle, "category", None)
-    is_bought = bool(getattr(vehicle, "is_featured", False)) or (
-        getattr(category, "slug", None) == "cars_bought"
-    )
+    is_bought = bool(getattr(vehicle, "is_featured", False)) or cat_slug == "cars_bought"
     if is_bought:
         items.append({"text": "Выкупленные", "class": "badge-featured"})
     elif (getattr(vehicle, "badge_text", None) or "").strip():

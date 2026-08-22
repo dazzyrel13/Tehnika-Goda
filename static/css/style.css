@@ -377,6 +377,10 @@ header::after {
     .nav-dropdown-menu a.nav-item-new .nav-item-new__label::after {
         animation: none;
     }
+
+    .badge-new-category {
+        animation: none;
+    }
 }
 
 .nav-dropdown-menu a.nav-item-new {
@@ -1014,6 +1018,21 @@ footer {
     background: var(--accent-yellow);
     color: #0f1419;
     box-shadow: 0 4px 14px var(--accent-red-glow);
+}
+
+.badge-new-category {
+    background: linear-gradient(
+        110deg,
+        #1a1c24 0%,
+        #2a2e38 40%,
+        #4a5160 50%,
+        #2a2e38 60%,
+        #1a1c24 100%
+    );
+    background-size: 220% 100%;
+    color: #f5f5f6;
+    border-color: #2a2e38;
+    animation: nav-new-shine 2.8s linear infinite;
 }
 
 .badge-featured {
@@ -4411,6 +4430,7 @@ body.vehicle-lightbox-open {
 .elite-badge,
 .badge-red,
 .badge-new,
+.badge-new-category,
 .badge-featured {
     border-radius: 3px !important;
     text-transform: uppercase !important;

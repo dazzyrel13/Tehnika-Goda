@@ -740,7 +740,20 @@ class VehicleFilterAndBadgeTests(TestCase):
         from catalog.templatetags.catalog_extras import vehicle_badge_items
 
         new_badges = vehicle_badge_items(self.new_car)
-        self.assertEqual([b["text"] for b in new_badges], ["Новый"])
+        self.assertEqual([b["text"] for b in new_badges], ["Новые"])
+
+        new_with_mileage = Vehicle.objects.create(
+            title="New With Miles",
+            brand=self.brand,
+            category=self.cars_new,
+            year=2026,
+            mileage=1656,
+            is_published=True,
+            slug="new-with-miles",
+        )
+        self.assertEqual(
+            [b["text"] for b in vehicle_badge_items(new_with_mileage)], ["Новые"]
+        )
 
         bought_badges = vehicle_badge_items(self.bought_flag)
         self.assertEqual([b["text"] for b in bought_badges], ["Выкупленные"])
