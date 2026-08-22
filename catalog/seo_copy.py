@@ -135,12 +135,45 @@ def model_heading(brand_name: str, model_name: str) -> tuple[str, str]:
     )
 
 
-def model_empty_intro(brand_name: str, model_name: str) -> str:
+_EMPTY_CALLOUT_PERKS: tuple[str, ...] = (
+    "Бесплатный просчёт под ваш запрос",
+    "Фото и видео с площадки до оплаты",
+    "Итоговая цена под ключ до Благовещенска",
+)
+
+
+def brand_empty_callout(brand_name: str) -> dict:
+    return {
+        "title": f"{brand_name} пока не в каталоге",
+        "text": (
+            f"Готовые объявления {brand_name} мы ещё не опубликовали — каталог пополняется "
+            "каждый день. Но отсутствие карточки на сайте не значит, что нужный автомобиль "
+            "недоступен: мы работаем с собственной площадкой в Китае и привозим технику под заказ."
+        ),
+        "perks": _EMPTY_CALLOUT_PERKS,
+        "cta_label": "Получить бесплатный просчёт",
+        "lead_prefill": f"Интересует {brand_name} под заказ из Китая.",
+    }
+
+
+def model_empty_callout(brand_name: str, model_name: str) -> dict:
     full = f"{brand_name} {model_name}".strip()
-    return (
-        f"Сейчас в каталоге нет готовых предложений по {full}. "
-        "Оставьте заявку — подберём комплектацию и рассчитаем цену под ключ."
-    )
+    return {
+        "title": f"Готовых предложений по {full} пока нет",
+        "text": (
+            f"Эта модель ещё не добавлена в каталог как готовое предложение. "
+            f"Не переживайте — {full} можно заказать с площадки: подберём комплектацию, "
+            "проверим автомобиль до оплаты и рассчитаем цену под ключ."
+        ),
+        "perks": _EMPTY_CALLOUT_PERKS,
+        "cta_label": f"Заказать {full}",
+        "lead_prefill": f"Интересует {full} под заказ из Китая.",
+    }
+
+
+def model_empty_intro(brand_name: str, model_name: str) -> str:
+    """Backward-compatible single paragraph (tests / short contexts)."""
+    return model_empty_callout(brand_name, model_name)["text"]
 
 
 def has_extra_listing_filters(get_params, *, path_has_category: bool, path_has_brand: bool) -> bool:

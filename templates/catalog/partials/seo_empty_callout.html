@@ -1,0 +1,15 @@
+<div class="glass-panel seo-empty-callout">
+    <p class="seo-empty-callout__eyebrow">Под заказ из Китая</p>
+    <h2 class="seo-empty-callout__title">{{ callout.title }}</h2>
+    <p class="seo-empty-callout__text">{{ callout.text }}</p>
+    {% if callout.perks %}
+    <ul class="seo-empty-callout__perks">
+        {% for perk in callout.perks %}
+        <li>{{ perk }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <a href="#leads-section" class="btn-elite seo-empty-callout__cta">
+        {{ callout.cta_label|default:"Получить бесплатный просчёт" }}
+    </a>
+</div>

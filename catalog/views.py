@@ -25,9 +25,11 @@ from .cache_helpers import (
 )
 from .models import Brand, CarModel, Category, EngineType, Vehicle
 from .seo_copy import (
+    brand_empty_callout,
     brand_heading,
     category_heading,
     has_extra_listing_filters,
+    model_empty_callout,
     model_empty_intro,
     model_heading,
 )
@@ -330,6 +332,11 @@ class VehicleListView(ListView):
             context["seo_intro"] = intro
             context["seo_title"] = f"{h1} | Техника Года"
             context["seo_description"] = intro
+            context["is_brand_landing"] = not cat_slug
+            if not cat_slug:
+                callout = brand_empty_callout(brand_name)
+                context["empty_callout"] = callout
+                context["lead_prefill"] = callout["lead_prefill"]
         else:
             context["seo_h1"] = "Автомобили под заказ из Китая"
             context["seo_intro"] = (
@@ -442,13 +449,15 @@ class ModelLandingView(_SeoPagesFeatureMixin, ListView):
             published_car_models_for_brand(brand).exclude(pk=car_model.pk)
         )
         context["has_stock"] = self.get_queryset().exists()
-        context["empty_intro"] = model_empty_intro(brand.name, car_model.name)
+        callout = model_empty_callout(brand.name, car_model.name)
+        context["empty_callout"] = callout
+        context["empty_intro"] = callout["text"]
         context["seo_h1"] = h1
         context["seo_intro"] = intro
         context["seo_title"] = f"{h1} | Техника Года"
         context["seo_description"] = intro
         context["canonical_url"] = absolute_url(car_model.get_absolute_url())
-        context["lead_prefill"] = f"Интересует {car_model.display_name} под заказ из Китая."
+        context["lead_prefill"] = callout["lead_prefill"]
         context["breadcrumb_links"] = [
             {"name": "Главная", "url": reverse("home")},
             {"name": "Марки", "url": reverse("catalog:brands_index")},

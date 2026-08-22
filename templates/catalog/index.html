@@ -129,6 +129,11 @@
                     </div>
                 </div>
             {% empty %}
+                {% if empty_callout %}
+                <div class="catalog-empty-callout-wrap">
+                    {% include "catalog/partials/seo_empty_callout.html" with callout=empty_callout %}
+                </div>
+                {% else %}
                 <div style="grid-column: 1/-1; text-align: center; padding: 80px 24px;">
                     <p style="color: var(--text-muted); margin-bottom: 12px;">По этим фильтрам предложений нет.</p>
                     <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Сбросьте фильтры или оставьте заявку на подбор.</p>
@@ -137,6 +142,7 @@
                         <a href="#leads-section" class="btn-elite">Оставить заявку на подбор</a>
                     </div>
                 </div>
+                {% endif %}
             {% endfor %}
         </div>
 
@@ -162,4 +168,16 @@
 
         </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+{% if lead_prefill %}
+<script>
+(function () {
+    var msg = document.getElementById('lead-message');
+    if (!msg || msg.value.trim()) return;
+    msg.value = "{{ lead_prefill|escapejs }}";
+})();
+</script>
+{% endif %}
 {% endblock %}

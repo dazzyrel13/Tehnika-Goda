@@ -1338,8 +1338,8 @@ class SeoModelPagesTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Li Auto L6 из Китая")
-        self.assertContains(response, "Сейчас нет в каталоге")
-        self.assertContains(response, empty_model.display_name)
+        self.assertContains(response, "Готовых предложений по Li Auto L6 пока нет")
+        self.assertContains(response, "Заказать Li Auto L6")
 
     def test_brand_page_shows_model_chips(self):
         response = self.client.get(
@@ -1391,6 +1391,8 @@ class SeoModelPagesTests(TestCase):
         response = self.client.get(reverse("catalog:brand", kwargs={"brand_slug": "byd"}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "BYD из Китая")
+        self.assertContains(response, "BYD пока не в каталоге")
+        self.assertContains(response, "Фото и видео с площадки до оплаты")
 
     def test_unknown_brand_slug_404(self):
         response = self.client.get(

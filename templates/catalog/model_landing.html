@@ -27,11 +27,7 @@
         {% endif %}
 
         {% if not has_stock %}
-        <div class="glass-panel seo-empty-callout">
-            <p class="seo-empty-callout__title">Сейчас нет в каталоге</p>
-            <p class="seo-empty-callout__text">{{ empty_intro }}</p>
-            <a href="#leads-section" class="btn-elite">Заказать {{ car_model.display_name }}</a>
-        </div>
+        {% include "catalog/partials/seo_empty_callout.html" with callout=empty_callout %}
         {% endif %}
 
         {% if has_stock %}
