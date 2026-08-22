@@ -83,12 +83,11 @@ class VisitAnalyticsMiddleware:
                 return
 
         if not request.session.session_key:
-            session_key = ""
-        else:
-            session_key = request.session.session_key
+            request.session.save()
+        session_key = request.session.session_key or ""
 
         visitor_id = self._build_visitor_id(session_key, ip_address, user_agent)
-        if session_key and request.session.get("analytics_visitor_id") != visitor_id:
+        if request.session.get("analytics_visitor_id") != visitor_id:
             request.session["analytics_visitor_id"] = visitor_id
         referer = (request.META.get("HTTP_REFERER", "") or "")[:500]
         utm = self._capture_utm(request)

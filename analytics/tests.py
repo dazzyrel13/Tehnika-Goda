@@ -39,7 +39,10 @@ class VisitAnalyticsMiddlewareTests(TestCase):
         event = VisitEvent.objects.get()
         self.assertEqual(event.path, "/")
         self.assertIsNone(event.ip_address)
-        self.assertEqual(Session.objects.count(), 0)
+        self.assertEqual(Session.objects.count(), 1)
+        session_data = Session.objects.get().get_decoded()
+        self.assertIn("analytics_visitor_id", session_data)
+        self.assertEqual(len(session_data["analytics_visitor_id"]), 32)
 
     def test_bots_are_skipped(self):
         response = self.client.get(
