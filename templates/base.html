@@ -1,27 +1,29 @@
 ﻿{% load static %}
+{% load seo_tags %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{% block title %}{{ seo_title|default:"Автомобили под заказ из Китая | Техника Года" }}{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}{{ seo_description|default:"Автомобили под заказ из Китая с площадки Техника Года. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
+    <meta name="description" content="{% block meta_description %}{{ seo_description|meta_description|default:"Автомобили под заказ из Китая с площадки Техника Года. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
     <meta name="robots" content="{% block meta_robots %}{{ meta_robots|default:'index, follow' }}{% endblock %}">
     <link rel="canonical" href="{% block canonical_url %}{{ canonical_url }}{% endblock %}">
+    <link rel="sitemap" type="application/xml" href="{{ sitemap_url }}">
 
     <meta name="application-name" content="Техника Года">
     <meta property="og:site_name" content="Техника Года">
     <meta property="og:locale" content="ru_RU">
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:title" content="{% block og_title %}{{ seo_title|default:"Автомобили под заказ из Китая | Техника Года" }}{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}{{ seo_description|default:"Автомобили под заказ из Китая с площадки Техника Года. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ seo_description|meta_description|default:"Автомобили под заказ из Китая с площадки Техника Года. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
     <meta property="og:url" content="{% block og_url %}{{ canonical_url }}{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{{ og_image_url|default:default_og_image_url }}{% endblock %}">
     <meta property="og:image:width" content="{{ og_image_width|default:'512' }}">
     <meta property="og:image:height" content="{{ og_image_height|default:'512' }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{% block twitter_title %}{{ seo_title|default:"Автомобили под заказ из Китая | Техника Года" }}{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}{{ seo_description|default:"Автомобили под заказ из Китая с площадки Техника Года. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ seo_description|meta_description|default:"Автомобили под заказ из Китая с площадки Техника Года. Гарантия 6 месяцев на ДВС и КПП. Цена под ключ до Благовещенска." }}{% endblock %}">
     <meta name="twitter:image" content="{% block twitter_image %}{{ og_image_url|default:default_og_image_url }}{% endblock %}">
     {% if GOOGLE_SITE_VERIFICATION %}
     <meta name="google-site-verification" content="{{ GOOGLE_SITE_VERIFICATION }}">

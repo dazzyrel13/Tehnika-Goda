@@ -27,11 +27,13 @@ from .models import Brand, CarModel, Category, EngineType, Vehicle
 from .seo_copy import (
     brand_empty_callout,
     brand_heading,
+    brand_meta_description,
     category_heading,
     has_extra_listing_filters,
     model_empty_callout,
     model_empty_intro,
     model_heading,
+    model_meta_description,
 )
 from .seo_pages import (
     brand_has_seo_landing,
@@ -331,7 +333,7 @@ class VehicleListView(ListView):
             context["seo_h1"] = h1
             context["seo_intro"] = intro
             context["seo_title"] = f"{h1} | Техника Года"
-            context["seo_description"] = intro
+            context["seo_description"] = brand_meta_description(brand_name)
             context["is_brand_landing"] = not cat_slug
             if not cat_slug:
                 callout = brand_empty_callout(brand_name)
@@ -455,7 +457,7 @@ class ModelLandingView(_SeoPagesFeatureMixin, ListView):
         context["seo_h1"] = h1
         context["seo_intro"] = intro
         context["seo_title"] = f"{h1} | Техника Года"
-        context["seo_description"] = intro
+        context["seo_description"] = model_meta_description(brand.name, car_model.name)
         context["canonical_url"] = absolute_url(car_model.get_absolute_url())
         context["lead_prefill"] = callout["lead_prefill"]
         context["breadcrumb_links"] = [

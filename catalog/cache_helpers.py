@@ -221,7 +221,10 @@ def review_aggregate() -> dict | None:
     from content.models import Review
 
     cache_key = "catalog:review_aggregate"
-    cached = cache.get(cache_key)
+    try:
+        cached = cache.get(cache_key)
+    except Exception:
+        cached = None
     if cached is not None:
         return cached or None
 
@@ -230,13 +233,19 @@ def review_aggregate() -> dict | None:
     )
     count = int(stats["count"] or 0)
     if count <= 0 or stats["avg"] is None:
-        cache.set(cache_key, {}, CACHE_TTL)
+        try:
+            cache.set(cache_key, {}, CACHE_TTL)
+        except Exception:
+            pass
         return None
     payload = {
         "ratingValue": round(float(stats["avg"]), 1),
         "reviewCount": count,
     }
-    cache.set(cache_key, payload, CACHE_TTL)
+    try:
+        cache.set(cache_key, payload, CACHE_TTL)
+    except Exception:
+        pass
     return payload
 
 

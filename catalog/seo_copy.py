@@ -126,6 +126,21 @@ def brand_heading(brand_name: str) -> tuple[str, str]:
     )
 
 
+def brand_meta_description(brand_name: str) -> str:
+    return (
+        f"{brand_name} под заказ из Китая — подбор, фото и видео с площадки, "
+        "бесплатный просчёт и цена под ключ до Благовещенска. Техника Года."
+    )
+
+
+def model_meta_description(brand_name: str, model_name: str) -> str:
+    full = f"{brand_name} {model_name}".strip()
+    return (
+        f"{full} под заказ из Китая — подбор комплектации, проверка до оплаты "
+        "и расчёт под ключ до Благовещенска. Техника Года."
+    )
+
+
 def model_heading(brand_name: str, model_name: str) -> tuple[str, str]:
     full = f"{brand_name} {model_name}".strip()
     return (

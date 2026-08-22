@@ -164,6 +164,16 @@ class SeoHelpersTests(SimpleTestCase):
             "https://tehnikagoda.ru/catalog/cars/?category=cars",
         )
 
+    def test_trim_meta_description(self):
+        from utils.seo import trim_meta_description
+
+        short = trim_meta_description("Короткий текст.")
+        self.assertEqual(short, "Короткий текст.")
+        long_text = "А" * 200
+        trimmed = trim_meta_description(long_text, limit=160)
+        self.assertLessEqual(len(trimmed), 160)
+        self.assertTrue(trimmed.endswith("…"))
+
     def test_listing_filter_noindex_rules(self):
         from catalog.seo_copy import has_extra_listing_filters
 

@@ -1,9 +1,17 @@
+from django.db.utils import OperationalError, ProgrammingError
 from django.urls import reverse
 
 from utils.sitemaps import SiteUrlSitemap
 
 from .models import Brand, CarModel, Category, Vehicle
 from .seo_pages import seo_brands_queryset, seo_model_pages_enabled
+
+
+def _safe_sitemap_items(queryset_factory):
+    try:
+        return queryset_factory()
+    except (ProgrammingError, OperationalError):
+        return []
 
 
 class VehicleSitemap(SiteUrlSitemap):
@@ -34,7 +42,9 @@ class CarModelSitemap(SiteUrlSitemap):
     def items(self):
         if not seo_model_pages_enabled():
             return []
-        return CarModel.objects.filter(is_published=True).select_related("brand")
+        return _safe_sitemap_items(
+            lambda: CarModel.objects.filter(is_published=True).select_related("brand")
+        )
 
     def lastmod(self, obj):
         return obj.updated_at

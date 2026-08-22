@@ -47,6 +47,17 @@ def absolute_url(path: str) -> str:
     return site_base_url() + path
 
 
+def trim_meta_description(text: str, limit: int = 160) -> str:
+    """Shorten meta description for search snippets."""
+    cleaned = " ".join((text or "").split())
+    if not cleaned:
+        return ""
+    if len(cleaned) <= limit:
+        return cleaned
+    cut = cleaned[: limit - 1].rsplit(" ", 1)[0]
+    return f"{cut}…"
+
+
 def canonical_url_for_request(request) -> str:
     """Build a canonical URL from the request, stripping tracking params."""
     parsed = urlparse(request.get_full_path())
