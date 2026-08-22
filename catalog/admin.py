@@ -203,6 +203,7 @@ class VehicleAdmin(admin.ModelAdmin):
         "price_rub",
         "is_published",
         "show_on_home",
+        "is_new",
         "is_featured",
     )
     list_filter = (
@@ -211,16 +212,19 @@ class VehicleAdmin(admin.ModelAdmin):
         "engine_type",
         "is_published",
         "show_on_home",
+        "is_new",
         "is_featured",
         "year",
     )
     search_fields = ("title", "brand__name", "model", "description", "color")
     autocomplete_fields = ("brand", "category", "report")
     inlines = [VehicleImageInline]
-    list_editable = ("is_published", "show_on_home", "is_featured", "price_rub")
+    list_editable = ("is_published", "show_on_home", "is_new", "is_featured", "price_rub")
     list_per_page = 25
     save_on_top = False
     actions = [
+        "mark_new",
+        "unmark_new",
         "mark_featured",
         "unmark_featured",
         "publish_selected",
@@ -252,16 +256,16 @@ class VehicleAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     ("price_rub", "cny_rate"),
-                    ("is_published", "show_on_home", "is_featured"),
+                    ("is_published", "show_on_home", "is_new", "is_featured"),
                 ),
                 "description": (
                     "Новые карточки и импорт по умолчанию скрыты. "
                     "«Опубликовано» — видно в каталоге. "
                     "«На главной» — блок на главной (включается само; снимите, если только каталог). "
-                    "«Выкупленный» — только тёмная плашка и фильтр «Выкупленные», "
+                    "«Новые» — плашка и фильтр «Новые» (пробег 0–3 тыс. км ок). "
+                    "«Выкупленный» — плашка и фильтр «Выкупленные», "
                     "на показ на главной не влияет. "
-                    "Курс юаня меняйте, когда цена в рублях уже не совпадает с расчётом. "
-                    "Плашка «Новые» — у категории «Новые» (пробег 0–3 тыс. км ок)."
+                    "Курс юаня меняйте, когда цена в рублях уже не совпадает с расчётом."
                 ),
             },
         ),
@@ -374,9 +378,32 @@ class VehicleAdmin(admin.ModelAdmin):
 
     display_image.short_description = "Фото"
 
+    def save_model(self, request, obj, form, change):
+        cars_new = Category.objects.filter(slug="cars_new").first()
+        cars_root = Category.objects.filter(slug="cars").first()
+        if obj.is_new and cars_new and cars_root:
+            if not obj.category_id or obj.category_id in cars_root.subtree_ids():
+                if getattr(obj.category, "slug", None) != "cars_bought":
+                    obj.category = cars_new
+        if obj.is_featured:
+            obj.is_new = False
+        super().save_model(request, obj, form, change)
+
+    @admin.action(description="Отметить как новые")
+    def mark_new(self, request, queryset):
+        updated = queryset.update(is_new=True, is_featured=False)
+        invalidate_vehicle_public_caches()
+        self.message_user(request, f"Новые: {updated}")
+
+    @admin.action(description="Снять метку «Новые»")
+    def unmark_new(self, request, queryset):
+        updated = queryset.update(is_new=False)
+        invalidate_vehicle_public_caches()
+        self.message_user(request, f"Снято с новых: {updated}")
+
     @admin.action(description="Отметить как выкупленные")
     def mark_featured(self, request, queryset):
-        updated = queryset.update(is_featured=True)
+        updated = queryset.update(is_featured=True, is_new=False)
         invalidate_vehicle_public_caches()
         self.message_user(request, f"Выкупленные: {updated}")
 

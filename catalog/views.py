@@ -123,12 +123,16 @@ class VehicleListView(ListView):
 
         category_slug = self.category_slug()
         if category_slug == "cars_new":
-            # Только категория «Новые» — пробег не фильтруем (техпробег 1–3 тыс. км ок).
             new_cat = Category.objects.filter(slug="cars_new").first()
-            if new_cat:
-                queryset = queryset.filter(
-                    category_id__in=new_cat.subtree_ids()
-                ).exclude(Q(is_featured=True) | Q(category__slug="cars_bought"))
+            cars_root = Category.objects.filter(slug="cars").first()
+            cars_ids = cars_root.subtree_ids() if cars_root else set()
+            if new_cat or cars_ids:
+                new_q = Q(is_new=True, category_id__in=cars_ids)
+                if new_cat:
+                    new_q |= Q(category_id__in=new_cat.subtree_ids())
+                queryset = queryset.filter(new_q).exclude(
+                    Q(is_featured=True) | Q(category__slug="cars_bought")
+                )
             else:
                 queryset = queryset.none()
         elif category_slug == "cars_bought":

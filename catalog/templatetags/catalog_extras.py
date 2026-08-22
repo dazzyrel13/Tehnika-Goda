@@ -68,7 +68,7 @@ def vehicle_badge_items(vehicle):
     category = getattr(vehicle, "category", None)
     cat_slug = getattr(category, "slug", None)
 
-    if cat_slug == "cars_new":
+    if getattr(vehicle, "is_new", False) or cat_slug == "cars_new":
         items.append({"text": "Новые", "class": "badge-new-category"})
 
     is_bought = bool(getattr(vehicle, "is_featured", False)) or cat_slug == "cars_bought"

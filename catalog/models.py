@@ -258,6 +258,12 @@ class Vehicle(models.Model):
         db_index=True,
         help_text="Показывать плашку «Выкупленные» и включать в фильтр выкупленных.",
     )
+    is_new = models.BooleanField(
+        "Новые",
+        default=False,
+        db_index=True,
+        help_text="Плашка «Новые» и фильтр «Новые» (пробег 0–3 тыс. км ок).",
+    )
     show_on_home = models.BooleanField(
         "На главной",
         default=True,
@@ -297,6 +303,10 @@ class Vehicle(models.Model):
             models.Index(
                 fields=["is_published", "is_featured", "-created_at"],
                 name="catalog_veh_pub_feat_idx",
+            ),
+            models.Index(
+                fields=["is_published", "is_new", "-created_at"],
+                name="catalog_veh_pub_new_idx",
             ),
             models.Index(
                 fields=["is_published", "mileage"], name="catalog_veh_pub_mile_idx"

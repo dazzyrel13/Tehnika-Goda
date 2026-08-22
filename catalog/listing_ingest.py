@@ -425,6 +425,7 @@ def ingest_listing(
         description=data.description,
         specs=data.specs,
         is_published=False,
+        is_new=getattr(resolved_category, "slug", None) == "cars_new",
     )
     added, skipped = attach_vehicle_images(vehicle, uploads)
     vehicle.refresh_from_db()

@@ -749,11 +749,28 @@ class VehicleFilterAndBadgeTests(TestCase):
             year=2026,
             mileage=1656,
             is_published=True,
+            is_new=True,
             slug="new-with-miles",
         )
         self.assertEqual(
             [b["text"] for b in vehicle_badge_items(new_with_mileage)], ["Новые"]
         )
+
+        flag_only = Vehicle.objects.create(
+            title="New By Flag",
+            brand=self.brand,
+            category=self.cars,
+            year=2026,
+            mileage=2000,
+            is_published=True,
+            is_new=True,
+            slug="new-by-flag",
+        )
+        self.assertEqual([b["text"] for b in vehicle_badge_items(flag_only)], ["Новые"])
+        response = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars_new"})
+        )
+        self.assertIn("New By Flag", [v.title for v in response.context["vehicles"]])
 
         bought_badges = vehicle_badge_items(self.bought_flag)
         self.assertEqual([b["text"] for b in bought_badges], ["Выкупленные"])
