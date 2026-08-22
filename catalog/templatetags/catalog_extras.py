@@ -62,7 +62,7 @@ def sanitized_html(value):
 def vehicle_badge_items(vehicle):
     """
     Плашки карточки: «Новые» (категория), «Выкупленные» (флаг/категория),
-    «Новый» (0 км без категории), либо кастомный badge_text.
+    либо кастомный badge_text.
     """
     items = []
     category = getattr(vehicle, "category", None)
@@ -70,8 +70,6 @@ def vehicle_badge_items(vehicle):
 
     if cat_slug == "cars_new":
         items.append({"text": "Новые", "class": "badge-new-category"})
-    elif getattr(vehicle, "mileage", None) == 0:
-        items.append({"text": "Новый", "class": "badge-new"})
 
     is_bought = bool(getattr(vehicle, "is_featured", False)) or cat_slug == "cars_bought"
     if is_bought:

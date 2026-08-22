@@ -268,7 +268,7 @@ class Vehicle(models.Model):
         "Текст на бэйдже",
         max_length=20,
         blank=True,
-        help_text="Свой текст плашки (если не «Новый» / «Выкупленные»). Например: В ПУТИ",
+        help_text="Свой текст плашки (если не «Новые» / «Выкупленные»). Например: В ПУТИ",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

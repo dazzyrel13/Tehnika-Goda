@@ -769,7 +769,7 @@ class VehicleFilterAndBadgeTests(TestCase):
             slug="both-badges",
         )
         texts = [b["text"] for b in vehicle_badge_items(both)]
-        self.assertEqual(texts, ["Новый", "Выкупленные"])
+        self.assertEqual(texts, ["Выкупленные"])
         self.assertNotIn("Рекомендуем", texts)
 
         cat_only = vehicle_badge_items(self.bought_cat_car)
