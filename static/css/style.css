@@ -1554,7 +1554,8 @@ section.home-page {
 }
 
 .home-promo-banner {
-    width: min(1160px, calc(100% - 48px));
+    /* Square art: cap width so height stays reasonable and image fills the frame. */
+    width: min(860px, calc(100% - 48px));
     margin: 32px auto 0;
     box-sizing: border-box;
 }
@@ -1564,11 +1565,7 @@ section.home-page {
 }
 
 .home-promo-banner__link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    aspect-ratio: 1024 / 530;
-    background: #12141a;
+    display: block;
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 18px 38px rgba(18, 20, 26, 0.18);
@@ -1582,11 +1579,8 @@ section.home-page {
 
 .home-promo-banner__media {
     display: block;
-    width: auto;
+    width: 100%;
     height: auto;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
 }
 
 .home-offer-block {
