@@ -75,6 +75,8 @@ _INFO_SEO = {
 
 urlpatterns = [
     path("healthz/", healthz, name="healthz"),
+    # Old WordPress / WooCommerce URLs (Yandex still has them indexed).
+    path("", include("core.legacy_redirects")),
     # 2FA login/setup lives under the hidden admin prefix (IP allowlist applies).
     path(_admin_url_prefix(), include(tf_urls)),
     path(_admin_url_prefix(), admin.site.urls),
