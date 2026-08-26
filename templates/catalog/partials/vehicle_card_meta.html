@@ -26,13 +26,6 @@
         </span>
     </div>
     <div class="vehicle-meta-item">
-        <span class="vehicle-meta-label">Двигатель</span>
-        <span class="vehicle-meta-value">
-            {% if vehicle.engine_type %}{{ vehicle.get_engine_type_display }}
-            {% else %}-{% endif %}
-        </span>
-    </div>
-    <div class="vehicle-meta-item">
         <span class="vehicle-meta-label">Год</span>
         <span class="vehicle-meta-value">{{ vehicle.year|default:"-" }}</span>
     </div>
@@ -46,6 +39,13 @@
             {% if vehicle.horsepower %}{{ vehicle.horsepower }} л.с.
             {% elif vehicle.specs.horsepower %}{{ vehicle.specs.horsepower }}
             {% elif vehicle.specs.power %}{{ vehicle.specs.power }}
+            {% else %}-{% endif %}
+        </span>
+    </div>
+    <div class="vehicle-meta-item vehicle-meta-item--full">
+        <span class="vehicle-meta-label">Тип двигателя</span>
+        <span class="vehicle-meta-value">
+            {% if vehicle.engine_type %}{{ vehicle.get_engine_type_display }}
             {% else %}-{% endif %}
         </span>
     </div>

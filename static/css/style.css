@@ -2068,6 +2068,24 @@ section.home-page {
     overflow: hidden;
 }
 
+.vehicle-meta-item--full {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+}
+
+.vehicle-meta-item--full .vehicle-meta-label {
+    flex: 0 1 auto;
+}
+
+.vehicle-meta-item--full .vehicle-meta-value {
+    flex: 0 0 auto;
+    text-align: right;
+}
+
 .vehicle-meta-label {
     color: var(--text-muted);
     font-size: 8px;
