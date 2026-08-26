@@ -12,6 +12,7 @@ class StaticViewSitemap(SiteUrlSitemap):
         ("catalog:category", 0.9, "daily", {"category_slug": "cars"}),
         ("content:faq", 0.65, "weekly"),
         ("about", 0.6, "monthly"),
+        ("services", 0.7, "monthly"),
         ("leasing", 0.5, "monthly"),
         ("privacy", 0.4, "yearly"),
     )

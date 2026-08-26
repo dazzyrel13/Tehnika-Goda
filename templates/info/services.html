@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body_class %}bg-about{% endblock %}
+
+{% block content %}
+<section class="info-page services-page">
+    <div class="container">
+        <div class="home-section__head info-page__intro">
+            <div class="home-section__eyebrow">Услуги и прайс</div>
+            <h1>Информация об услугах и прайс-лист</h1>
+            <p>
+                «Техника Года» оказывает услугу по&nbsp;подбору, проверке, ввозу и&nbsp;таможенному
+                оформлению легковых автомобилей, коммерческого транспорта и&nbsp;спецтехники из&nbsp;Китая
+                «под ключ» до&nbsp;выдачи в&nbsp;Благовещенске. Ниже&nbsp;— условия оказания услуги,
+                порядок работы и&nbsp;пример расчёта стоимости.
+            </p>
+        </div>
+
+        <div class="services-page__block glass-panel">
+            <div class="home-section__eyebrow">Услуга</div>
+            <h2>Что входит в нашу работу</h2>
+            <p class="services-page__lead">
+                Мы не&nbsp;продаём автомобили как витринный магазин: сопровождаем сделку как
+                коммерческую услугу&nbsp;— от&nbsp;заявки до&nbsp;документов на&nbsp;ваше имя.
+            </p>
+            <ul class="about-case__bullets services-page__bullets">
+                <li>Бесплатный подбор под бюджет и задачи</li>
+                <li>Проверка автомобиля до оплаты (осмотр, история, фото/видео)</li>
+                <li>Бронирование и логистика по Китаю</li>
+                <li>Ввоз, таможня, СБКТС, ЭПТС/ЭПСМ</li>
+                <li>Выдача в Благовещенске; при необходимости&nbsp;— организация автовоза по&nbsp;РФ</li>
+                <li>Гарантия 6&nbsp;месяцев на&nbsp;ДВС и&nbsp;КПП для автомобилей с&nbsp;нашей площадки</li>
+            </ul>
+        </div>
+
+        <div class="home-section services-page__section">
+            <div class="home-section__head">
+                <div class="home-section__eyebrow">Порядок работы</div>
+                <h2>От заявки до выдачи</h2>
+                <p>Четыре этапа сделки. Детали оплаты&nbsp;— в&nbsp;прайс-листе ниже.</p>
+            </div>
+            <ol class="about-case__services">
+                <li class="about-case__service">
+                    <span class="info-feature-mark" aria-hidden="true">01</span>
+                    <div>
+                        <h3 class="services-page__step-title">Подбор</h3>
+                        <p>Бесплатно подбираем вариант под бюджет и пожелания. После согласования заключаем договор; для бронирования обычно нужен залог (ориентир от&nbsp;100&nbsp;000&nbsp;₽, сумма может быть выше в&nbsp;зависимости от&nbsp;стоимости автомобиля).</p>
+                    </div>
+                </li>
+                <li class="about-case__service">
+                    <span class="info-feature-mark" aria-hidden="true">02</span>
+                    <div>
+                        <h3 class="services-page__step-title">Проверка до оплаты</h3>
+                        <p>Осмотр кузова и&nbsp;ЛКП, сверка VIN, диагностика ДВС/КПП/ходовой, история автомобиля, фото и&nbsp;видео отчёт&nbsp;— до&nbsp;перевода денег.</p>
+                    </div>
+                </li>
+                <li class="about-case__service">
+                    <span class="info-feature-mark" aria-hidden="true">03</span>
+                    <div>
+                        <h3 class="services-page__step-title">Ввоз и таможня</h3>
+                        <p>Оплата по этапам (предоплата → инвойс → ФТС → документы). Срок ввоза до&nbsp;Благовещенска&nbsp;— до&nbsp;30&nbsp;рабочих дней с&nbsp;даты оплаты инвойса. Автомобиль оформляется сразу на&nbsp;ваше имя.</p>
+                    </div>
+                </li>
+                <li class="about-case__service">
+                    <span class="info-feature-mark" aria-hidden="true">04</span>
+                    <div>
+                        <h3 class="services-page__step-title">Выдача</h3>
+                        <p>После таможни и&nbsp;лаборатории выдаём автомобиль в&nbsp;Благовещенске с&nbsp;полным комплектом документов. Дальше при необходимости организуем доставку автовозом в&nbsp;ваш город.</p>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <div class="home-section services-page__section" id="price-list">
+            <div class="home-section__head">
+                <div class="home-section__eyebrow">Прайс-лист</div>
+                <h2>Пример расчёта «под ключ»</h2>
+                <p>
+                    Итоговая цена в&nbsp;договоре&nbsp;— до&nbsp;выдачи в&nbsp;Благовещенске: автомобиль, ввоз,
+                    таможня и&nbsp;пакет документов (ЭПТС/ЭПСМ). Автовоз по&nbsp;России оплачивается отдельно.
+                </p>
+            </div>
+
+            <div class="glass-panel services-price">
+                <div class="services-price__head">
+                    <div>
+                        <div class="home-section__eyebrow">Пример</div>
+                        <h3>Honda XR-V</h3>
+                    </div>
+                    <p class="services-price__total">≈&nbsp;1&nbsp;680&nbsp;000&nbsp;₽</p>
+                </div>
+
+                <div class="ed-delivery__table-wrap">
+                    <table class="ed-delivery__table services-price__table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Этап оплаты</th>
+                                <th scope="col">Что входит</th>
+                                <th scope="col">Сумма</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1. Предоплата</td>
+                                <td>Бронируем автомобиль, вносим залог, доставка по&nbsp;Китаю</td>
+                                <td>180&nbsp;000&nbsp;₽</td>
+                            </tr>
+                            <tr>
+                                <td>2. Инвойс</td>
+                                <td>94&nbsp;000&nbsp;¥ ×&nbsp;12,32</td>
+                                <td>1&nbsp;158&nbsp;000&nbsp;₽</td>
+                            </tr>
+                            <tr>
+                                <td>3. ФТС</td>
+                                <td>Таможенные платежи</td>
+                                <td>262&nbsp;000&nbsp;₽</td>
+                            </tr>
+                            <tr>
+                                <td>4. Документы</td>
+                                <td>Лаборатория, ЭПТС, эвакуатор</td>
+                                <td>80&nbsp;000&nbsp;₽</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="services-price__note">
+                    <strong>Важно:</strong> предоплата, инвойс и&nbsp;платежи ФТС могут меняться
+                    в&nbsp;зависимости от&nbsp;цены автомобиля в&nbsp;Китае, года выпуска, объёма двигателя,
+                    мощности (л.&nbsp;с.) и&nbsp;типа двигателя, а&nbsp;также от&nbsp;курса юаня на&nbsp;дату оплаты.
+                    Актуальный расчёт фиксируем в&nbsp;договоре до&nbsp;оплаты.
+                </p>
+            </div>
+
+            <div class="services-page__payment-ways glass-panel">
+                <h3>Как проходит оплата</h3>
+                <p>
+                    Поэтапно: предоплата (бронь и&nbsp;залог дилеру в&nbsp;Китае) → инвойс за&nbsp;автомобиль
+                    (банковский перевод; внесённый залог засчитывается в&nbsp;общую сумму) → таможенные платежи ФТС
+                    → документы (брокер, декларант, лаборатория, СБКТС, ЭПТС).
+                    На&nbsp;таможне потребуется регистрация в&nbsp;личном кабинете ФТС для оплаты утилизационного сбора.
+                </p>
+            </div>
+        </div>
+
+        <div class="home-section services-page__section">
+            <div class="home-section__head">
+                <div class="home-section__eyebrow">Доставка по РФ</div>
+                <h2>Не входит в цену «под ключ»</h2>
+                <p>Ориентиры по автовозу после выдачи в&nbsp;Благовещенске. Итог зависит от&nbsp;тарифа перевозчика.</p>
+            </div>
+            <div class="ed-delivery">
+                <div class="ed-delivery__table-wrap">
+                    <table class="ed-delivery__table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Город</th>
+                                <th scope="col">Срок</th>
+                                <th scope="col">Ориентир</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Красноярск</td>
+                                <td>~10 дней</td>
+                                <td>от 100&nbsp;000&nbsp;₽</td>
+                            </tr>
+                            <tr>
+                                <td>Новосибирск</td>
+                                <td>~15 дней</td>
+                                <td>от 130&nbsp;000&nbsp;₽</td>
+                            </tr>
+                            <tr>
+                                <td>Екатеринбург</td>
+                                <td>~20 дней</td>
+                                <td>от 160&nbsp;000&nbsp;₽</td>
+                            </tr>
+                            <tr>
+                                <td>Москва</td>
+                                <td>~20 дней</td>
+                                <td>от 180&nbsp;000&nbsp;₽</td>
+                            </tr>
+                            <tr>
+                                <td>Санкт-Петербург</td>
+                                <td>~25 дней</td>
+                                <td>от 210&nbsp;000&nbsp;₽</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel info-page__cta services-page__cta">
+            <h3>Заказать расчёт по вашей модели</h3>
+            <p>
+                Оставьте заявку&nbsp;— подготовим коммерческий расчёт под конкретный автомобиль
+                и&nbsp;ответьм по срокам. Телефон:
+                <a href="tel:+79241490013">8 (924) 149-00-13</a>,
+                почта: <a href="mailto:sale@tehnikagoda.ru">sale@tehnikagoda.ru</a>,
+                адрес: Благовещенск, ул.&nbsp;Тенистая, 131, вход&nbsp;№&nbsp;7.
+            </p>
+            <a href="{% url 'home' %}#leads-section" class="btn-elite">Оставить заявку</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

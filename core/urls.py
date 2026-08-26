@@ -63,6 +63,13 @@ _INFO_SEO = {
             "персональных данных, цели сбора информации и меры защиты данных пользователей."
         ),
     },
+    "services": {
+        "seo_title": "Информация об услугах и прайс-лист | Техника Года",
+        "seo_description": (
+            "Услуга подбора и привоза автомобилей из Китая под ключ: порядок работы, "
+            "этапы оплаты и пример прайс-листа. Выдача в Благовещенске."
+        ),
+    },
 }
 
 
@@ -119,6 +126,14 @@ urlpatterns = [
             extra_context=_INFO_SEO["privacy"],
         ),
         name="privacy",
+    ),
+    path(
+        "services/",
+        TemplateView.as_view(
+            template_name="info/services.html",
+            extra_context=_INFO_SEO["services"],
+        ),
+        name="services",
     ),
     # Favicon at site root (browsers request /favicon.ico by default)
     path(

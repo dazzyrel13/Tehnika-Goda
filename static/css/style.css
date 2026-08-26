@@ -3290,6 +3290,120 @@ a.home-reviews-platform:hover {
     margin: 0 auto 24px;
 }
 
+/* —— Services & price list —— */
+.services-page__block {
+    padding: 28px 28px 32px;
+    margin-bottom: 48px;
+}
+
+.services-page__block h2 {
+    margin: 8px 0 12px;
+    font-size: clamp(22px, 3vw, 28px);
+}
+
+.services-page__lead {
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 720px;
+    margin: 0 0 18px;
+}
+
+.services-page__bullets {
+    margin: 0;
+}
+
+.services-page__section {
+    padding-top: 8px;
+    margin-bottom: 24px;
+}
+
+.services-page__step-title {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.services-price {
+    padding: 24px 24px 20px;
+    margin-bottom: 16px;
+}
+
+.services-price__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px 20px;
+    margin-bottom: 18px;
+}
+
+.services-price__head h3 {
+    margin: 6px 0 0;
+    font-size: clamp(22px, 3vw, 28px);
+}
+
+.services-price__total {
+    margin: 0;
+    font-size: clamp(22px, 3vw, 28px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-main);
+}
+
+.services-price__table td:last-child,
+.services-price__table th:last-child {
+    white-space: nowrap;
+    font-weight: 700;
+}
+
+.services-price__note {
+    margin: 16px 0 0;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: #f7f8fa;
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.services-price__note strong {
+    color: var(--text-main);
+}
+
+.services-page__payment-ways {
+    padding: 22px 24px;
+}
+
+.services-page__payment-ways h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+
+.services-page__payment-ways p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.65;
+}
+
+.services-page__cta a:not(.btn-elite) {
+    color: var(--accent-blue);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+    .services-page__block,
+    .services-price,
+    .services-page__payment-ways {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+}
+
 /* —— About company case —— */
 .about-case__intro {
     max-width: 960px;
