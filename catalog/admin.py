@@ -407,6 +407,19 @@ class VehicleAdmin(admin.ModelAdmin):
     display_image.short_description = "Фото"
 
     def save_model(self, request, obj, form, change):
+        from .listing_ingest import BODY_TO_SLUG, _norm
+
+        # «Выкупленные» — флаг, не единственная категория: при известном типе кузова
+        # держим авто в Седанах/Кроссоверах и т.п.
+        cat_slug = getattr(obj.category, "slug", None)
+        if cat_slug == "cars_bought" and (obj.body_type or "").strip():
+            mapped = BODY_TO_SLUG.get(_norm(obj.body_type))
+            if mapped:
+                body_cat = Category.objects.filter(slug=mapped).first()
+                if body_cat:
+                    obj.category = body_cat
+                    obj.is_featured = True
+
         cars_new = Category.objects.filter(slug="cars_new").first()
         cars_root = Category.objects.filter(slug="cars").first()
         if obj.is_new and cars_new and cars_root:

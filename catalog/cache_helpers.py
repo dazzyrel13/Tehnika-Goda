@@ -18,7 +18,8 @@ CACHE_TTL = 300
 HOME_SECTION_LIMIT = 10
 
 # Special car filters — not body-type options in search dropdowns
-_CAR_SPECIAL_SLUGS = ("cars_new", "cars_used", "cars_bought")
+CAR_STATUS_SLUGS = ("cars_new", "cars_used", "cars_bought")
+_CAR_SPECIAL_SLUGS = CAR_STATUS_SLUGS
 _TRUCK_TYPE_SLUGS = (
     "trucks_trucks",
     "trucks_vans",
@@ -29,6 +30,41 @@ _SPECIAL_TYPE_SLUGS = (
     "special_lifts",
     "special_cranes",
 )
+
+
+def category_name_match_terms(category: Category) -> set[str]:
+    """Singular/plural name variants for body_type text matching."""
+    name = (category.name or "").strip()
+    if not name:
+        return set()
+    terms = {name}
+    # "Седаны" -> "Седан", "Минивэны" -> "Минивэн".
+    if name[-1:].lower() in {"ы", "и"}:
+        singular = name[:-1].strip()
+        if singular:
+            terms.add(singular)
+    terms |= {term.lower() for term in terms}
+    return terms
+
+
+def type_category_q(category: Category) -> Q:
+    """
+    Match vehicles by category tree OR body_type text.
+
+    Status categories (Новые / Выкупленные) keep a single FK; body-type pages
+    still need those cars when body_type is filled (e.g. Кроссовер).
+    """
+    q = Q(category_id__in=category.subtree_ids())
+    for term in category_name_match_terms(category):
+        q |= Q(body_type__icontains=term)
+    return q
+
+
+def is_car_body_type_category(category: Category) -> bool:
+    parent = getattr(category, "parent", None)
+    if parent is None or getattr(parent, "slug", None) != "cars":
+        return False
+    return category.slug not in CAR_STATUS_SLUGS
 
 
 def _ordered_children(

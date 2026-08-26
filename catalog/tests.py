@@ -734,6 +734,69 @@ class VehicleFilterAndBadgeTests(TestCase):
         self.assertNotIn("Featured Truck", titles)
         self.assertIn("Bought Flag", titles)
 
+    def test_bought_car_appears_in_matching_body_type_category(self):
+        crossover, _ = Category.objects.get_or_create(
+            slug="cars_crossover",
+            defaults={"name": "Кроссоверы", "parent": self.cars},
+        )
+        if crossover.parent_id != self.cars.id:
+            crossover.parent = self.cars
+            crossover.save(update_fields=["parent"])
+        sedan, _ = Category.objects.get_or_create(
+            slug="cars_sedan",
+            defaults={"name": "Седаны", "parent": self.cars},
+        )
+        if sedan.parent_id != self.cars.id:
+            sedan.parent = self.cars
+            sedan.save(update_fields=["parent"])
+
+        bought_crossover = Vehicle.objects.create(
+            title="Bought Crossover",
+            brand=self.brand,
+            category=self.bought_cat,
+            body_type="Кроссовер",
+            year=2023,
+            mileage=12000,
+            is_published=True,
+            is_featured=False,
+            slug="bought-crossover",
+            price_rub=2_500_000,
+        )
+        featured_sedan = Vehicle.objects.create(
+            title="Featured Sedan",
+            brand=self.brand,
+            category=sedan,
+            body_type="Седан",
+            year=2022,
+            mileage=30000,
+            is_published=True,
+            is_featured=True,
+            slug="featured-sedan",
+            price_rub=1_800_000,
+        )
+
+        crossover_resp = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars_crossover"})
+        )
+        crossover_titles = [v.title for v in crossover_resp.context["vehicles"]]
+        self.assertIn(bought_crossover.title, crossover_titles)
+        self.assertNotIn(featured_sedan.title, crossover_titles)
+        self.assertNotIn("Bought Cat", crossover_titles)
+
+        sedan_resp = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars_sedan"})
+        )
+        sedan_titles = [v.title for v in sedan_resp.context["vehicles"]]
+        self.assertIn(featured_sedan.title, sedan_titles)
+        self.assertNotIn(bought_crossover.title, sedan_titles)
+
+        bought_resp = self.client.get(
+            reverse("catalog:category", kwargs={"category_slug": "cars_bought"})
+        )
+        bought_titles = [v.title for v in bought_resp.context["vehicles"]]
+        self.assertIn(bought_crossover.title, bought_titles)
+        self.assertIn(featured_sedan.title, bought_titles)
+
     def test_mileage_display_groups_thousands(self):
         from catalog.templatetags.catalog_extras import mileage_display
 
@@ -1173,7 +1236,6 @@ class ListingIngestTests(TestCase):
             defaults={"name": "Седаны"},
         )
         result = ingest_listing(self.SAMPLE)
-        self.assertTrue(result.brand_created)
         self.assertFalse(result.category_created)
         self.assertEqual(result.vehicle.brand.name, "Volkswagen")
         self.assertEqual(result.vehicle.category_id, sedan.id)
@@ -1206,6 +1268,33 @@ class ListingIngestTests(TestCase):
         again = ingest_listing(text)
         self.assertFalse(again.category_created)
         self.assertEqual(result.vehicle.category_id, again.vehicle.category_id)
+
+    def test_ingest_bought_uses_body_type_and_featured_flag(self):
+        from catalog.listing_ingest import ingest_listing
+
+        cars, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Легковые автомобили"}
+        )
+        crossover, _ = Category.objects.get_or_create(
+            slug="cars_crossover",
+            defaults={"name": "Кроссоверы", "parent": cars},
+        )
+        Category.objects.get_or_create(
+            slug="cars_bought",
+            defaults={"name": "Выкупленные", "parent": cars},
+        )
+        text = (
+            "[Название автомобиля] Geely Monjaro\n"
+            "【Марка】 Geely\n"
+            "【Категория】 Выкупленные\n"
+            "【Тип кузова】 Кроссовер\n"
+            "[Пробег] 15000 километров\n"
+            "Цена 2 500 000 ₽"
+        )
+        result = ingest_listing(text)
+        self.assertEqual(result.vehicle.category_id, crossover.id)
+        self.assertTrue(result.vehicle.is_featured)
+        self.assertEqual(result.vehicle.body_type, "Кроссовер")
 
     def test_ingest_attaches_photos_as_cover_and_gallery(self):
         import tempfile

@@ -20,8 +20,10 @@ from .cache_helpers import (
     home_faqs,
     home_reviews,
     home_sections,
+    is_car_body_type_category,
     nav_context,
     review_platforms,
+    type_category_q,
 )
 from .models import Brand, CarModel, Category, EngineType, Vehicle
 from .seo_copy import (
@@ -167,9 +169,18 @@ class VehicleListView(ListView):
                 | Q(is_featured=True, category_id__in=cars_ids)
             )
         elif category_slug:
-            category = Category.objects.filter(slug=category_slug).first()
+            category = (
+                Category.objects.filter(slug=category_slug)
+                .select_related("parent")
+                .first()
+            )
             if category:
-                queryset = queryset.filter(category_id__in=category.subtree_ids())
+                if is_car_body_type_category(category):
+                    # Include cars whose FK is «Выкупленные»/«Новые» but body_type
+                    # matches (Седан, Кроссовер, …).
+                    queryset = queryset.filter(type_category_q(category))
+                else:
+                    queryset = queryset.filter(category_id__in=category.subtree_ids())
             elif self.kwargs.get("category_slug") == category_slug:
                 raise Http404("Категория не найдена")
             else:
@@ -179,18 +190,7 @@ class VehicleListView(ListView):
         if body_type_slug:
             body_type_category = Category.objects.filter(slug=body_type_slug).first()
             if body_type_category:
-                body_type_terms = {body_type_category.name.strip()}
-                if body_type_category.name:
-                    # "Седаны" -> "Седан", "Минивэны" -> "Минивэн".
-                    if body_type_category.name[-1:].lower() in {"ы", "и"}:
-                        body_type_terms.add(body_type_category.name[:-1].strip())
-                body_type_terms |= {term.lower() for term in body_type_terms}
-                body_type_q = Q()
-                for term in filter(None, body_type_terms):
-                    body_type_q |= Q(body_type__icontains=term)
-                queryset = queryset.filter(
-                    Q(category_id__in=body_type_category.subtree_ids()) | body_type_q
-                )
+                queryset = queryset.filter(type_category_q(body_type_category))
 
         brand_slug = self.brand_slug()
         if brand_slug:

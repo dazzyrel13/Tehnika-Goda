@@ -17,6 +17,9 @@ from .models import Brand, Category, Vehicle, VehicleImage
 from .engine_type import detect_engine_type
 from .spec_sheet import parse_spec_sheet
 
+# Status-only car filters — prefer body-type category when known.
+_CAR_STATUS_SLUGS = frozenset({"cars_new", "cars_used", "cars_bought"})
+
 YEAR_RE = re.compile(r"\b(19[89]\d|20[0-3]\d)\b")
 MILEAGE_RE = re.compile(
     r"(\d[\d\s\u00a0]{0,12})\s*(?:км|километр)",
@@ -310,15 +313,22 @@ def get_or_create_category(
     if explicit is not None:
         return explicit, False
 
-    matched = _match_existing_category(name) or _match_existing_category(body_type)
-    if matched:
-        return matched, False
-
-    mapped = BODY_TO_SLUG.get(_norm(body_type)) or BODY_TO_SLUG.get(_norm(name))
-    if mapped:
-        existing = Category.objects.filter(slug=mapped).first()
+    body_mapped = BODY_TO_SLUG.get(_norm(body_type)) or BODY_TO_SLUG.get(_norm(name))
+    if body_mapped:
+        existing = Category.objects.filter(slug=body_mapped).first()
         if existing:
             return existing, False
+
+    matched = _match_existing_category(name) or _match_existing_category(body_type)
+    if matched:
+        # Don't park the car only under «Выкупленные»/«Новые» when body type is known.
+        if matched.slug in _CAR_STATUS_SLUGS:
+            mapped = BODY_TO_SLUG.get(_norm(body_type))
+            if mapped:
+                body_cat = Category.objects.filter(slug=mapped).first()
+                if body_cat:
+                    return body_cat, False
+        return matched, False
 
     blob = _norm(" ".join((name, body_type, haystack)))
     if name:
@@ -330,11 +340,8 @@ def get_or_create_category(
         )
         return created, True
 
-    if "выкуплен" in blob:
-        bought = Category.objects.filter(slug="cars_bought").first()
-        if bought:
-            return bought, False
-    if mileage == 0:
+    # Status words are flags (is_featured / is_new), not exclusive categories.
+    if mileage == 0 and "выкуплен" not in blob:
         new_cat = Category.objects.filter(slug="cars_new").first()
         if new_cat:
             return new_cat, False
@@ -345,6 +352,10 @@ def get_or_create_category(
     if fallback:
         return fallback, False
     return _ensure_root("cars", "Легковые автомобили"), False
+
+
+def _listing_looks_bought(name: str, body_type: str, haystack: str) -> bool:
+    return "выкуплен" in _norm(" ".join((name, body_type, haystack)))
 
 
 def attach_vehicle_images(vehicle: Vehicle, uploads) -> tuple[int, int]:
@@ -409,6 +420,9 @@ def ingest_listing(
         mileage=data.mileage,
         explicit=category,
     )
+    looks_bought = _listing_looks_bought(
+        data.category_name, data.body_type, data.description
+    ) or getattr(resolved_category, "slug", None) == "cars_bought"
     vehicle = Vehicle.objects.create(
         title=data.title[:255],
         brand=brand,
@@ -426,6 +440,7 @@ def ingest_listing(
         specs=data.specs,
         is_published=False,
         is_new=getattr(resolved_category, "slug", None) == "cars_new",
+        is_featured=looks_bought,
     )
     added, skipped = attach_vehicle_images(vehicle, uploads)
     vehicle.refresh_from_db()
