@@ -1942,7 +1942,7 @@ section.home-page {
 
     .car-card:hover .car-card__media img,
     .car-card:hover .car-card__media--list img {
-        transform: scale(1.04);
+        transform: none;
     }
 }
 
@@ -1954,7 +1954,7 @@ section.home-page {
 .car-card__media--list {
     display: block;
     width: 100%;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 3 / 2;
     height: auto;
     overflow: hidden;
     position: relative;
@@ -1971,7 +1971,7 @@ section.home-page {
 .car-card__media--list img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
     display: block;
     transition: transform 0.5s ease;
