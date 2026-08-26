@@ -1566,6 +1566,9 @@ section.home-page {
     padding: 0 24px;
     width: 100%;
     box-sizing: border-box;
+    /* Above following .reveal banner: transform creates stacking contexts. */
+    position: relative;
+    z-index: 20;
 }
 
 .home-section--offers {
@@ -1577,6 +1580,8 @@ section.home-page {
     width: min(860px, calc(100% - 48px));
     margin: 32px auto 0;
     box-sizing: border-box;
+    position: relative;
+    z-index: 1;
 }
 
 .home-promo-banner + .home-section.home-section--offers {
@@ -1785,7 +1790,15 @@ section.home-page {
     justify-content: flex-end;
 }
 
-.tdv-select { position: relative; width: 100%; }
+.tdv-select {
+    position: relative;
+    width: 100%;
+    z-index: 1;
+}
+
+.tdv-select.open {
+    z-index: 30;
+}
 
 .tdv-select__trigger {
     width: 100%;
@@ -1826,9 +1839,12 @@ section.home-page {
     background: #fff;
     border: 1px solid var(--glass-border);
     border-radius: 12px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: min(320px, 50vh);
     z-index: 1200;
     box-shadow: var(--shadow-hover);
+    -webkit-overflow-scrolling: touch;
 }
 
 .tdv-select.open .tdv-select__dropdown { display: block; }
