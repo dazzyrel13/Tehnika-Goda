@@ -1,0 +1,14 @@
+{% load catalog_extras %}
+{% responsive_image vehicle.main_image 800 as img %}
+<span class="car-card__media-fill" aria-hidden="true">
+    <img src="{{ img.src }}" alt="" decoding="async"{% if not priority %} loading="lazy"{% endif %}>
+</span>
+<img
+    class="car-card__media-photo"
+    src="{{ img.src }}"
+    srcset="{{ img.srcset }}"
+    sizes="(max-width: 640px) 92vw, (max-width: 1100px) 45vw, 380px"
+    alt="{{ vehicle.title }}"
+    {% if not priority %}loading="lazy"{% else %}fetchpriority="high"{% endif %}
+    decoding="async"
+>
