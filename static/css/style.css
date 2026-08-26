@@ -3631,6 +3631,10 @@ a.home-reviews-platform:hover {
     grid-column: 1 / -1;
 }
 
+.services-page .about-case__service:last-child {
+    grid-column: auto;
+}
+
 .about-case__principles {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
