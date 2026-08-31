@@ -1,4 +1,3 @@
-import json
 import re
 
 from django.db.models import Q
@@ -7,13 +6,12 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import strip_tags
-from django.utils.safestring import mark_safe
 from django.views.decorators.cache import cache_control
 from django.views.generic import DetailView, ListView
 from django_ratelimit.decorators import ratelimit
 
 from utils.image_processing import variant_url
-from utils.seo import absolute_url
+from utils.seo import absolute_url, serialize_json_ld
 
 from .cache_helpers import (
     available_colors,
@@ -45,11 +43,6 @@ from .seo_pages import (
     vehicles_for_car_model,
 )
 
-
-def _json_ld(data: dict) -> str:
-    """Serialize JSON-LD safely for embedding in a <script> tag."""
-    payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
-    return mark_safe(payload.replace("<", "\\u003c"))
 
 
 @method_decorator(
@@ -640,8 +633,8 @@ class VehicleDetailView(DetailView):
             "itemListElement": crumb_items,
         }
         context["breadcrumb_links"] = breadcrumb_links
-        context["product_json_ld"] = _json_ld(product)
-        context["breadcrumb_json_ld"] = _json_ld(breadcrumb)
+        context["product_json_ld"] = serialize_json_ld(product)
+        context["breadcrumb_json_ld"] = serialize_json_ld(breadcrumb)
         context["seo_title"] = f"{display_title} | Техника Года"
         context["seo_description"] = (
             f"{display_title} — в каталоге Техника Года. "

@@ -17,6 +17,7 @@ from catalog.sitemaps import (
 from catalog.views import HomeView
 from content.sitemaps import StaticViewSitemap
 from core.health import healthz
+from core.info_pages import InfoPageView
 from core.media import serve_media
 
 sitemaps = {
@@ -40,37 +41,6 @@ def _admin_url_prefix() -> str:
         prefix += "/"
     return prefix
 
-
-_INFO_SEO = {
-    "leasing": {
-        "seo_title": "Лизинг коммерческого транспорта и спецтехники | Техника Года",
-        "seo_description": (
-            "Лизинг коммерческого транспорта и спецтехники из Китая: "
-            "ориентировочный расчёт платежа и подбор программы у лизинговых компаний."
-        ),
-    },
-    "about": {
-        "seo_title": "О компании Техника Года — площадка в Китае и выдача в Благовещенске",
-        "seo_description": (
-            "Техника Года: своя площадка в Китае, проверка до оплаты, "
-            "цена под ключ до Благовещенска, гарантия 6 месяцев на ДВС и КПП."
-        ),
-    },
-    "privacy": {
-        "seo_title": "Политика конфиденциальности | Техника Года",
-        "seo_description": (
-            "Политика конфиденциальности Техника Года: правила обработки "
-            "персональных данных, цели сбора информации и меры защиты данных пользователей."
-        ),
-    },
-    "services": {
-        "seo_title": "Информация об услугах и прайс-лист | Техника Года",
-        "seo_description": (
-            "Услуга подбора и привоза автомобилей из Китая под ключ: порядок работы, "
-            "этапы оплаты и пример прайс-листа. Выдача в Благовещенске."
-        ),
-    },
-}
 
 
 urlpatterns = [
@@ -107,33 +77,33 @@ urlpatterns = [
     ),
     path(
         "leasing/",
-        TemplateView.as_view(
+        InfoPageView.as_view(
             template_name="info/leasing.html",
-            extra_context=_INFO_SEO["leasing"],
+            page_key="leasing",
         ),
         name="leasing",
     ),
     path(
         "about/",
-        TemplateView.as_view(
+        InfoPageView.as_view(
             template_name="info/about.html",
-            extra_context=_INFO_SEO["about"],
+            page_key="about",
         ),
         name="about",
     ),
     path(
         "privacy/",
-        TemplateView.as_view(
+        InfoPageView.as_view(
             template_name="info/privacy.html",
-            extra_context=_INFO_SEO["privacy"],
+            page_key="privacy",
         ),
         name="privacy",
     ),
     path(
         "services/",
-        TemplateView.as_view(
+        InfoPageView.as_view(
             template_name="info/services.html",
-            extra_context=_INFO_SEO["services"],
+            page_key="services",
         ),
         name="services",
     ),

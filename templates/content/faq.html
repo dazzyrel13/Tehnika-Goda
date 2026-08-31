@@ -3,6 +3,9 @@
 
 {% block json_ld %}
 {{ block.super }}
+{% if article_json_ld %}
+<script type="application/ld+json">{{ article_json_ld }}</script>
+{% endif %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

@@ -44,6 +44,34 @@ class ServicesPageTests(TestCase):
         self.assertContains(response, "типа двигателя")
         self.assertContains(response, "Оставить заявку")
 
+    def test_services_page_has_article_json_ld(self):
+        response = self.client.get(reverse("services"))
+        self.assertContains(response, '"@type":"Article"')
+        self.assertContains(response, '"datePublished":"2025-03-01"')
+
+
+class InfoPagesArticleJsonLdTests(TestCase):
+    def test_info_pages_expose_article_json_ld(self):
+        pages = (
+            ("about", "О компании Техника Года"),
+            ("leasing", "Лизинг коммерческого транспорта и спецтехники"),
+            ("privacy", "Политика конфиденциальности"),
+        )
+        for url_name, headline in pages:
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name))
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, '"@type":"Article"')
+                self.assertContains(response, f'"headline":"{headline}"')
+                self.assertContains(response, '"datePublished"')
+
+    def test_faq_page_has_article_json_ld(self):
+        response = self.client.get(reverse("content:faq"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '"@type":"Article"')
+        self.assertContains(response, '"@type": "FAQPage"')
+        self.assertContains(response, "FAQ по покупке авто из Китая")
+
 
 class ReviewPlatformStatsTests(TestCase):
     def setUp(self):

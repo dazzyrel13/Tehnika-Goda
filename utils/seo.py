@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import json
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from django.conf import settings
 from django.db.utils import OperationalError, ProgrammingError
+from django.templatetags.static import static as static_url
+from django.utils.safestring import mark_safe
 
 # Query params that must not appear in canonical URLs.
 _STRIP_QUERY_KEYS = frozenset(
@@ -56,6 +59,54 @@ def trim_meta_description(text: str, limit: int = 160) -> str:
         return cleaned
     cut = cleaned[: limit - 1].rsplit(" ", 1)[0]
     return f"{cut}…"
+
+
+ORGANIZATION_NAME = "Техника Года"
+
+
+def serialize_json_ld(data: dict) -> str:
+    """Serialize JSON-LD safely for embedding in a <script> tag."""
+    payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    return mark_safe(payload.replace("<", "\\u003c"))
+
+
+def build_article_json_ld(
+    *,
+    headline: str,
+    description: str,
+    url: str,
+    date_published: str,
+    date_modified: str | None = None,
+    image_url: str | None = None,
+) -> dict:
+    """Schema.org Article for Yandex Metrica content analytics."""
+    site_url = site_base_url()
+    logo_url = absolute_url(static_url("images/pwa/icon-512.png"))
+    article = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": headline,
+        "description": trim_meta_description(description),
+        "url": url,
+        "mainEntityOfPage": {"@type": "WebPage", "@id": url},
+        "datePublished": date_published,
+        "dateModified": date_modified or date_published,
+        "author": {
+            "@type": "Organization",
+            "name": ORGANIZATION_NAME,
+            "url": site_url,
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": ORGANIZATION_NAME,
+            "url": site_url,
+            "logo": {"@type": "ImageObject", "url": logo_url},
+        },
+        "inLanguage": "ru-RU",
+    }
+    if image_url:
+        article["image"] = image_url
+    return article
 
 
 def canonical_url_for_request(request) -> str:
