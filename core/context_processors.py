@@ -24,7 +24,6 @@ def seo(request):
         "GOOGLE_SITE_VERIFICATION": getattr(
             settings, "GOOGLE_SITE_VERIFICATION", ""
         ),
-        "YANDEX_VERIFICATION": getattr(settings, "YANDEX_VERIFICATION", ""),
         "YANDEX_METRIKA_ID": getattr(settings, "YANDEX_METRIKA_ID", ""),
         "SEO_MODEL_PAGES_ENABLED": getattr(settings, "SEO_MODEL_PAGES_ENABLED", False),
     }

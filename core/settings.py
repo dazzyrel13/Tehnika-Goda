@@ -63,9 +63,8 @@ REVIEW_2GIS_URL = env("REVIEW_2GIS_URL", default="")
 REVIEW_AVITO_URL = env("REVIEW_AVITO_URL", default="")
 # Rating/count are computed from published Review rows — not env placeholders.
 
-# Search Console / Яндекс.Вебмастер (optional meta verification tokens)
+# Google Search Console (optional meta verification token)
 GOOGLE_SITE_VERIFICATION = env("GOOGLE_SITE_VERIFICATION", default="")
-YANDEX_VERIFICATION = env("YANDEX_VERIFICATION", default="")
 # Public counter id only (digits). Empty = Metrika not loaded.
 YANDEX_METRIKA_ID = (env("YANDEX_METRIKA_ID", default="") or "").strip()
 
