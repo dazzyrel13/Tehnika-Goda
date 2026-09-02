@@ -1970,6 +1970,7 @@ section.home-page {
 .car-card__media--list {
     display: block;
     width: 100%;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
     position: relative;
     background: #eef1f5;
@@ -1983,9 +1984,10 @@ section.home-page {
 
 .car-card__media-photo {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
     display: block;
-    vertical-align: middle;
 }
 
 .car-card__brand,
