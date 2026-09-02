@@ -1968,11 +1968,8 @@ section.home-page {
 
 .car-card__media,
 .car-card__media--list {
-    display: grid;
-    grid-template: 1fr / 1fr;
+    display: block;
     width: 100%;
-    aspect-ratio: 3 / 2;
-    height: auto;
     overflow: hidden;
     position: relative;
     background: #eef1f5;
@@ -1984,42 +1981,11 @@ section.home-page {
     margin-bottom: 0;
 }
 
-.car-card__media-fill,
-.car-card__media-photo,
-.car-card__no-photo {
-    grid-area: 1 / 1;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-}
-
-.car-card__media-fill {
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.car-card__media-fill img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    filter: blur(16px);
-    transform: scale(1.14);
-    display: block;
-}
-
 .car-card__media-photo {
-    object-fit: contain;
-    object-position: center;
-    position: relative;
-    z-index: 1;
+    width: 100%;
+    height: auto;
     display: block;
-}
-
-@media (prefers-reduced-transparency: reduce) {
-    .car-card__media-fill {
-        display: none;
-    }
+    vertical-align: middle;
 }
 
 .car-card__brand,
@@ -4038,16 +4004,13 @@ body.bg-faq .leads-cta-section {
 
 .car-card__no-photo {
     width: 100%;
-    height: 100%;
-    min-height: 100%;
+    aspect-ratio: 4 / 3;
     background: rgba(255, 255, 255, 0.03);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text-muted);
     font-size: 12px;
-    position: absolute;
-    inset: 0;
 }
 
 /* —— Vehicle detail —— */
