@@ -7,6 +7,7 @@ def build_public_csp(*, yandex_metrika_id: str = "") -> str:
     script = ["'self'"]
     connect = ["'self'"]
     img = ["'self'", "data:", "blob:"]
+    frame = ["'self'"]
     if (yandex_metrika_id or "").strip():
         script += ["https://mc.yandex.ru", "https://mc.yandex.com"]
         connect += [
@@ -15,6 +16,7 @@ def build_public_csp(*, yandex_metrika_id: str = "") -> str:
             "wss://mc.yandex.ru",
         ]
         img += ["https://mc.yandex.ru", "https://mc.yandex.com"]
+        frame += ["https://mc.yandex.ru", "https://mc.yandex.com"]
     return (
         "default-src 'self'; "
         "base-uri 'self'; "
@@ -26,6 +28,7 @@ def build_public_csp(*, yandex_metrika_id: str = "") -> str:
         "font-src 'self'; "
         f"img-src {' '.join(img)}; "
         f"connect-src {' '.join(connect)}; "
+        f"frame-src {' '.join(frame)}; "
     )
 
 

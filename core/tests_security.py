@@ -86,6 +86,8 @@ class SecurityHeadersTests(TestCase):
         csp = response["Content-Security-Policy"]
         self.assertIn("mc.yandex.ru", csp)
         self.assertRegex(csp, r"script-src[^;]*https://mc\.yandex\.ru")
+        self.assertRegex(csp, r"frame-src[^;]*https://mc\.yandex\.ru")
+        self.assertRegex(csp, r"connect-src[^;]*https://mc\.yandex\.ru")
 
     def test_home_exposes_metrika_data_attr_when_configured(self):
         with override_settings(YANDEX_METRIKA_ID="87654321"):
