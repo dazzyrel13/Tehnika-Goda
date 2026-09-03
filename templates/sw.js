@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tehnika-goda-cache-v11';
+const CACHE_NAME = 'tehnika-goda-cache-v12';
 const ASSETS_TO_CACHE = [
     '/static/images/pwa/icon-512.png?v=7',
 ];
@@ -23,6 +23,9 @@ self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
 
     const url = new URL(event.request.url);
+    // Let analytics / CDN / third-party requests bypass the SW.
+    if (url.origin !== self.location.origin) return;
+
     if (url.pathname.startsWith('/static/fonts/')) {
         event.respondWith(
             caches.open(CACHE_NAME).then((cache) =>
