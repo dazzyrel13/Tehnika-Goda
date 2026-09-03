@@ -1,0 +1,22 @@
+---
+description: After site changes, always push to GitHub and give Timeweb deploy command
+alwaysApply: true
+---
+
+# Deploy workflow
+
+When finishing a change that should go to production:
+
+1. Commit relevant files (never `.env`, secrets, `*.db` test dumps).
+2. Push to `origin/main` on GitHub.
+3. Always end with the Timeweb SSH command.
+
+Default Timeweb command:
+
+```bash
+cd /opt/tehnikagoda && git pull origin main && docker compose -f docker-compose.prod.yml up --build -d
+```
+
+If `.env` on the server must change too, include those `sed`/`echo` steps in the same one-liner before or with the pull/rebuild.
+
+Do not wait for the user to ask "залить" — do commit + push + Timeweb command by default after production-ready work, unless they say not to.
