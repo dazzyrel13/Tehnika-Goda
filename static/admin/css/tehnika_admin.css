@@ -1,19 +1,21 @@
-/* Техника Года — admin mini-app theme */
+/* Техника Года — admin dark navy theme */
 
-html[data-theme="light"],
+html[data-theme="dark"],
 :root {
     --tg-yellow: #ffb300;
-    --tg-yellow-soft: #fff4d6;
-    --tg-blue: #1a1c24;
-    --tg-blue-soft: #f0f1f3;
-    --tg-navy: #1a1c24;
-    --tg-bg: #fafafa;
-    --tg-card: #ffffff;
-    --tg-text: #0f1419;
-    --tg-muted: #3d4654;
-    --tg-border: rgba(15, 20, 25, 0.08);
-    --tg-shadow: 0 10px 30px rgba(15, 20, 25, 0.07);
-    --tg-shadow-lg: 0 18px 50px rgba(15, 20, 25, 0.12);
+    --tg-yellow-soft: rgba(255, 179, 0, 0.16);
+    --tg-blue: #5b9cf5;
+    --tg-blue-soft: rgba(91, 156, 245, 0.14);
+    --tg-navy: #0a1628;
+    --tg-bg: #0a1628;
+    --tg-card: #132238;
+    --tg-surface-alt: #1a2d4a;
+    --tg-surface-hover: #223a5c;
+    --tg-text: #e8ecf1;
+    --tg-muted: #94a3b8;
+    --tg-border: rgba(255, 255, 255, 0.1);
+    --tg-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --tg-shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.45);
     --tg-radius: 18px;
     --tg-radius-sm: 12px;
     --font-display: "Outfit", "Manrope", "Segoe UI", sans-serif;
@@ -26,11 +28,11 @@ html[data-theme="light"],
     --body-fg: var(--tg-text);
     --body-bg: var(--tg-bg);
     --body-quiet-color: var(--tg-muted);
-    --body-medium-color: #3a4350;
+    --body-medium-color: #b8c4d4;
     --body-loud-color: var(--tg-text);
     --header-color: #fff;
     --header-branding-color: #fff;
-    --header-bg: var(--tg-navy);
+    --header-bg: #0d1f38;
     --header-link-color: #fff;
     --breadcrumbs-fg: var(--tg-muted);
     --breadcrumbs-link-fg: var(--tg-blue);
@@ -39,28 +41,28 @@ html[data-theme="light"],
     --link-hover-color: #ffb300;
     --hairline-color: var(--tg-border);
     --border-color: var(--tg-border);
-    --darkened-bg: #eef1f5;
+    --darkened-bg: var(--tg-surface-alt);
     --selected-bg: var(--tg-yellow-soft);
-    --selected-row: var(--tg-yellow-soft);
-    --button-fg: var(--tg-navy);
+    --selected-row: rgba(255, 179, 0, 0.1);
+    --button-fg: #0a1628;
     --button-bg: var(--tg-yellow);
     --button-hover-bg: #e0b40f;
     --default-button-bg: var(--tg-blue);
-    --default-button-hover-bg: #2a2d36;
-    --close-button-bg: #8a93a0;
-    --close-button-hover-bg: #6c7583;
+    --default-button-hover-bg: #4a8ae0;
+    --close-button-bg: #475569;
+    --close-button-hover-bg: #64748b;
 }
 
-html[data-theme="dark"] {
-    /* Force light brand theme even if OS prefers dark */
-    color-scheme: light;
+html[data-theme="light"] {
+    /* Brand uses dark theme only */
+    color-scheme: dark;
 }
 
 body {
     font-family: var(--font-body) !important;
     background:
-        radial-gradient(ellipse 70% 40% at 100% 0%, rgba(255, 179, 0, 0.18), transparent 55%),
-        radial-gradient(ellipse 50% 35% at 0% 100%, rgba(26, 28, 36, 0.06), transparent 50%),
+        radial-gradient(ellipse 70% 40% at 100% 0%, rgba(91, 156, 245, 0.12), transparent 55%),
+        radial-gradient(ellipse 50% 35% at 0% 100%, rgba(255, 179, 0, 0.06), transparent 50%),
         var(--tg-bg) !important;
     color: var(--tg-text);
     -webkit-font-smoothing: antialiased;
@@ -330,7 +332,7 @@ div.breadcrumbs a {
 .tg-card__link {
     font-size: 13px;
     font-weight: 800;
-    color: #0f1419;
+    color: var(--tg-blue);
 }
 
 .tg-dash__footer-row {
@@ -353,10 +355,10 @@ div.breadcrumbs a {
 }
 
 .tg-secondary-cta--ghost {
-    background: #fff;
+    background: var(--tg-card);
     box-shadow: none;
-    border: 1px solid rgba(15, 20, 25, 0.16);
-    color: #0f1419 !important;
+    border: 1px solid var(--tg-border);
+    color: var(--tg-text) !important;
 }
 
 .tg-tool-dark {
@@ -390,7 +392,7 @@ fieldset.module {
 .module caption,
 inline-group h2,
 .inline-related h3 {
-    background: #f8fafc !important;
+    background: var(--tg-surface-alt) !important;
     color: var(--tg-text) !important;
     font-family: var(--font-display);
     font-weight: 700;
@@ -404,7 +406,7 @@ inline-group h2,
 }
 
 #changelist table thead th {
-    background: #f8fafc !important;
+    background: var(--tg-surface-alt) !important;
     border-bottom: 1px solid var(--tg-border) !important;
 }
 
@@ -486,7 +488,8 @@ select,
 .vLargeTextField {
     border-radius: 12px !important;
     border: 1px solid var(--tg-border) !important;
-    background: #fff !important;
+    background: var(--tg-surface-alt) !important;
+    color: var(--tg-text) !important;
     padding: 10px 12px !important;
     box-shadow: none !important;
 }
@@ -687,7 +690,7 @@ body.login {
 
 .tg-stat--alert {
     border-color: rgba(255, 179, 0, 0.45);
-    background: linear-gradient(180deg, var(--tg-blue-soft), #fff);
+    background: linear-gradient(180deg, var(--tg-blue-soft), var(--tg-card));
 }
 
 .tg-stat--alert strong {
@@ -785,27 +788,27 @@ body.login {
 /* ===== Modern app shell: nav + change form ===== */
 
 #nav-sidebar {
-    background: #f7f8fa !important;
-    border-right: 1px solid rgba(15, 20, 25, 0.08) !important;
+    background: var(--tg-navy) !important;
+    border-right: 1px solid var(--tg-border) !important;
     box-shadow: none;
     padding: 12px 10px 24px !important;
 }
 
 #nav-filter {
     border-radius: 14px !important;
-    border: 1px solid rgba(15, 20, 25, 0.1) !important;
-    background: #fff !important;
+    border: 1px solid var(--tg-border) !important;
+    background: var(--tg-card) !important;
     margin: 4px 4px 16px !important;
     padding: 11px 14px !important;
     font-size: 13px !important;
     font-weight: 600 !important;
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     width: calc(100% - 8px) !important;
-    box-shadow: 0 1px 2px rgba(15, 20, 25, 0.04);
+    box-shadow: none;
 }
 
 #nav-filter::placeholder {
-    color: #6b7380 !important;
+    color: var(--tg-muted) !important;
     font-weight: 500 !important;
 }
 
@@ -840,7 +843,7 @@ body.login {
 
 #nav-sidebar caption a.section {
     display: inline-block !important;
-    color: #6b7380 !important;
+    color: var(--tg-muted) !important;
     font-size: 11px !important;
     font-weight: 800 !important;
     letter-spacing: 0.06em !important;
@@ -852,7 +855,7 @@ body.login {
 }
 
 #nav-sidebar caption a.section:hover {
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     background: transparent !important;
 }
 
@@ -896,7 +899,7 @@ body.login {
     font-weight: 700 !important;
     font-size: 13.5px !important;
     line-height: 1.25 !important;
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     text-transform: none !important;
     letter-spacing: -0.01em !important;
     background: transparent !important;
@@ -933,11 +936,11 @@ body.login {
 
 #nav-sidebar tr[class^="model-"]:hover th a,
 #nav-sidebar tr[class^="model-"]:hover td a.addlink {
-    background: #fff !important;
+    background: var(--tg-surface-hover) !important;
 }
 
 #nav-sidebar tr[class^="model-"]:hover td a.addlink::before {
-    color: #0f1419;
+    color: var(--tg-yellow);
 }
 
 #nav-sidebar tr[class^="model-"]:hover th a {
@@ -948,8 +951,8 @@ body.login {
 #nav-sidebar tr.current-model th a,
 #nav-sidebar tr.selected th a,
 #nav-sidebar .current-model th a {
-    background: #fff !important;
-    color: #0f1419 !important;
+    background: var(--tg-surface-hover) !important;
+    color: var(--tg-text) !important;
     box-shadow: inset 3px 0 0 var(--tg-yellow) !important;
     font-weight: 800 !important;
 }
@@ -957,26 +960,26 @@ body.login {
 #nav-sidebar tr.current-model td a.addlink,
 #nav-sidebar tr.selected td a.addlink,
 #nav-sidebar .current-model td a.addlink {
-    background: #fff !important;
+    background: var(--tg-surface-hover) !important;
 }
 
 #nav-sidebar tr.current-model td a.addlink::before,
 #nav-sidebar tr.selected td a.addlink::before {
-    color: #0f1419;
+    color: var(--tg-yellow);
 }
 
 #nav-sidebar tr.current-model:hover th a,
 #nav-sidebar tr.current-model:hover td a.addlink {
-    background: #fff !important;
+    background: var(--tg-surface-hover) !important;
 }
 
 .toggle-nav-sidebar {
     border-radius: 0 12px 12px 0 !important;
-    background: #fff !important;
-    border: 1px solid rgba(15, 20, 25, 0.1) !important;
+    background: var(--tg-card) !important;
+    border: 1px solid var(--tg-border) !important;
     border-left: none !important;
-    box-shadow: 4px 0 16px rgba(15, 20, 25, 0.05);
-    color: #0f1419 !important;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
+    color: var(--tg-text) !important;
 }
 
 /* Change form page */
@@ -1010,7 +1013,7 @@ body.login {
     padding: 0 !important;
     border: 1px solid var(--tg-border) !important;
     border-radius: 20px !important;
-    background: #fff !important;
+    background: var(--tg-card) !important;
     box-shadow: 0 12px 36px rgba(15, 20, 25, 0.06) !important;
     overflow: hidden;
 }
@@ -1021,7 +1024,7 @@ body.login {
 }
 
 .change-form fieldset.module > h2 {
-    background: linear-gradient(180deg, #fbfbfc 0%, #f4f5f7 100%) !important;
+    background: linear-gradient(180deg, var(--tg-surface-alt) 0%, var(--tg-card) 100%) !important;
     color: var(--tg-navy) !important;
     font-size: 15px !important;
     font-weight: 800 !important;
@@ -1034,7 +1037,7 @@ body.login {
     padding: 12px 22px !important;
     color: var(--tg-muted) !important;
     font-size: 13px !important;
-    background: #fafbfc !important;
+    background: var(--tg-surface-alt) !important;
     border-bottom: 1px solid var(--tg-border);
     line-height: 1.45;
 }
@@ -1082,7 +1085,7 @@ body.login {
 .change-form .vURLField {
     border-radius: 14px !important;
     border: 1px solid rgba(15, 20, 25, 0.12) !important;
-    background: #fbfbfc !important;
+    background: var(--tg-surface-alt) !important;
     padding: 11px 14px !important;
     min-height: 42px;
     font-size: 14px !important;
@@ -1092,14 +1095,14 @@ body.login {
 .change-form input:hover,
 .change-form textarea:hover,
 .change-form select:hover {
-    background: #fff !important;
-    border-color: rgba(15, 20, 25, 0.2) !important;
+    background: var(--tg-surface-hover) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
 }
 
 .change-form input:focus,
 .change-form textarea:focus,
 .change-form select:focus {
-    background: #fff !important;
+    background: var(--tg-card) !important;
     border-color: var(--tg-yellow) !important;
     box-shadow: 0 0 0 4px rgba(255, 179, 0, 0.22) !important;
 }
@@ -1137,7 +1140,7 @@ body.login {
 .change-form input[type="file"] {
     border-radius: 16px !important;
     border: 1.5px dashed rgba(15, 20, 25, 0.18) !important;
-    background: linear-gradient(180deg, #fffef8, #f7f8fa) !important;
+    background: linear-gradient(180deg, var(--tg-card) 0%, var(--tg-surface-alt) 100%) !important;
     padding: 18px 16px !important;
     width: 100%;
     max-width: 520px;
@@ -1156,7 +1159,7 @@ body.login {
 }
 
 .change-form .inline-group h2 {
-    background: linear-gradient(180deg, #fbfbfc 0%, #f4f5f7 100%) !important;
+    background: linear-gradient(180deg, var(--tg-surface-alt) 0%, var(--tg-card) 100%) !important;
     padding: 14px 20px !important;
     font-size: 15px !important;
     font-weight: 800 !important;
@@ -1175,7 +1178,7 @@ body.login {
     flex-wrap: wrap;
     gap: 10px;
     align-items: center;
-    background: rgba(255, 255, 255, 0.92) !important;
+    background: rgba(19, 34, 56, 0.94) !important;
     backdrop-filter: blur(14px);
     border: 1px solid var(--tg-border) !important;
     border-radius: 18px !important;
@@ -1203,7 +1206,7 @@ body.login {
 .change-form .submit-row a.deletelink {
     border-radius: 999px !important;
     padding: 11px 16px !important;
-    background: #ffe8e6 !important;
+    background: rgba(180, 35, 24, 0.18) !important;
     color: #b42318 !important;
     margin-left: auto !important;
 }
@@ -1255,7 +1258,7 @@ body.login {
 
 .change-list #toolbar {
     border-radius: 14px;
-    background: #fff !important;
+    background: var(--tg-card) !important;
     border: 1px solid var(--tg-border);
     padding: 10px 12px !important;
     margin-bottom: 14px;
@@ -1297,13 +1300,13 @@ body.login {
 }
 
 .change-form fieldset.module > h2 {
-    background: #fff !important;
+    background: var(--tg-card) !important;
     padding: 18px 24px 14px !important;
     font-size: 1.05rem !important;
     font-weight: 800 !important;
     letter-spacing: -0.02em !important;
     border-bottom: none !important;
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
 }
 
 .change-form fieldset.module > .description {
@@ -1311,7 +1314,7 @@ body.login {
     padding: 10px 14px !important;
     border: none !important;
     border-radius: 12px !important;
-    background: #f4f6f8 !important;
+    background: var(--tg-surface-alt) !important;
     color: #3d4654 !important;
     font-size: 13px !important;
     line-height: 1.45 !important;
@@ -1348,7 +1351,7 @@ body.login {
     display: inline-flex !important;
     align-items: stretch;
     gap: 0 !important;
-    background: #fbfbfc;
+    background: var(--tg-surface-alt);
     border: 1px solid rgba(15, 20, 25, 0.12);
     border-radius: 14px;
     overflow: hidden;
@@ -1384,7 +1387,7 @@ body.login {
     margin: 0 !important;
     border-radius: 0 !important;
     border-left: 1px solid rgba(15, 20, 25, 0.08) !important;
-    background: #fff !important;
+    background: var(--tg-card) !important;
     opacity: 1 !important;
     filter: none !important;
 }
@@ -1404,11 +1407,11 @@ body.login {
     border-radius: 16px !important;
     border: 1.5px dashed rgba(15, 20, 25, 0.2) !important;
     background:
-        linear-gradient(180deg, #fffef9 0%, #f7f8fa 100%) !important;
+        linear-gradient(180deg, var(--tg-card) 0%, var(--tg-surface-alt) 100%) !important;
     padding: 22px 18px !important;
     max-width: 100% !important;
     font-weight: 600 !important;
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
 }
 
 .change-form input[type="file"]:hover,
@@ -1442,13 +1445,13 @@ body.login {
 }
 
 .change-form .ck.ck-toolbar {
-    background: #f7f8fa !important;
+    background: var(--tg-surface-alt) !important;
     border: none !important;
 }
 
 .change-form .ck.ck-editor__main > .ck-editor__editable {
     min-height: 160px;
-    background: #fff !important;
+    background: var(--tg-card) !important;
 }
 
 /* Inline gallery */
@@ -1461,14 +1464,14 @@ body.login {
 
 .change-form .inline-group > h2,
 .change-form .inline-group h2 {
-    background: #fff !important;
+    background: var(--tg-card) !important;
     border-bottom: 1px solid rgba(15, 20, 25, 0.06) !important;
     padding: 16px 20px !important;
     font-size: 1.05rem !important;
     font-weight: 800 !important;
     text-transform: none !important;
     letter-spacing: -0.02em !important;
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
 }
 
 .change-form .add-row a {
@@ -1479,7 +1482,7 @@ body.login {
     padding: 10px 16px !important;
     border-radius: 999px !important;
     background: var(--tg-yellow) !important;
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     font-weight: 800 !important;
     text-decoration: none !important;
     box-shadow: 0 6px 16px rgba(255, 179, 0, 0.28);
@@ -1495,7 +1498,7 @@ body.login {
     gap: 10px !important;
     align-items: center;
     justify-content: flex-start;
-    background: rgba(255, 255, 255, 0.94) !important;
+    background: rgba(19, 34, 56, 0.94) !important;
     backdrop-filter: blur(16px);
     border: 1px solid rgba(15, 20, 25, 0.1) !important;
     border-radius: 20px !important;
@@ -1534,24 +1537,24 @@ body.login {
 
 .change-form .submit-row input[name="_addanother"],
 .change-form .submit-row input[name="_continue"] {
-    background: #fff !important;
-    color: #0f1419 !important;
+    background: var(--tg-card) !important;
+    color: var(--tg-text) !important;
     border: 1px solid rgba(15, 20, 25, 0.14) !important;
     box-shadow: none !important;
 }
 
 .change-form .submit-row input[name="_addanother"]:hover,
 .change-form .submit-row input[name="_continue"]:hover {
-    background: #f4f6f8 !important;
+    background: var(--tg-surface-alt) !important;
     border-color: rgba(15, 20, 25, 0.22) !important;
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
 }
 
 .change-form .submit-row a.deletelink {
     margin-left: auto !important;
     border-radius: 999px !important;
     padding: 12px 16px !important;
-    background: #ffe8e6 !important;
+    background: rgba(180, 35, 24, 0.18) !important;
     color: #b42318 !important;
     font-weight: 800 !important;
     text-transform: none !important;
@@ -1567,8 +1570,8 @@ button.default,
 
 input[type="submit"]:not(.default),
 .submit-row input:not(.default) {
-    background: #fff !important;
-    color: #0f1419 !important;
+    background: var(--tg-card) !important;
+    color: var(--tg-text) !important;
     border: 1px solid rgba(15, 20, 25, 0.14) !important;
     box-shadow: none !important;
 }
@@ -1576,7 +1579,7 @@ input[type="submit"]:not(.default),
 /* Keep login CTA yellow */
 .login .submit-row input {
     background: var(--tg-yellow) !important;
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     border: none !important;
 }
 
@@ -1601,7 +1604,7 @@ input[type="submit"]:not(.default),
     padding: 12px 16px 8px !important;
     font-size: 0.92rem !important;
     font-weight: 800 !important;
-    background: #fff !important;
+    background: var(--tg-card) !important;
     border-bottom: none !important;
 }
 
@@ -1611,7 +1614,7 @@ input[type="submit"]:not(.default),
     border-radius: 10px !important;
     font-size: 12px !important;
     line-height: 1.35 !important;
-    background: #f3f4f6 !important;
+    background: var(--tg-surface-alt) !important;
 }
 
 .change-form .form-row {
@@ -1664,7 +1667,7 @@ input[type="submit"]:not(.default),
 .change-form .vTimeField {
     border-radius: 10px !important;
     border: 1px solid rgba(15, 20, 25, 0.12) !important;
-    background: #fff !important;
+    background: var(--tg-card) !important;
     padding: 7px 10px !important;
     min-height: 34px !important;
     height: 34px !important;
@@ -1695,7 +1698,7 @@ input[type="submit"]:not(.default),
     gap: 0 !important;
     flex-wrap: nowrap !important;
     max-width: 100%;
-    background: #fff;
+    background: var(--tg-card);
     border: 1px solid rgba(15, 20, 25, 0.12);
     border-radius: 10px;
     overflow: hidden;
@@ -1758,7 +1761,7 @@ input[type="submit"]:not(.default),
 }
 
 .change-form .related-widget-wrapper-link:hover {
-    background: #fff4d6 !important;
+    background: var(--tg-yellow-soft) !important;
     transform: none !important;
 }
 
@@ -1831,12 +1834,12 @@ body,
 #content,
 .change-form,
 .change-list {
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
 }
 
 a:link,
 a:visited {
-    color: #12141a;
+    color: var(--tg-text);
 }
 
 a:hover {
@@ -1875,7 +1878,7 @@ input[type="submit"],
 input[type="button"],
 .submit-row input,
 a.button {
-    color: #12141a !important;
+    color: var(--tg-text) !important;
 }
 
 .button.default,
@@ -1898,7 +1901,7 @@ input[type="submit"].default,
 }
 
 ul.errorlist {
-    background: #ffe8e6;
+    background: rgba(180, 35, 24, 0.18);
     border-radius: 10px;
     padding: 8px 12px !important;
     margin: 6px 0 10px !important;
@@ -1910,7 +1913,7 @@ ul.errorlist {
     padding: 10px 12px !important;
     font-size: 13px !important;
     vertical-align: middle !important;
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     white-space: nowrap;
 }
 
@@ -1939,12 +1942,12 @@ ul.errorlist {
 }
 
 #result_list th a {
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
 }
 
 .paginator {
     background: transparent !important;
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     font-weight: 600 !important;
     padding: 14px 4px !important;
 }
@@ -1952,12 +1955,12 @@ ul.errorlist {
 .paginator a {
     border-radius: 10px !important;
     padding: 6px 10px !important;
-    background: #fff;
+    background: var(--tg-card);
     border: 1px solid rgba(15, 20, 25, 0.12);
 }
 
 #changelist-filter {
-    background: #fff !important;
+    background: var(--tg-card) !important;
 }
 
 #changelist-filter h3,
@@ -1967,7 +1970,7 @@ ul.errorlist {
 }
 
 #changelist-filter li a {
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     font-weight: 600 !important;
     padding: 8px 10px !important;
 }
@@ -1979,7 +1982,7 @@ ul.errorlist {
 /* Collapse headers readable */
 fieldset.collapse details summary,
 fieldset.collapsed .collapse-toggle {
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     font-weight: 700 !important;
 }
 
@@ -1991,7 +1994,7 @@ fieldset.collapsed .collapse-toggle {
 }
 
 .select2-container--admin-autocomplete .select2-selection__rendered {
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     line-height: 42px !important;
     padding-left: 14px !important;
     font-weight: 600 !important;
@@ -1999,13 +2002,13 @@ fieldset.collapsed .collapse-toggle {
 
 /* Calendar / date widgets */
 .datetimeshortcuts a {
-    color: #0f1419 !important;
+    color: var(--tg-text) !important;
     font-weight: 700 !important;
 }
 
 /* Delete confirmation */
 .delete-confirmation ul {
-    background: #fff;
+    background: var(--tg-card);
     border-radius: 16px;
     border: 1px solid rgba(15, 20, 25, 0.1);
     padding: 16px 20px;

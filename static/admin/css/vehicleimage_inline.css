@@ -4,9 +4,10 @@
 .tg-gallery-multi-input {
     min-height: 48px !important;
     padding: 12px !important;
-    border: 2px dashed #1a1c24 !important;
+    border: 2px dashed rgba(255, 255, 255, 0.2) !important;
     border-radius: 12px !important;
-    background: #f0f1f3 !important;
+    background: #1a2d4a !important;
+    color: #e8ecf1 !important;
     width: 100%;
     max-width: 520px;
     cursor: pointer;
@@ -14,7 +15,7 @@
 
 .tg-gallery-multi-input:hover {
     border-color: #ffb300 !important;
-    background: #fff4d6 !important;
+    background: rgba(255, 179, 0, 0.1) !important;
 }
 
 .tg-photo-inline::before {
@@ -23,9 +24,9 @@
     margin: 0 16px 14px;
     padding: 12px 14px;
     border-radius: 12px;
-    background: #fff4d6;
+    background: rgba(255, 179, 0, 0.12);
     border: 1px solid rgba(255, 179, 0, 0.35);
-    color: #1a1c24;
+    color: #e8ecf1;
     font-size: 13px;
     line-height: 1.45;
 }
@@ -50,10 +51,10 @@
     min-width: 0 !important;
     margin: 0 !important;
     padding: 8px !important;
-    border: 1px solid rgba(15, 20, 25, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 14px !important;
-    background: #fff !important;
-    box-shadow: 0 4px 14px rgba(15, 20, 25, 0.06);
+    background: #132238 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     box-sizing: border-box !important;
 }
@@ -93,7 +94,7 @@
     max-height: 120px !important;
     object-fit: cover !important;
     border-radius: 10px;
-    background: #f0f1f3;
+    background: #1a2d4a;
     -webkit-user-drag: none;
     user-drag: none;
     pointer-events: none;
@@ -104,7 +105,7 @@
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    color: #667;
+    color: #94a3b8;
 }
 
 .tg-photo-inline .tg-photo-card__django-fields,
@@ -122,6 +123,7 @@
     font-size: 12px;
     cursor: pointer;
     user-select: none;
+    color: #e8ecf1;
 }
 
 .tg-photo-inline .tg-photo-card a {
