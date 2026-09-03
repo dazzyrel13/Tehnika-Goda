@@ -1417,7 +1417,7 @@ body.login {
 .change-form input[type="file"]:hover,
 .change-form .tg-gallery-multi-input:hover {
     border-color: var(--tg-yellow) !important;
-    background: #fff8e6 !important;
+    background: var(--tg-yellow-soft) !important;
 }
 
 /* Checkboxes */
@@ -1748,7 +1748,7 @@ input[type="submit"]:not(.default),
     padding: 0 !important;
     border-radius: 0 !important;
     border-left: 1px solid rgba(15, 20, 25, 0.08) !important;
-    background: #fafafa !important;
+    background: var(--tg-surface-alt) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
