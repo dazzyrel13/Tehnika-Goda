@@ -282,12 +282,95 @@
                 ["focusin", "input", "pointerdown"].forEach((ev) => {
                     leadForm.addEventListener(ev, stampFormTs, { passive: true });
                 });
+
+                const reachLeadGoal = () => {
+                    const id = (document.body.dataset.yandexMetrikaId || "").trim();
+                    if (!id || typeof window.ym !== "function") return;
+                    try {
+                        window.ym(Number(id), "reachGoal", "lead_submit");
+                    } catch (_) {
+                        /* Metrika blocked / unavailable */
+                    }
+                };
+
+                const showLeadFeedback = (text, isError) => {
+                    let box = document.getElementById("lead-form-feedback");
+                    if (!box) {
+                        box = document.createElement("div");
+                        box.id = "lead-form-feedback";
+                        box.className = "glass-panel";
+                        box.style.cssText =
+                            "padding: 15px; margin-bottom: 20px; border-color: var(--accent-yellow); background: rgba(255, 179, 0, 0.12);";
+                        leadForm.parentNode.insertBefore(box, leadForm);
+                    }
+                    box.style.borderColor = isError ? "#b45309" : "var(--accent-yellow)";
+                    box.textContent = text;
+                };
+
                 leadForm.addEventListener("submit", (event) => {
                     if (phoneInput && !isValidRuPhone(phoneInput.value)) {
                         event.preventDefault();
                         if (phoneHint) phoneHint.style.display = "block";
                         phoneInput.focus();
+                        return;
                     }
+
+                    // Prefer AJAX so we can fire Metrika reachGoal only on real success.
+                    event.preventDefault();
+                    stampFormTs();
+                    const submitBtn = leadForm.querySelector('[type="submit"]');
+                    if (submitBtn) submitBtn.disabled = true;
+
+                    const body = new FormData(leadForm);
+                    fetch(leadForm.action, {
+                        method: "POST",
+                        body,
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            Accept: "application/json",
+                        },
+                        credentials: "same-origin",
+                    })
+                        .then(async (response) => {
+                            let payload = {};
+                            try {
+                                payload = await response.json();
+                            } catch (_) {
+                                payload = {};
+                            }
+                            if (!response.ok || payload.status !== "success") {
+                                const errors = payload.errors || {};
+                                const first =
+                                    (errors.__all__ && errors.__all__[0]) ||
+                                    (errors.phone && errors.phone[0]) ||
+                                    (errors.city && errors.city[0]) ||
+                                    (errors.name && errors.name[0]) ||
+                                    "Не удалось отправить заявку. Проверьте данные.";
+                                showLeadFeedback(first, true);
+                                return;
+                            }
+                            reachLeadGoal();
+                            showLeadFeedback(
+                                payload.message ||
+                                    "Заявка успешно отправлена! Свяжемся в течение 15 минут в рабочее время.",
+                                false
+                            );
+                            leadForm.reset();
+                            if (formTs) {
+                                formTs.value = "";
+                                delete formTs.dataset.stamped;
+                            }
+                            if (vehicleInput) vehicleInput.value = "";
+                        })
+                        .catch(() => {
+                            showLeadFeedback(
+                                "Сеть недоступна. Попробуйте ещё раз через минуту.",
+                                true
+                            );
+                        })
+                        .finally(() => {
+                            if (submitBtn) submitBtn.disabled = false;
+                        });
                 });
             }
         })();
