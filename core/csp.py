@@ -8,15 +8,26 @@ def build_public_csp(*, yandex_metrika_id: str = "") -> str:
     connect = ["'self'"]
     img = ["'self'", "data:", "blob:"]
     frame = ["'self'"]
+    child = ["'self'"]
     if (yandex_metrika_id or "").strip():
-        script += ["https://mc.yandex.ru", "https://mc.yandex.com"]
-        connect += [
+        # Hosts from Yandex Metrika CSP docs (RU/.com + static CDN + webvisor).
+        ym_hosts = [
             "https://mc.yandex.ru",
             "https://mc.yandex.com",
+            "https://mc.webvisor.com",
+            "https://mc.webvisor.org",
+        ]
+        script += ym_hosts + ["https://yastatic.net"]
+        connect += ym_hosts + [
             "wss://mc.yandex.ru",
+            "wss://mc.yandex.com",
+            "wss://mc.webvisor.com",
+            "wss://mc.webvisor.org",
         ]
         img += ["https://mc.yandex.ru", "https://mc.yandex.com"]
-        frame += ["https://mc.yandex.ru", "https://mc.yandex.com"]
+        # blob: required for Webvisor / clickmap / scroll maps (official docs).
+        frame += ["blob:", "https://mc.yandex.ru", "https://mc.yandex.com"]
+        child += ["blob:", "https://mc.yandex.ru", "https://mc.yandex.com"]
     return (
         "default-src 'self'; "
         "base-uri 'self'; "
@@ -29,6 +40,7 @@ def build_public_csp(*, yandex_metrika_id: str = "") -> str:
         f"img-src {' '.join(img)}; "
         f"connect-src {' '.join(connect)}; "
         f"frame-src {' '.join(frame)}; "
+        f"child-src {' '.join(child)}; "
     )
 
 
