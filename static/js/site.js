@@ -170,12 +170,21 @@
                     k.async = 1;
                     k.src = r;
                     a.parentNode.insertBefore(k, a);
-                })(window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+                })(
+                    window,
+                    document,
+                    "script",
+                    "https://mc.yandex.ru/metrika/tag.js?id=" + encodeURIComponent(id),
+                    "ym"
+                );
+                window.dataLayer = window.dataLayer || [];
                 window.ym(Number(id), "init", {
+                    ssr: true,
+                    webvisor: true,
                     clickmap: true,
-                    trackLinks: true,
+                    ecommerce: "dataLayer",
                     accurateTrackBounce: true,
-                    webvisor: false,
+                    trackLinks: true,
                 });
             };
 
