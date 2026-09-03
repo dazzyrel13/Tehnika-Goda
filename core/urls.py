@@ -152,6 +152,15 @@ urlpatterns = [
         name="google_search_console",
     ),
     path(
+        "yandex_5e2faf95833a84d5.html",
+        TemplateView.as_view(
+            template_name="yandex_5e2faf95833a84d5.html",
+            content_type="text/html; charset=UTF-8",
+        ),
+        name="yandex_webmaster",
+    ),
+
+    path(
         "sitemap.xml",
         sitemap,
         {"sitemaps": sitemaps},
