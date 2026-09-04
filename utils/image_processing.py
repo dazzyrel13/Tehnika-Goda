@@ -1,5 +1,6 @@
 import os
 import re
+import uuid
 from io import BytesIO
 
 from django.core.cache import cache
@@ -93,8 +94,9 @@ def process_image_to_webp(image_field, quality=MASTER_QUALITY, max_width=MASTER_
     output = BytesIO()
     img.save(output, format="WEBP", quality=quality, method=6)
     output.seek(0)
-    stem = os.path.splitext(name)[0]
-    return ContentFile(output.read(), name=f"{stem}.webp")
+    # Short random stem — long original filenames blow ImageField max_length
+    # when combined with catalog/vehicles/<slug>/… upload paths.
+    return ContentFile(output.read(), name=f"{uuid.uuid4().hex[:12]}.webp")
 
 
 def is_variant_name(name: str) -> bool:

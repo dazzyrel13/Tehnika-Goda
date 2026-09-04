@@ -242,6 +242,8 @@ def parse_listing_text(raw: str) -> ListingData:
     if not data.title:
         bits = [data.brand_name, data.model, str(data.year or "")]
         data.title = _clean(" ".join(bit for bit in bits if bit)) or "Автомобиль"
+    # Keep titles (and derived URL slugs / media paths) within a sane length.
+    data.title = data.title[:160]
 
     return data
 

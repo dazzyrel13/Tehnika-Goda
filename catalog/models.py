@@ -27,15 +27,43 @@ def brand_logo_path(instance, filename):
 # Custom save path for vehicle photos
 
 
+def _short_upload_name(filename: str, *, prefix: str = "") -> str:
+    """Keep storage names short so ImageField max_length is never exceeded."""
+    ext = os.path.splitext(filename)[1].lower()
+    if ext not in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
+        ext = ".jpg"
+    if ext == ".jpeg":
+        ext = ".jpg"
+    return f"{prefix}{uuid.uuid4().hex[:10]}{ext}"
+
+
 def vehicle_photo_path(instance, filename):
-    return f"catalog/vehicles/{instance.vehicle.slug}/{filename}"
+    slug = (getattr(instance.vehicle, "slug", None) or "vehicle")[:60]
+    return f"catalog/vehicles/{slug}/{_short_upload_name(filename)}"
 
 
 # Custom save path for main image
 
 
 def vehicle_main_photo_path(instance, filename):
-    return f"catalog/vehicles/{instance.slug}/main_{filename}"
+    slug = (getattr(instance, "slug", None) or "vehicle")[:60]
+    return f"catalog/vehicles/{slug}/{_short_upload_name(filename, prefix='main_')}"
+
+
+VEHICLE_SLUG_MAX_LENGTH = 80
+
+
+def build_unique_vehicle_slug(title: str, *, pk=None) -> str:
+    """Slugify title and keep it short enough for URLs and media paths."""
+    raw = slugify(unidecode(title or "")) or "vehicle"
+    base = raw[:VEHICLE_SLUG_MAX_LENGTH].rstrip("-") or "vehicle"
+    slug = base
+    num = 1
+    while Vehicle.objects.filter(slug=slug).exclude(pk=pk).exists():
+        suffix = f"-{num}"
+        slug = f"{base[: VEHICLE_SLUG_MAX_LENGTH - len(suffix)].rstrip('-')}{suffix}"
+        num += 1
+    return slug
 
 
 class Category(models.Model):
@@ -297,7 +325,11 @@ class Vehicle(models.Model):
 
     # Media
     main_image = models.ImageField(
-        "Основное фото", upload_to=vehicle_main_photo_path, blank=True, null=True
+        "Основное фото",
+        upload_to=vehicle_main_photo_path,
+        blank=True,
+        null=True,
+        max_length=255,
     )
     report = models.OneToOneField(
         InspectionReport,
@@ -487,13 +519,9 @@ class Vehicle(models.Model):
 
         # Auto-slug with collision prevention and IntegrityError retry
         if not self.slug:
-            base_slug = slugify(unidecode(self.title))
-            slug = base_slug
-            num = 1
-            while Vehicle.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f"{base_slug}-{num}"
-                num += 1
-            self.slug = slug
+            self.slug = build_unique_vehicle_slug(self.title, pk=self.pk)
+        elif len(self.slug) > VEHICLE_SLUG_MAX_LENGTH:
+            self.slug = build_unique_vehicle_slug(self.slug, pk=self.pk)
 
         update_fields = kwargs.get("update_fields")
         touch_image = update_fields is None or "main_image" in update_fields
@@ -516,7 +544,11 @@ class Vehicle(models.Model):
             super().save(*args, **kwargs)
         except IntegrityError:
             # Slug race condition: another request saved the same slug between check and save
-            self.slug = f"{self.slug}-{uuid.uuid4().hex[:6]}"
+            suffix = f"-{uuid.uuid4().hex[:6]}"
+            base = (self.slug or "vehicle")[
+                : VEHICLE_SLUG_MAX_LENGTH - len(suffix)
+            ].rstrip("-")
+            self.slug = f"{base}{suffix}"
             super().save(*args, **kwargs)
         new_name = getattr(self.main_image, "name", "") or ""
         if old_image_name and old_image_name != new_name:
@@ -532,7 +564,9 @@ class VehicleImage(models.Model):
         related_name="gallery",
         verbose_name="Автомобиль",
     )
-    image = models.ImageField("Изображение", upload_to=vehicle_photo_path)
+    image = models.ImageField(
+        "Изображение", upload_to=vehicle_photo_path, max_length=255
+    )
     order = models.PositiveIntegerField("Порядок вывода", default=0)
 
     class Meta:

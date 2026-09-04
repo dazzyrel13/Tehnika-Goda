@@ -1325,6 +1325,51 @@ class ListingIngestTests(TestCase):
         for item in result.vehicle.gallery.all():
             item.image.close()
 
+    def test_ingest_long_title_with_photos_fits_image_path(self):
+        import tempfile
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.test import override_settings
+        from PIL import Image
+
+        from catalog.listing_ingest import ingest_listing
+        from catalog.models import VEHICLE_SLUG_MAX_LENGTH
+
+        tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.addCleanup(tmp.cleanup)
+        media = override_settings(MEDIA_ROOT=tmp.name)
+        media.enable()
+        self.addCleanup(media.disable)
+
+        long_title = (
+            "Модель Haval Haval M6 Plus 2021 1.5T DCT "
+            "Люксовая интеллектуальная комплектация 2023 "
+            + ("очень длинное название " * 8)
+        )
+        text = (
+            f"[Название автомобиля] {long_title}\n"
+            "[Марка] Haval\n"
+            "[Пробег] 12 000 километров\n"
+            "【Цвет】 белый"
+        )
+        buf = BytesIO()
+        Image.new("RGB", (80, 60), (10, 20, 30)).save(buf, format="JPEG")
+        photo = SimpleUploadedFile(
+            "cover_with_a_very_long_original_filename_from_phone_export.jpg",
+            buf.getvalue(),
+            content_type="image/jpeg",
+        )
+        result = ingest_listing(text, uploads=[photo])
+        self.assertLessEqual(len(result.vehicle.slug), VEHICLE_SLUG_MAX_LENGTH)
+        self.assertTrue(result.vehicle.main_image)
+        self.assertLessEqual(len(result.vehicle.main_image.name), 255)
+        self.assertEqual(result.photos_added, 1)
+        result.vehicle.main_image.close()
+        for item in result.vehicle.gallery.all():
+            self.assertLessEqual(len(item.image.name), 255)
+            item.image.close()
+
     def test_admin_ingest_page_renders(self):
         from django.contrib.admin.sites import AdminSite
         from django.contrib.auth import get_user_model
