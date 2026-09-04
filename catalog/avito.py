@@ -12,7 +12,7 @@ from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
-TOKEN_URL = "https://api.avito.ru/token"
+TOKEN_URL = "https://api.avito.ru/token/"
 UPDATE_PRICE_URL = "https://api.avito.ru/core/v1/items/{item_id}/update_price"
 TOKEN_CACHE_KEY = "avito:access_token"
 # Avito tokens last ~24h; refresh a bit early.
@@ -72,8 +72,9 @@ def get_access_token(*, force_refresh: bool = False) -> str:
         if cached:
             return str(cached)
 
-    client_id = settings.AVITO_CLIENT_ID
-    client_secret = settings.AVITO_CLIENT_SECRET
+    # Strip quotes/whitespace — easy to introduce via shell printf/sed.
+    client_id = (settings.AVITO_CLIENT_ID or "").strip().strip('"').strip("'")
+    client_secret = (settings.AVITO_CLIENT_SECRET or "").strip().strip('"').strip("'")
     try:
         response = requests.post(
             TOKEN_URL,
@@ -84,7 +85,21 @@ def get_access_token(*, force_refresh: bool = False) -> str:
             },
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             timeout=20,
+            allow_redirects=False,
         )
+        # Official docs use trailing slash; follow one redirect carefully if needed.
+        if response.is_redirect and response.headers.get("Location"):
+            response = requests.post(
+                response.headers["Location"],
+                data={
+                    "grant_type": "client_credentials",
+                    "client_id": client_id,
+                    "client_secret": client_secret,
+                },
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                timeout=20,
+                allow_redirects=False,
+            )
     except requests.RequestException as exc:
         raise AvitoAPIError(f"Token request failed: {exc}") from exc
 
@@ -94,9 +109,21 @@ def get_access_token(*, force_refresh: bool = False) -> str:
         payload = {}
 
     if not response.ok or "access_token" not in payload:
-        detail = payload.get("error_description") or payload.get("error") or response.text[:200]
+        detail = (
+            payload.get("error_description")
+            or payload.get("error")
+            or response.text[:200]
+        )
+        hint = ""
+        detail_l = str(detail).lower()
+        if "not authorized" in detail_l or "unauthorized_client" in detail_l:
+            hint = (
+                " Ключи не подходят для client_credentials: возьмите client_id/secret "
+                "в https://www.avito.ru/professionals/api (личный API аккаунта), "
+                "не из Авито Рекламы и не от чужого приложения."
+            )
         raise AvitoAPIError(
-            f"Token error HTTP {response.status_code}: {detail}",
+            f"Token error HTTP {response.status_code}: {detail}.{hint}",
             status_code=response.status_code,
         )
 

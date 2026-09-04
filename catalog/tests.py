@@ -1691,6 +1691,8 @@ class AvitoPriceSyncTests(TestCase):
         self.assertIn("/core/v1/items/1234567890/update_price", price_call.args[0])
         self.assertEqual(price_call.kwargs["json"], {"price": 2500000})
         self.assertIn("Bearer tok-1", price_call.kwargs["headers"]["Authorization"])
+        token_call = mock_post.call_args_list[0]
+        self.assertTrue(str(token_call.args[0]).rstrip("/").endswith("api.avito.ru/token"))
 
     @override_settings(AVITO_CLIENT_ID="", AVITO_CLIENT_SECRET="")
     def test_task_noop_without_credentials(self):
