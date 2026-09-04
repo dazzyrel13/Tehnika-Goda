@@ -1,5 +1,6 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from unittest.mock import patch
 
 from .cache_helpers import invalidate_nav_cache
 from .models import Brand, CarModel, Category, Vehicle, VehicleImage
@@ -1629,4 +1630,123 @@ class SeoModelPagesTests(TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
+
+class AvitoPriceSyncTests(TestCase):
+    def setUp(self):
+        self.brand = Brand.objects.create(name="Haval", slug="haval-avito")
+        self.category, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Cars"}
+        )
+        # Avoid hitting Redis when signals fire during fixture saves.
+        self._delay_patch = patch("catalog.tasks.sync_avito_price_task.delay")
+        self.mock_delay = self._delay_patch.start()
+        self.addCleanup(self._delay_patch.stop)
+
+    def test_parse_avito_item_id_from_url_and_digits(self):
+        from catalog.avito import parse_avito_item_id
+
+        self.assertEqual(parse_avito_item_id("1234567890"), 1234567890)
+        self.assertEqual(
+            parse_avito_item_id(
+                "https://www.avito.ru/blagoveshchensk/avtomobili/haval_m6_1234567890"
+            ),
+            1234567890,
+        )
+        self.assertEqual(
+            parse_avito_item_id(
+                "https://www.avito.ru/moskva/avtomobili/item_999888777?utm=1"
+            ),
+            999888777,
+        )
+        self.assertIsNone(parse_avito_item_id(""))
+        self.assertIsNone(parse_avito_item_id("not-an-id"))
+
+    @override_settings(AVITO_CLIENT_ID="cid", AVITO_CLIENT_SECRET="sec")
+    def test_update_item_price_posts_expected_body(self):
+        from unittest.mock import MagicMock, patch as mock_patch
+
+        from catalog.avito import clear_token_cache, update_item_price
+
+        clear_token_cache()
+        token_resp = MagicMock()
+        token_resp.ok = True
+        token_resp.status_code = 200
+        token_resp.json.return_value = {
+            "access_token": "tok-1",
+            "expires_in": 86400,
+        }
+
+        price_resp = MagicMock()
+        price_resp.ok = True
+        price_resp.status_code = 200
+        price_resp.content = b"{}"
+        price_resp.json.return_value = {}
+
+        with mock_patch("catalog.avito.requests.post") as mock_post:
+            mock_post.side_effect = [token_resp, price_resp]
+            update_item_price(1234567890, 2_500_000)
+
+        self.assertEqual(mock_post.call_count, 2)
+        price_call = mock_post.call_args_list[1]
+        self.assertIn("/core/v1/items/1234567890/update_price", price_call.args[0])
+        self.assertEqual(price_call.kwargs["json"], {"price": 2500000})
+        self.assertIn("Bearer tok-1", price_call.kwargs["headers"]["Authorization"])
+
+    @override_settings(AVITO_CLIENT_ID="", AVITO_CLIENT_SECRET="")
+    def test_task_noop_without_credentials(self):
+        from catalog.tasks import sync_avito_price_task
+
+        vehicle = Vehicle.objects.create(
+            title="No Creds",
+            brand=self.brand,
+            category=self.category,
+            year=2022,
+            price_rub=1000000,
+            avito_item_id=111222333,
+            slug="no-creds-avito",
+        )
+        self.assertFalse(sync_avito_price_task(vehicle.pk))
+
+    @override_settings(AVITO_CLIENT_ID="cid", AVITO_CLIENT_SECRET="sec")
+    def test_post_save_enqueues_only_when_price_changes(self):
+        vehicle = Vehicle.objects.create(
+            title="Sync Car",
+            brand=self.brand,
+            category=self.category,
+            year=2023,
+            price_rub=1_000_000,
+            avito_item_id=555666777,
+            slug="sync-car-avito",
+        )
+        self.mock_delay.assert_called()
+        self.mock_delay.reset_mock()
+
+        vehicle.title = "Sync Car Renamed"
+        vehicle.save()
+        self.mock_delay.assert_not_called()
+
+        vehicle.price_rub = 1_100_000
+        vehicle.save()
+        self.mock_delay.assert_called_once_with(vehicle.pk)
+
+    @override_settings(AVITO_CLIENT_ID="cid", AVITO_CLIENT_SECRET="sec")
+    def test_task_writes_sync_timestamp(self):
+        from unittest.mock import patch as mock_patch
+
+        from catalog.tasks import sync_avito_price_task
+
+        vehicle = Vehicle.objects.create(
+            title="Priced Car",
+            brand=self.brand,
+            category=self.category,
+            year=2021,
+            price_rub=3_000_000,
+            avito_item_id=444555666,
+            slug="priced-car-avito",
+        )
+        with mock_patch("catalog.avito.update_item_price", return_value={}):
+            self.assertTrue(sync_avito_price_task(vehicle.pk))
+        vehicle.refresh_from_db()
+        self.assertIsNotNone(vehicle.avito_price_synced_at)
+        self.assertEqual(vehicle.avito_price_sync_error, "")
 

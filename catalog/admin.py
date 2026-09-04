@@ -93,7 +93,8 @@ class VehicleAdminForm(forms.ModelForm):
         self.fields["title"].help_text = "Например: Zeekr 001 2024 FR"
         self.fields["price_rub"].label = "Цена, ₽"
         self.fields["price_rub"].help_text = (
-            "Цена для сайта в рублях. Рядом укажите курс юаня — он выводится под ценой."
+            "Цена для сайта в рублях. Рядом укажите курс юаня — он выводится под ценой. "
+            "Если указан ID Авито — цена уйдёт на Авито после сохранения."
         )
         self.fields["cny_rate"].label = "Курс юаня"
         self.fields["cny_rate"].help_text = (
@@ -121,6 +122,29 @@ class VehicleAdminForm(forms.ModelForm):
             "【Цвет】 серый\n"
             "[Пробег] 30 000 километров"
         )
+        if "avito_item_id" in self.fields:
+            self.fields["avito_item_id"] = forms.CharField(
+                required=False,
+                label="Авито (ID или ссылка)",
+                help_text=(
+                    "Числовой ID объявления или ссылка "
+                    "https://www.avito.ru/.../1234567890 — "
+                    "при смене цены на сайте обновится и на Авито."
+                ),
+            )
+            if self.instance and self.instance.pk and self.instance.avito_item_id:
+                self.fields["avito_item_id"].initial = str(self.instance.avito_item_id)
+
+    def clean_avito_item_id(self):
+        from .avito import parse_avito_item_id
+
+        raw = self.cleaned_data.get("avito_item_id")
+        parsed = parse_avito_item_id(raw)
+        if raw and str(raw).strip() and parsed is None:
+            raise forms.ValidationError(
+                "Не удалось распознать ID Авито. Вставьте число или ссылку на объявление."
+            )
+        return parsed
 
 
 @admin.register(InspectionReport)
@@ -259,7 +283,9 @@ class VehicleAdmin(admin.ModelAdmin):
         "unpublish_selected",
         "show_on_home_selected",
         "hide_from_home_selected",
+        "sync_avito_price_now",
     ]
+    readonly_fields = ("avito_price_synced_at", "avito_price_sync_error")
 
     fieldsets = (
         (
@@ -284,6 +310,8 @@ class VehicleAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     ("price_rub", "cny_rate"),
+                    "avito_item_id",
+                    ("avito_price_synced_at", "avito_price_sync_error"),
                     ("is_published", "show_on_home", "is_new", "is_featured"),
                 ),
                 "description": (
@@ -293,7 +321,8 @@ class VehicleAdmin(admin.ModelAdmin):
                     "«Новые» — плашка и фильтр «Новые» (пробег 0–3 тыс. км ок). "
                     "«Выкупленный» — плашка и фильтр «Выкупленные». "
                     "Обе галочки можно включить одновременно — две плашки и оба фильтра. "
-                    "Курс юаня меняйте, когда цена в рублях уже не совпадает с расчётом."
+                    "Курс юаня меняйте, когда цена в рублях уже не совпадает с расчётом. "
+                    "Авито: укажите ID или ссылку объявления — при смене цены она уйдёт на Авито."
                 ),
             },
         ),
@@ -427,6 +456,31 @@ class VehicleAdmin(admin.ModelAdmin):
                 if getattr(obj.category, "slug", None) != "cars_bought":
                     obj.category = cars_new
         super().save_model(request, obj, form, change)
+
+    @admin.action(description="Синхронизировать цену с Авито сейчас")
+    def sync_avito_price_now(self, request, queryset):
+        from .avito import is_configured
+        from .signals import enqueue_avito_price_sync
+
+        if not is_configured():
+            self.message_user(
+                request,
+                "Авито не настроено: задайте AVITO_CLIENT_ID и AVITO_CLIENT_SECRET в .env.",
+                level=messages.ERROR,
+            )
+            return
+        queued = 0
+        skipped = 0
+        for vehicle in queryset.iterator():
+            if vehicle.avito_item_id and vehicle.price_rub is not None:
+                enqueue_avito_price_sync(vehicle.pk)
+                queued += 1
+            else:
+                skipped += 1
+        self.message_user(
+            request,
+            f"В очередь Авито: {queued}. Пропущено (нет ID или цены): {skipped}.",
+        )
 
     @admin.action(description="Отметить как новые")
     def mark_new(self, request, queryset):

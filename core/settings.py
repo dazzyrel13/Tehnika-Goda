@@ -34,6 +34,9 @@ for _loopback in ("127.0.0.1", "localhost"):
 SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000")
 TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="")
+# Avito API (price sync site → Avito). Empty = sync disabled.
+AVITO_CLIENT_ID = (env("AVITO_CLIENT_ID", default="") or "").strip()
+AVITO_CLIENT_SECRET = (env("AVITO_CLIENT_SECRET", default="") or "").strip()
 ANALYTICS_ASYNC = env.bool("ANALYTICS_ASYNC", default=True)
 ANALYTICS_RETENTION_DAYS = env.int("ANALYTICS_RETENTION_DAYS", default=90)
 # When False (default), raw client IPs are not stored — visitor_id already mixes IP.

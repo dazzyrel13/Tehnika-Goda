@@ -315,6 +315,26 @@ class Vehicle(models.Model):
     )
     is_currency_fixed = models.BooleanField("Зафиксировать цену", default=False)
 
+    # Avito price sync (site → Avito)
+    avito_item_id = models.BigIntegerField(
+        "ID объявления Авито",
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="Числовой ID или ссылка вида https://www.avito.ru/.../1234567890",
+    )
+    avito_price_synced_at = models.DateTimeField(
+        "Цена ушла на Авито",
+        null=True,
+        blank=True,
+    )
+    avito_price_sync_error = models.CharField(
+        "Ошибка синхронизации Авито",
+        max_length=255,
+        blank=True,
+        default="",
+    )
+
     # Specs & Description
     description = models.TextField("Описание", blank=True)
     specs = models.JSONField(
