@@ -75,31 +75,50 @@ def get_access_token(*, force_refresh: bool = False) -> str:
     # Strip quotes/whitespace — easy to introduce via shell printf/sed.
     client_id = (settings.AVITO_CLIENT_ID or "").strip().strip('"').strip("'")
     client_secret = (settings.AVITO_CLIENT_SECRET or "").strip().strip('"').strip("'")
-    try:
+
+    def _request_token(*, use_basic: bool) -> requests.Response:
+        data = {"grant_type": "client_credentials"}
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        auth = None
+        if use_basic:
+            auth = (client_id, client_secret)
+        else:
+            data["client_id"] = client_id
+            data["client_secret"] = client_secret
         response = requests.post(
             TOKEN_URL,
-            data={
-                "grant_type": "client_credentials",
-                "client_id": client_id,
-                "client_secret": client_secret,
-            },
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data=data,
+            headers=headers,
+            auth=auth,
             timeout=20,
             allow_redirects=False,
         )
-        # Official docs use trailing slash; follow one redirect carefully if needed.
         if response.is_redirect and response.headers.get("Location"):
             response = requests.post(
                 response.headers["Location"],
-                data={
-                    "grant_type": "client_credentials",
-                    "client_id": client_id,
-                    "client_secret": client_secret,
-                },
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                data=data,
+                headers=headers,
+                auth=auth,
                 timeout=20,
                 allow_redirects=False,
             )
+        return response
+
+    try:
+        response = _request_token(use_basic=False)
+        try:
+            first_payload: dict[str, Any] = response.json() if response.content else {}
+        except Exception:
+            first_payload = {}
+        # Some Avito app registrations accept only HTTP Basic for the token endpoint.
+        if "access_token" not in first_payload:
+            detail = str(
+                first_payload.get("error_description")
+                or first_payload.get("error")
+                or ""
+            ).lower()
+            if "not authorized" in detail or "unauthorized_client" in detail:
+                response = _request_token(use_basic=True)
     except requests.RequestException as exc:
         raise AvitoAPIError(f"Token request failed: {exc}") from exc
 
