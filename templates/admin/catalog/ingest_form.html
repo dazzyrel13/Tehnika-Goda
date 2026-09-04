@@ -18,7 +18,7 @@
     или категорию, если их ещё нет, и откроет черновик для проверки.
   </p>
 
-  <form method="POST" class="tg-parse__form" enctype="multipart/form-data">
+  <form method="POST" class="tg-parse__form" enctype="multipart/form-data" id="tg-ingest-form">
     {% csrf_token %}
     <label for="description">Текст комплектации</label>
     <textarea name="description" id="description" rows="16" required autofocus
@@ -36,10 +36,12 @@
 
     <label for="photos">Фото автомобиля</label>
     <input type="file" name="photos" id="photos" accept="image/*" multiple
-           class="tg-gallery-multi-input">
+           class="tg-gallery-multi-input" data-max-files="{{ max_photos|default:80 }}">
     <p class="tg-parse__hint">
       Не обязательно. Зажмите Ctrl или Shift и выберите пачку — первое станет обложкой.
+      За один раз — до {{ max_photos|default:80 }} фото; остальное догрузите в карточке.
     </p>
+    <p class="tg-parse__hint" id="tg-photos-count" hidden></p>
 
     <label for="category">Категория (если не указана в тексте)</label>
     <select name="category" id="category">
@@ -59,4 +61,36 @@
     </div>
   </form>
 </div>
+<script>
+(function () {
+  var input = document.getElementById("photos");
+  var form = document.getElementById("tg-ingest-form");
+  var counter = document.getElementById("tg-photos-count");
+  if (!input || !form) return;
+  var maxFiles = parseInt(input.getAttribute("data-max-files") || "80", 10);
+
+  function syncCount() {
+    var n = (input.files && input.files.length) || 0;
+    if (!counter) return;
+    if (!n) {
+      counter.hidden = true;
+      return;
+    }
+    counter.hidden = false;
+    counter.textContent = n > maxFiles
+      ? ("Выбрано " + n + " фото — это больше лимита " + maxFiles + ". Уберите лишние перед отправкой.")
+      : ("Выбрано фото: " + n);
+    counter.style.color = n > maxFiles ? "#ffb4a8" : "";
+  }
+
+  input.addEventListener("change", syncCount);
+  form.addEventListener("submit", function (event) {
+    var n = (input.files && input.files.length) || 0;
+    if (n > maxFiles) {
+      event.preventDefault();
+      alert("Слишком много фото: " + n + ". Максимум за раз — " + maxFiles + ".");
+    }
+  });
+})();
+</script>
 {% endblock %}

@@ -43,6 +43,8 @@ def _admin_url_prefix() -> str:
 
 
 
+handler400 = "core.errors.bad_request"
+
 urlpatterns = [
     path("healthz/", healthz, name="healthz"),
     # Old WordPress / WooCommerce URLs (Yandex still has them indexed).

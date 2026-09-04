@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Не удалось загрузить</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Manrope, "Segoe UI", sans-serif;
+      background: #0a1628;
+      color: #e8ecf1;
+      padding: 24px;
+    }
+    .card {
+      max-width: 520px;
+      background: #132238;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 28px 24px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 1.35rem;
+      color: #ffb300;
+    }
+    p {
+      margin: 0 0 18px;
+      line-height: 1.5;
+      color: #c5d0dc;
+    }
+    a {
+      color: #5b9cf5;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Не удалось принять запрос</h1>
+    <p>{{ message }}</p>
+    <p><a href="javascript:history.back()">← Вернуться назад</a></p>
+  </div>
+</body>
+</html>

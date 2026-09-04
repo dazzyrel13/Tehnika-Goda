@@ -90,7 +90,7 @@ MULTIWORD_BRANDS = (
     "hong qi",
 )
 
-MAX_GALLERY_UPLOADS = 30
+MAX_GALLERY_UPLOADS = 80
 
 
 @dataclass

@@ -1346,6 +1346,101 @@ class ListingIngestTests(TestCase):
         self.assertContains(response, 'name="description"')
         self.assertContains(response, 'name="photos"')
 
+    def test_admin_ingest_post_creates_draft(self):
+        from django.contrib.admin.sites import AdminSite
+        from django.contrib.auth import get_user_model
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.test import RequestFactory
+
+        from catalog.admin import VehicleAdmin
+
+        user = get_user_model().objects.create_superuser(
+            "ingest-post", "ingest-post@example.com", "pass-not-used"
+        )
+        request = RequestFactory().post(
+            "/admin/catalog/vehicle/ingest-listing/",
+            {
+                "description": self.SAMPLE,
+                "category": "",
+            },
+        )
+        request.user = user
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        response = VehicleAdmin(Vehicle, AdminSite()).ingest_listing_view(request)
+        self.assertEqual(response.status_code, 302)
+        vehicle = Vehicle.objects.latest("id")
+        self.assertIn("Volkswagen", vehicle.title)
+        self.assertFalse(vehicle.is_published)
+
+    def test_admin_ingest_rejects_too_many_photos_gracefully(self):
+        from django.contrib.admin.sites import AdminSite
+        from django.contrib.auth import get_user_model
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.test import RequestFactory
+        from django.utils.datastructures import MultiValueDict
+        from io import BytesIO
+        from PIL import Image
+
+        from catalog.admin import VehicleAdmin
+        from catalog.listing_ingest import MAX_GALLERY_UPLOADS
+
+        user = get_user_model().objects.create_superuser(
+            "ingest-many", "ingest-many@example.com", "pass-not-used"
+        )
+        files = []
+        for i in range(MAX_GALLERY_UPLOADS + 1):
+            buf = BytesIO()
+            Image.new("RGB", (20, 20), (i % 255, 10, 20)).save(buf, format="JPEG")
+            files.append(
+                SimpleUploadedFile(
+                    f"p{i}.jpg", buf.getvalue(), content_type="image/jpeg"
+                )
+            )
+        request = RequestFactory().post(
+            "/admin/catalog/vehicle/ingest-listing/",
+            {"description": self.SAMPLE, "category": ""},
+        )
+        _ = request.POST  # finish multipart parse before injecting files
+        request._files = MultiValueDict({"photos": files})
+        request.user = user
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        before = Vehicle.objects.count()
+        response = VehicleAdmin(Vehicle, AdminSite()).ingest_listing_view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Vehicle.objects.count(), before)
+        self.assertContains(response, "не больше")
+
+
+class UploadErrorHandlerTests(TestCase):
+    def test_too_many_files_shows_russian_message(self):
+        from django.core.exceptions import TooManyFilesSent
+        from django.test import RequestFactory, override_settings
+
+        from core.errors import bad_request
+
+        request = RequestFactory().post("/admin/catalog/vehicle/ingest-listing/")
+        with override_settings(DATA_UPLOAD_MAX_NUMBER_FILES=40):
+            response = bad_request(request, TooManyFilesSent("too many"))
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, "Слишком много файлов", status_code=400)
+        self.assertContains(response, "40", status_code=400)
+
+    def test_request_too_big_shows_russian_message(self):
+        from django.core.exceptions import RequestDataTooBig
+        from django.test import RequestFactory
+
+        from core.errors import bad_request
+
+        request = RequestFactory().post("/admin/catalog/vehicle/ingest-listing/")
+        response = bad_request(request, RequestDataTooBig("big"))
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(
+            response, "Размер запроса слишком большой", status_code=400
+        )
+
 
 @override_settings(RATELIMIT_ENABLE=False, SEO_MODEL_PAGES_ENABLED=True)
 class SeoModelPagesTests(TestCase):

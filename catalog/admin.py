@@ -25,7 +25,7 @@ from .models import (
     Vehicle,
     VehicleImage,
 )
-from .listing_ingest import ingest_listing
+from .listing_ingest import MAX_GALLERY_UPLOADS, ingest_listing
 from .parser_service import EliteVehicleParser
 
 
@@ -69,7 +69,7 @@ class VehicleAdminForm(forms.ModelForm):
         help_text=(
                     "Зажмите Ctrl (⌘ на Mac) или Shift и выберите сразу много фото. "
                     "Либо выделите пачку в проводнике мышкой. "
-                    "Не больше ~30 снимков за раз (тяжёлые JPEG лучше пачками). "
+                    f"До {MAX_GALLERY_UPLOADS} снимков за раз; если больше — догрузите второй пачкой после сохранения. "
                     "После сохранения порядок меняется перетаскиванием фото ниже."
         ),
     )
@@ -610,36 +610,62 @@ class VehicleAdmin(admin.ModelAdmin):
                 category_id = request.POST.get("category")
                 if category_id and str(category_id).isdigit():
                     category = Category.objects.filter(pk=int(category_id)).first()
-                result = ingest_listing(
-                    raw,
-                    uploads=request.FILES.getlist("photos"),
-                    category=category,
-                )
-                bits = [f"Авто «{result.vehicle.title}» создано как черновик."]
-                if result.brand_created:
-                    bits.append(f"Добавлена марка «{result.vehicle.brand.name}».")
-                else:
-                    bits.append(f"Марка «{result.vehicle.brand.name}» уже была в справочнике.")
-                if result.vehicle.category_id:
-                    if result.category_created:
-                        bits.append(f"Добавлена категория «{result.vehicle.category}».")
-                    else:
-                        bits.append(f"Категория: {result.vehicle.category}.")
-                if result.photos_added:
-                    bits.append(f"В галерею добавлено фото: {result.photos_added}.")
-                if result.photos_skipped:
-                    self.message_user(
+                uploads = request.FILES.getlist("photos")
+                if len(uploads) > MAX_GALLERY_UPLOADS:
+                    messages.error(
                         request,
-                        f"Пропущено файлов (не изображение): {result.photos_skipped}.",
-                        level=messages.WARNING,
+                        f"Выбрано фото: {len(uploads)}. За один раз — не больше {MAX_GALLERY_UPLOADS}. "
+                        "Создайте черновик с частью снимков, остальное догрузите в карточке.",
                     )
-                messages.success(
-                    request,
-                    " ".join(bits) + " Проверьте поля и опубликуйте.",
-                )
-                return redirect(
-                    reverse("admin:catalog_vehicle_change", args=[result.vehicle.id])
-                )
+                else:
+                    try:
+                        result = ingest_listing(
+                            raw,
+                            uploads=uploads,
+                            category=category,
+                        )
+                    except Exception as exc:
+                        messages.error(
+                            request,
+                            f"Не удалось создать черновик: {exc}",
+                        )
+                    else:
+                        bits = [f"Авто «{result.vehicle.title}» создано как черновик."]
+                        if result.brand_created:
+                            bits.append(
+                                f"Добавлена марка «{result.vehicle.brand.name}»."
+                            )
+                        else:
+                            bits.append(
+                                f"Марка «{result.vehicle.brand.name}» уже была в справочнике."
+                            )
+                        if result.vehicle.category_id:
+                            if result.category_created:
+                                bits.append(
+                                    f"Добавлена категория «{result.vehicle.category}»."
+                                )
+                            else:
+                                bits.append(f"Категория: {result.vehicle.category}.")
+                        if result.photos_added:
+                            bits.append(
+                                f"В галерею добавлено фото: {result.photos_added}."
+                            )
+                        if result.photos_skipped:
+                            self.message_user(
+                                request,
+                                f"Пропущено файлов (не изображение): {result.photos_skipped}.",
+                                level=messages.WARNING,
+                            )
+                        messages.success(
+                            request,
+                            " ".join(bits) + " Проверьте поля и опубликуйте.",
+                        )
+                        return redirect(
+                            reverse(
+                                "admin:catalog_vehicle_change",
+                                args=[result.vehicle.id],
+                            )
+                        )
 
         categories = Category.objects.select_related("parent").order_by(
             "parent__name", "name"
@@ -647,5 +673,5 @@ class VehicleAdmin(admin.ModelAdmin):
         return render(
             request,
             "admin/catalog/ingest_form.html",
-            {"categories": categories},
+            {"categories": categories, "max_photos": MAX_GALLERY_UPLOADS},
         )

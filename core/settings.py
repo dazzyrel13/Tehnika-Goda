@@ -255,10 +255,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Upload limits (anti-abuse). A gallery batch of JPEGs easily exceeds 50MB.
+# Upload limits (anti-abuse). Car galleries often exceed 40 photos per batch.
 DATA_UPLOAD_MAX_MEMORY_SIZE = 150 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 15 * 1024 * 1024
-DATA_UPLOAD_MAX_NUMBER_FILES = 40
+DATA_UPLOAD_MAX_NUMBER_FILES = 100
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
 
 # Site Configuration
 SITE_ID = 1
