@@ -1671,6 +1671,9 @@ class AvitoPriceSyncTests(TestCase):
         token_resp = MagicMock()
         token_resp.ok = True
         token_resp.status_code = 200
+        token_resp.is_redirect = False
+        token_resp.headers = {}
+        token_resp.text = ""
         token_resp.json.return_value = {
             "access_token": "tok-1",
             "expires_in": 86400,
@@ -1680,6 +1683,7 @@ class AvitoPriceSyncTests(TestCase):
         price_resp.ok = True
         price_resp.status_code = 200
         price_resp.content = b"{}"
+        price_resp.text = "{}"
         price_resp.json.return_value = {}
 
         with mock_patch("catalog.avito.requests.post") as mock_post:
