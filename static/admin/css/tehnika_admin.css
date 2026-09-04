@@ -11,6 +11,10 @@ html[data-theme="dark"],
     --tg-card: #132238;
     --tg-surface-alt: #1a2d4a;
     --tg-surface-hover: #223a5c;
+    --tg-input-bg: #1e3450;
+    --tg-input-border: rgba(255, 255, 255, 0.22);
+    --tg-input-border-strong: rgba(255, 255, 255, 0.32);
+    --tg-label: #c5d0dc;
     --tg-text: #e8ecf1;
     --tg-muted: #94a3b8;
     --tg-border: rgba(255, 255, 255, 0.1);
@@ -53,8 +57,10 @@ html[data-theme="dark"],
     --close-button-hover-bg: #64748b;
 }
 
+html,
+html[data-theme="dark"],
 html[data-theme="light"] {
-    /* Brand uses dark theme only */
+    /* Brand uses dark theme only — native controls follow dark palette */
     color-scheme: dark;
 }
 
@@ -2017,12 +2023,12 @@ fieldset.collapsed .collapse-toggle {
 
 /* Quiet empty changelist */
 .change-list .paginator {
-    border-top: 1px solid rgba(15, 20, 25, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 #content-main .quiet,
 .quiet {
-    color: #3d4654 !important;
+    color: var(--tg-muted) !important;
 }
 
 /* Top save row on change form (save_on_top) */
@@ -2031,4 +2037,228 @@ fieldset.collapsed .collapse-toggle {
     margin-bottom: 16px;
 }
 
+/* ===== Dark contrast: always-visible fields (idle + focus) ===== */
+
+.change-form label,
+.change-form .flex-container label,
+.change-form .checkbox-row label,
+.aligned label,
+form .aligned label,
+label {
+    color: var(--tg-label) !important;
+}
+
+.change-form fieldset.module > .description,
+.change-form .help,
+.change-form p.help,
+.change-form div.help,
+.help,
+.form-row .help {
+    color: var(--tg-muted) !important;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select,
+.vTextField,
+.vLargeTextField,
+.vIntegerField,
+.vURLField,
+.vDateField,
+.vTimeField,
+.change-form input[type="text"],
+.change-form input[type="password"],
+.change-form input[type="email"],
+.change-form input[type="url"],
+.change-form input[type="number"],
+.change-form input[type="tel"],
+.change-form input[type="search"],
+.change-form input[type="date"],
+.change-form input[type="time"],
+.change-form input[type="datetime-local"],
+.change-form textarea,
+.change-form select,
+.change-form .vTextField,
+.change-form .vLargeTextField,
+.change-form .vIntegerField,
+.change-form .vURLField,
+.change-form .vDateField,
+.change-form .vTimeField {
+    background: var(--tg-input-bg) !important;
+    border: 1px solid var(--tg-input-border) !important;
+    color: var(--tg-text) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+input:hover,
+textarea:hover,
+select:hover,
+.change-form input:hover,
+.change-form textarea:hover,
+.change-form select:hover {
+    background: var(--tg-surface-hover) !important;
+    border-color: var(--tg-input-border-strong) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.change-form input:focus,
+.change-form textarea:focus,
+.change-form select:focus {
+    background: #243a56 !important;
+    border-color: var(--tg-yellow) !important;
+    box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.22) !important;
+    outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: rgba(148, 163, 184, 0.75) !important;
+}
+
+/* Related FK: visible shell even when select bg is transparent */
+.change-form .related-widget-wrapper {
+    background: var(--tg-input-bg) !important;
+    border: 1px solid var(--tg-input-border) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.change-form .related-widget-wrapper:hover {
+    border-color: var(--tg-input-border-strong) !important;
+    background: var(--tg-surface-hover) !important;
+}
+
+.change-form .related-widget-wrapper:focus-within {
+    border-color: var(--tg-yellow) !important;
+    box-shadow: 0 0 0 3px rgba(255, 179, 0, 0.22) !important;
+}
+
+.change-form .related-widget-wrapper select,
+.change-form .related-widget-wrapper .select2-container--admin-autocomplete .select2-selection--single {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--tg-text) !important;
+}
+
+.change-form .related-widget-wrapper-link {
+    border-left: 1px solid var(--tg-input-border) !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Checkboxes / radios: visible idle state */
+input[type="checkbox"],
+input[type="radio"],
+.change-form input[type="checkbox"],
+.change-form input[type="radio"] {
+    width: 18px !important;
+    height: 18px !important;
+    accent-color: var(--tg-yellow);
+    outline: 1px solid var(--tg-input-border-strong);
+    outline-offset: 1px;
+    cursor: pointer;
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked,
+.change-form input[type="checkbox"]:checked,
+.change-form input[type="radio"]:checked {
+    outline-color: var(--tg-yellow);
+}
+
+/* File inputs */
+.change-form input[type="file"],
+.change-form .tg-gallery-multi-input {
+    background: var(--tg-input-bg) !important;
+    border: 1.5px dashed var(--tg-input-border-strong) !important;
+    color: var(--tg-text) !important;
+}
+
+.change-form input[type="file"]:hover,
+.change-form .tg-gallery-multi-input:hover {
+    border-color: var(--tg-yellow) !important;
+    background: var(--tg-yellow-soft) !important;
+}
+
+/* Select2 idle */
+.select2-container--admin-autocomplete .select2-selection--single {
+    background: var(--tg-input-bg) !important;
+    border: 1px solid var(--tg-input-border) !important;
+    color: var(--tg-text) !important;
+}
+
+.select2-container--admin-autocomplete .select2-selection--single:hover {
+    border-color: var(--tg-input-border-strong) !important;
+}
+
+.select2-dropdown {
+    background: var(--tg-card) !important;
+    border: 1px solid var(--tg-input-border) !important;
+    color: var(--tg-text) !important;
+}
+
+.select2-container--admin-autocomplete .select2-results__option {
+    color: var(--tg-text) !important;
+}
+
+.select2-container--admin-autocomplete .select2-results__option--highlighted {
+    background: var(--tg-surface-hover) !important;
+    color: #fff !important;
+}
+
+/* Changelist / filters leftover light text */
+#result_list thead th {
+    color: var(--tg-muted) !important;
+}
+
+.paginator a {
+    border: 1px solid var(--tg-input-border) !important;
+    background: var(--tg-input-bg) !important;
+    color: var(--tg-text) !important;
+}
+
+#changelist-search input[type="text"],
+#toolbar input[type="text"],
+#changelist #searchbar {
+    background: var(--tg-input-bg) !important;
+    border: 1px solid var(--tg-input-border) !important;
+    color: var(--tg-text) !important;
+}
+
+/* CKEditor editable surface */
+.change-form .ck.ck-editor__main > .ck-editor__editable {
+    background: var(--tg-input-bg) !important;
+    color: var(--tg-text) !important;
+    border-color: var(--tg-input-border) !important;
+}
+
+.change-form .django_ckeditor_5,
+.change-form .ck-editor {
+    border-color: var(--tg-input-border) !important;
+}
+
+/* Fieldset title stays light on dark cards */
+.change-form fieldset.module > h2 {
+    color: var(--tg-text) !important;
+}
+
+/* Errors readable on dark */
+.errornote,
+.errorlist li {
+    color: #ffb4a8 !important;
+}
+
+ul.errorlist {
+    background: rgba(180, 35, 24, 0.28) !important;
+}
 
