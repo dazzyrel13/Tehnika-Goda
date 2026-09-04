@@ -51,10 +51,11 @@ def parse_avito_item_id(raw: str | int | None) -> int | None:
     match = _AVITO_ID_RE.search(text)
     if match:
         return int(match.group(1))
-    # Last path segment sometimes is just the id
+    # Prefer the last long digit run (Avito item id is usually at the end;
+    # earlier numbers can be years/mileage fragments in the slug).
     digits = re.findall(r"\d{5,20}", text)
-    if len(digits) == 1:
-        return int(digits[0])
+    if digits:
+        return int(digits[-1])
     return None
 
 

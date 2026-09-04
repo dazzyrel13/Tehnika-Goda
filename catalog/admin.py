@@ -436,6 +436,7 @@ class VehicleAdmin(admin.ModelAdmin):
     display_image.short_description = "Фото"
 
     def save_model(self, request, obj, form, change):
+        from .avito import is_configured
         from .listing_ingest import BODY_TO_SLUG, _norm
 
         # «Выкупленные» — флаг, не единственная категория: при известном типе кузова
@@ -456,6 +457,22 @@ class VehicleAdmin(admin.ModelAdmin):
                 if getattr(obj.category, "slug", None) != "cars_bought":
                     obj.category = cars_new
         super().save_model(request, obj, form, change)
+
+        if obj.avito_item_id and obj.price_rub is not None:
+            if not is_configured():
+                self.message_user(
+                    request,
+                    "Авито: ID сохранён, но на сервере нет AVITO_CLIENT_ID/SECRET — цена не уйдёт.",
+                    level=messages.WARNING,
+                )
+            else:
+                # Signal already enqueues on link/price change; remind the operator.
+                self.message_user(
+                    request,
+                    "Авито: цена поставлена в очередь синхронизации. "
+                    "Через минуту смотрите поля «Цена ушла на Авито» / ошибку ниже.",
+                    level=messages.INFO,
+                )
 
     @admin.action(description="Синхронизировать цену с Авито сейчас")
     def sync_avito_price_now(self, request, queryset):

@@ -1730,6 +1730,21 @@ class AvitoPriceSyncTests(TestCase):
         self.mock_delay.assert_called_once_with(vehicle.pk)
 
     @override_settings(AVITO_CLIENT_ID="cid", AVITO_CLIENT_SECRET="sec")
+    def test_linking_avito_id_enqueues_without_price_change(self):
+        vehicle = Vehicle.objects.create(
+            title="Link Later",
+            brand=self.brand,
+            category=self.category,
+            year=2023,
+            price_rub=2_000_000,
+            slug="link-later-avito",
+        )
+        self.mock_delay.reset_mock()
+        vehicle.avito_item_id = 888777666
+        vehicle.save()
+        self.mock_delay.assert_called_once_with(vehicle.pk)
+
+    @override_settings(AVITO_CLIENT_ID="cid", AVITO_CLIENT_SECRET="sec")
     def test_task_writes_sync_timestamp(self):
         from unittest.mock import patch as mock_patch
 
