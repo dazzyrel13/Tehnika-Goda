@@ -3,14 +3,10 @@ from io import BytesIO
 
 from django import forms
 from django.contrib import admin, messages
-from django.core.files.base import ContentFile
-from django.db.models import Max
 from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
-from django.utils.text import slugify
 from PIL import Image
-from unidecode import unidecode
 
 from utils.safe_http import fetch_url_bytes, is_safe_request_url
 
@@ -25,7 +21,15 @@ from .models import (
     Vehicle,
     VehicleImage,
 )
-from .listing_ingest import MAX_GALLERY_UPLOADS, ingest_listing
+from .listing_ingest import (
+    BODY_TO_SLUG,
+    MAX_GALLERY_UPLOADS,
+    _norm,
+    attach_vehicle_images,
+    create_vehicle_draft,
+    get_or_create_brand,
+    ingest_listing,
+)
 from .parser_service import EliteVehicleParser
 
 
@@ -386,44 +390,19 @@ class VehicleAdmin(admin.ModelAdmin):
             uploaded = request.FILES.getlist("gallery_images")
 
         if uploaded:
-            max_order = (
-                vehicle.gallery.aggregate(max_order=Max("order")).get("max_order") or 0
-            )
-            added = 0
-            for index, image in enumerate(uploaded, start=1):
-                try:
-                    probe = Image.open(image)
-                    probe.verify()
-                    image.seek(0)
-                except Exception:
-                    continue
-                VehicleImage.objects.create(
-                    vehicle=vehicle,
-                    image=image,
-                    order=max_order + index,
-                )
-                added += 1
+            added, skipped = attach_vehicle_images(vehicle, uploaded)
             if added:
                 self.message_user(
                     request,
                     f"В галерею добавлено фото: {added}. "
                     "Перетащите строки, если нужно изменить порядок, и сохраните ещё раз.",
                 )
-            skipped = len(uploaded) - added
             if skipped:
                 self.message_user(
                     request,
                     f"Пропущено файлов (не изображение): {skipped}.",
                     level=messages.WARNING,
                 )
-
-        # Обложка из первого фото галереи, если не задана вручную
-        vehicle.refresh_from_db()
-        if not vehicle.main_image:
-            first = vehicle.gallery.order_by("order", "id").first()
-            if first and first.image:
-                vehicle.main_image = first.image
-                vehicle.save(update_fields=["main_image"])
 
     def display_image(self, obj):
         if obj.main_image:
@@ -437,8 +416,6 @@ class VehicleAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         from .avito import is_configured
-        from .listing_ingest import BODY_TO_SLUG, _norm
-
         # «Выкупленные» — флаг, не единственная категория: при известном типе кузова
         # держим авто в Седанах/Кроссоверах и т.п.
         cat_slug = getattr(obj.category, "slug", None)
@@ -569,27 +546,23 @@ class VehicleAdmin(admin.ModelAdmin):
             if url:
                 data = EliteVehicleParser.parse_from_url(url)
                 if data:
-                    brand_name = data.get("brand_name") or "Unknown"
-                    brand, _ = Brand.objects.get_or_create(
-                        name=brand_name,
-                        defaults={"slug": slugify(unidecode(brand_name))},
-                    )
+                    brand, _ = get_or_create_brand(data.get("brand_name") or "Unknown")
+                    body_type = data.get("body_type", "") or ""
+                    specs = data.get("specs") or {}
+                    category = None
+                    mapped = BODY_TO_SLUG.get(_norm(body_type))
+                    if mapped:
+                        category = Category.objects.filter(slug=mapped).first()
+                    if category is None:
+                        category = (
+                            Category.objects.filter(slug="cars_new").first()
+                            or Category.objects.all().first()
+                        )
 
-                    category = (
-                        Category.objects.filter(slug="cars_new").first()
-                        or Category.objects.all().first()
-                    )
-
-                    title = f"{brand.name} {data['model_name']} {data['year'] or ''}".strip()
-                    base_slug = slugify(unidecode(title))
-                    unique_slug = base_slug
-
-                    num = 1
-                    while Vehicle.objects.filter(slug=unique_slug).exists():
-                        unique_slug = f"{base_slug}-{num}"
-                        num += 1
-
-                    vehicle = Vehicle.objects.create(
+                    title = (
+                        f"{brand.name} {data['model_name']} {data['year'] or ''}"
+                    ).strip()
+                    vehicle = create_vehicle_draft(
                         title=title,
                         brand=brand,
                         category=category,
@@ -598,25 +571,28 @@ class VehicleAdmin(admin.ModelAdmin):
                         mileage=data.get("mileage", 0),
                         horsepower=data.get("horsepower"),
                         transmission=(
-                            data.get("specs", {}).get("transmission")
-                            or data.get("specs", {}).get("gearbox")
+                            specs.get("transmission")
+                            or specs.get("gearbox")
                             or ""
                         ),
-                        body_type=data.get("body_type", ""),
-                        color=data.get("specs", {}).get("color", ""),
+                        body_type=body_type,
+                        color=specs.get("color", ""),
                         engine_type=detect_engine_type(
-                            str(data.get("specs", {}).get("fuelType") or "")
+                            str(specs.get("fuelType") or "")
                         ),
                         price_rub=data["price_rub"],
                         description=data["description"],
-                        specs=data.get("specs", {}),
-                        slug=unique_slug,
-                        is_published=False,
+                        specs=specs,
+                        is_new=True,
                     )
 
                     image_url = data.get("main_image_url")
                     if image_url and is_safe_request_url(image_url):
                         try:
+                            from django.core.files.uploadedfile import (
+                                SimpleUploadedFile,
+                            )
+
                             raw, _final_url = fetch_url_bytes(
                                 image_url,
                                 max_bytes=15 * 1024 * 1024,
@@ -633,17 +609,19 @@ class VehicleAdmin(admin.ModelAdmin):
                                 "WEBP": ".webp",
                             }
                             ext = ext_map.get(fmt, ".jpg")
-                            path_ext = (
-                                os.path.splitext(image_url.split("?")[0])[1].lower()
-                            )
+                            path_ext = os.path.splitext(
+                                image_url.split("?")[0]
+                            )[1].lower()
                             if path_ext in (".jpg", ".jpeg", ".png", ".webp"):
                                 ext = ".jpg" if path_ext == ".jpeg" else path_ext
-
-                            vehicle.main_image.save(
-                                f"imported_{vehicle.id}{ext}",
-                                ContentFile(raw),
-                                save=True,
+                            upload = SimpleUploadedFile(
+                                f"imported{ext}",
+                                raw,
+                                content_type=f"image/{ext.lstrip('.')}",
                             )
+                            added, _skipped = attach_vehicle_images(vehicle, [upload])
+                            if not added:
+                                raise ValueError("файл не прошёл проверку изображения")
                         except Exception as e:
                             self.message_user(
                                 request,

@@ -360,6 +360,53 @@ def _listing_looks_bought(name: str, body_type: str, haystack: str) -> bool:
     return "выкуплен" in _norm(" ".join((name, body_type, haystack)))
 
 
+def create_vehicle_draft(
+    *,
+    title: str,
+    brand: Brand,
+    category: Category | None,
+    model: str = "",
+    year: int = 0,
+    mileage: int = 0,
+    horsepower: int | None = None,
+    transmission: str = "",
+    body_type: str = "",
+    color: str = "",
+    engine_type: str = "",
+    price_rub=None,
+    description: str = "",
+    specs: dict | None = None,
+    is_new: bool | None = None,
+    is_featured: bool = False,
+) -> Vehicle:
+    """
+    Single entrypoint for unpublished vehicle rows (text ingest + URL import).
+    Slug is assigned in Vehicle.save — do not pass a custom slug here.
+    """
+    cat_slug = getattr(category, "slug", None)
+    if is_new is None:
+        is_new = cat_slug == "cars_new"
+    return Vehicle.objects.create(
+        title=_clean(title, 255) or "Автомобиль",
+        brand=brand,
+        category=category,
+        model=_clean(model, 100),
+        year=year or 0,
+        mileage=mileage or 0,
+        horsepower=horsepower,
+        transmission=_clean(transmission, 50),
+        body_type=_clean(body_type, 80),
+        color=_clean(color, 60),
+        engine_type=engine_type or "",
+        price_rub=price_rub,
+        description=description or "",
+        specs=specs or {},
+        is_published=False,
+        is_new=bool(is_new),
+        is_featured=bool(is_featured),
+    )
+
+
 def attach_vehicle_images(vehicle: Vehicle, uploads) -> tuple[int, int]:
     files = []
     if uploads:
@@ -425,12 +472,12 @@ def ingest_listing(
     looks_bought = _listing_looks_bought(
         data.category_name, data.body_type, data.description
     ) or getattr(resolved_category, "slug", None) == "cars_bought"
-    vehicle = Vehicle.objects.create(
-        title=data.title[:255],
+    vehicle = create_vehicle_draft(
+        title=data.title,
         brand=brand,
         category=resolved_category,
         model=data.model,
-        year=data.year or 0,
+        year=data.year,
         mileage=data.mileage,
         horsepower=data.horsepower,
         transmission=data.transmission,
@@ -440,8 +487,6 @@ def ingest_listing(
         price_rub=data.price_rub,
         description=data.description,
         specs=data.specs,
-        is_published=False,
-        is_new=getattr(resolved_category, "slug", None) == "cars_new",
         is_featured=looks_bought,
     )
     added, skipped = attach_vehicle_images(vehicle, uploads)

@@ -1492,6 +1492,72 @@ class ListingIngestTests(TestCase):
         self.assertEqual(Vehicle.objects.count(), before)
         self.assertContains(response, "не больше")
 
+    def test_create_vehicle_draft_sets_slug_and_unpublished(self):
+        from catalog.listing_ingest import create_vehicle_draft, get_or_create_brand
+        from catalog.models import Category
+
+        brand, _ = get_or_create_brand("DraftBrand")
+        category, _ = Category.objects.get_or_create(
+            slug="cars_sedan", defaults={"name": "Седаны"}
+        )
+        vehicle = create_vehicle_draft(
+            title="DraftBrand Sedan 2024",
+            brand=brand,
+            category=category,
+            model="Sedan",
+            year=2024,
+            body_type="Седан",
+            is_new=True,
+        )
+        self.assertFalse(vehicle.is_published)
+        self.assertTrue(vehicle.is_new)
+        self.assertTrue(vehicle.slug)
+        self.assertIn("draftbrand", vehicle.slug)
+
+    @patch("catalog.admin.EliteVehicleParser.parse_from_url")
+    def test_parse_url_view_uses_shared_draft_helper(self, mock_parse):
+        from django.contrib.admin.sites import AdminSite
+        from django.contrib.auth import get_user_model
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.test import RequestFactory
+
+        from catalog.admin import VehicleAdmin
+        from catalog.models import Category
+
+        Category.objects.get_or_create(slug="cars_new", defaults={"name": "Новые"})
+        Category.objects.get_or_create(slug="cars_sedan", defaults={"name": "Седаны"})
+        mock_parse.return_value = {
+            "brand_name": "Zeekr",
+            "model_name": "001",
+            "year": 2024,
+            "mileage": 1000,
+            "horsepower": 544,
+            "body_type": "Седан",
+            "price_rub": 5_000_000,
+            "description": "Imported",
+            "specs": {"color": "белый", "fuelType": "Электро", "transmission": "AT"},
+            "main_image_url": "",
+        }
+        user = get_user_model().objects.create_superuser(
+            "parse-url", "parse@example.com", "pass-not-used"
+        )
+        request = RequestFactory().post(
+            "/admin/catalog/vehicle/parse-url/",
+            {"url": "https://example.com/listing/1"},
+        )
+        request.user = user
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        response = VehicleAdmin(Vehicle, AdminSite()).parse_url_view(request)
+        self.assertEqual(response.status_code, 302)
+        vehicle = Vehicle.objects.latest("id")
+        self.assertEqual(vehicle.brand.name, "Zeekr")
+        self.assertFalse(vehicle.is_published)
+        self.assertTrue(vehicle.is_new)
+        self.assertEqual(vehicle.category.slug, "cars_sedan")
+        self.assertEqual(vehicle.color, "белый")
+        self.assertTrue(vehicle.slug)
+
 
 class UploadErrorHandlerTests(TestCase):
     def test_too_many_files_shows_russian_message(self):
