@@ -41,6 +41,10 @@ ANALYTICS_ASYNC = env.bool("ANALYTICS_ASYNC", default=True)
 ANALYTICS_RETENTION_DAYS = env.int("ANALYTICS_RETENTION_DAYS", default=90)
 # When False (default), raw client IPs are not stored — visitor_id already mixes IP.
 ANALYTICS_STORE_IP = env.bool("ANALYTICS_STORE_IP", default=False)
+# WebP + card variants in Celery (admin/ingest stay responsive). False = sync in save().
+IMAGE_PROCESSING_ASYNC = env.bool(
+    "IMAGE_PROCESSING_ASYNC", default=not TESTING
+)
 # Optional shared secret for detailed /healthz/ from non-loopback monitors.
 HEALTHZ_TOKEN = (env("HEALTHZ_TOKEN", default="") or "").strip()
 # Trust X-Real-IP / X-Forwarded-For from nginx (also implied by BEHIND_HTTPS_PROXY).

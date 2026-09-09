@@ -2,6 +2,7 @@ import os
 import uuid
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
+from django.conf import settings
 from django.core.validators import FileExtensionValidator, MinValueValidator
 from django.db import IntegrityError, models
 from django.urls import reverse
@@ -534,7 +535,7 @@ class Vehicle(models.Model):
                 self.engine_type = detected
                 return
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, skip_image_queue=False, **kwargs):
         if self.description:
             self.description = sanitize_html(self.description)
 
@@ -557,13 +558,20 @@ class Vehicle(models.Model):
                 .first()
                 or ""
             )
+
+        async_on = (
+            getattr(settings, "IMAGE_PROCESSING_ASYNC", False)
+            and not skip_image_queue
+        )
         process_now = touch_image and self.main_image and should_process_image(
             self.main_image
         )
-        if process_now:
+        # Sync path (tests / IMAGE_PROCESSING_ASYNC=False): convert before first write.
+        if process_now and not async_on:
             processed_image = process_image_to_webp(self.main_image)
             if processed_image:
                 self.main_image = processed_image
+
         try:
             super().save(*args, **kwargs)
         except IntegrityError:
@@ -574,11 +582,21 @@ class Vehicle(models.Model):
             ].rstrip("-")
             self.slug = f"{base}{suffix}"
             super().save(*args, **kwargs)
+
         new_name = getattr(self.main_image, "name", "") or ""
         if old_image_name and old_image_name != new_name:
             delete_responsive_variants(old_image_name)
-        if touch_image and self.main_image and (process_now or old_image_name != new_name):
-            write_responsive_variants(self.main_image)
+
+        if not (touch_image and self.main_image and (process_now or old_image_name != new_name)):
+            return
+
+        if async_on:
+            from .tasks import enqueue_process_vehicle_main_image
+
+            enqueue_process_vehicle_main_image(self.pk)
+            return
+
+        write_responsive_variants(self.main_image)
 
 
 class VehicleImage(models.Model):
@@ -601,7 +619,7 @@ class VehicleImage(models.Model):
     def __str__(self):
         return f"Фото для {self.vehicle.title}"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, skip_image_queue=False, **kwargs):
         update_fields = kwargs.get("update_fields")
         touch_image = update_fields is None or "image" in update_fields
         old_image_name = ""
@@ -612,14 +630,30 @@ class VehicleImage(models.Model):
                 .first()
                 or ""
             )
+
+        async_on = (
+            getattr(settings, "IMAGE_PROCESSING_ASYNC", False)
+            and not skip_image_queue
+        )
         process_now = touch_image and self.image and should_process_image(self.image)
-        if process_now:
+        if process_now and not async_on:
             processed_image = process_image_to_webp(self.image)
             if processed_image:
                 self.image = processed_image
+
         super().save(*args, **kwargs)
+
         new_name = getattr(self.image, "name", "") or ""
         if old_image_name and old_image_name != new_name:
             delete_responsive_variants(old_image_name)
-        if touch_image and self.image and (process_now or old_image_name != new_name):
-            write_responsive_variants(self.image)
+
+        if not (touch_image and self.image and (process_now or old_image_name != new_name)):
+            return
+
+        if async_on:
+            from .tasks import enqueue_process_gallery_image
+
+            enqueue_process_gallery_image(self.pk)
+            return
+
+        write_responsive_variants(self.image)

@@ -92,7 +92,7 @@ def process_image_to_webp(image_field, quality=MASTER_QUALITY, max_width=MASTER_
         img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
 
     output = BytesIO()
-    img.save(output, format="WEBP", quality=quality, method=6)
+    img.save(output, format="WEBP", quality=quality, method=4)
     output.seek(0)
     # Short random stem — long original filenames blow ImageField max_length
     # when combined with catalog/vehicles/<slug>/… upload paths.
@@ -181,7 +181,7 @@ def write_responsive_variants(image_field) -> None:
             Image.Resampling.LANCZOS,
         )
         buf = BytesIO()
-        resized.save(buf, format="WEBP", quality=VARIANT_QUALITY, method=6)
+        resized.save(buf, format="WEBP", quality=VARIANT_QUALITY, method=4)
         buf.seek(0)
         content = ContentFile(buf.read())
         if storage.exists(dest):

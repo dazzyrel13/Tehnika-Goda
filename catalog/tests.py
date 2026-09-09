@@ -1002,9 +1002,42 @@ class VehicleImageVariantTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, vehicle.main_image.url)
 
+    @override_settings(
+        IMAGE_PROCESSING_ASYNC=True,
+        CELERY_TASK_ALWAYS_EAGER=True,
+        CELERY_TASK_EAGER_PROPAGATES=True,
+    )
+    def test_async_jpeg_processed_via_celery_eager(self):
+        from io import BytesIO
 
-@override_settings(RATELIMIT_ENABLE=False)
-class AdminBulkCacheTests(TestCase):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+
+        from utils.image_processing import variant_storage_name
+
+        buf = BytesIO()
+        Image.new("RGB", (1600, 900), (20, 20, 20)).save(buf, format="JPEG")
+        buf.seek(0)
+        upload = SimpleUploadedFile("async.jpg", buf.read(), content_type="image/jpeg")
+        vehicle = Vehicle(
+            title="Async Photo Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            mileage=100,
+            price_rub=2000000,
+            is_published=True,
+            slug="async-photo-car",
+        )
+        vehicle.main_image = upload
+        vehicle.save()
+        vehicle.refresh_from_db()
+        self.assertTrue(vehicle.main_image.name.lower().endswith(".webp"))
+        self.assertTrue(
+            vehicle.main_image.storage.exists(
+                variant_storage_name(vehicle.main_image.name, 800)
+            )
+        )
     def test_unpublish_selected_invalidates_home_cache(self):
         from django.contrib.admin.sites import AdminSite
         from django.contrib.messages.storage.fallback import FallbackStorage
