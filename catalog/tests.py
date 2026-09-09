@@ -1038,6 +1038,10 @@ class VehicleImageVariantTests(TestCase):
                 variant_storage_name(vehicle.main_image.name, 800)
             )
         )
+
+
+@override_settings(RATELIMIT_ENABLE=False)
+class AdminBulkCacheTests(TestCase):
     def test_unpublish_selected_invalidates_home_cache(self):
         from django.contrib.admin.sites import AdminSite
         from django.contrib.messages.storage.fallback import FallbackStorage
@@ -1048,6 +1052,7 @@ class VehicleImageVariantTests(TestCase):
         from catalog.cache_helpers import (
             HOME_SECTION_LIMIT,
             HOME_SECTIONS_CACHE_KEY,
+            HOME_SECTIONS_VER_KEY,
             home_sections,
         )
 
@@ -1063,9 +1068,11 @@ class VehicleImageVariantTests(TestCase):
             is_published=True,
             slug="cached-car",
         )
-        home_sections()
-        cache_key = f"{HOME_SECTIONS_CACHE_KEY}:{HOME_SECTION_LIMIT}"
+        before = home_sections()
+        ver = int(cache.get(HOME_SECTIONS_VER_KEY) or 0)
+        cache_key = f"{HOME_SECTIONS_CACHE_KEY}:v{ver}:{HOME_SECTION_LIMIT}"
         self.assertIsNotNone(cache.get(cache_key))
+        self.assertEqual(before["home_cars"][0].pk, vehicle.pk)
 
         request = RequestFactory().post("/")
         request.session = {}
@@ -1073,8 +1080,12 @@ class VehicleImageVariantTests(TestCase):
         VehicleAdmin(Vehicle, AdminSite()).unpublish_selected(
             request, Vehicle.objects.filter(pk=vehicle.pk)
         )
-        self.assertIsNone(cache.get(cache_key))
+        after_ver = int(cache.get(HOME_SECTIONS_VER_KEY) or 0)
+        self.assertGreater(after_ver, ver)
         self.assertFalse(Vehicle.objects.get(pk=vehicle.pk).is_published)
+        # New version must not serve the unpublished car.
+        refreshed = home_sections()
+        self.assertEqual(refreshed["home_cars"], [])
 
 
 class VehicleAdminAddFormTests(TestCase):

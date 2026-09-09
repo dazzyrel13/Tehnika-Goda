@@ -21,6 +21,7 @@ from .cache_helpers import (
     is_car_body_type_category,
     nav_context,
     review_platforms,
+    seo_brands_cached,
     type_category_q,
 )
 from .models import Brand, CarModel, Category, EngineType, Vehicle
@@ -38,7 +39,6 @@ from .seo_copy import (
 from .seo_pages import (
     brand_has_seo_landing,
     published_car_models_for_brand,
-    seo_brands_queryset,
     seo_model_pages_enabled,
     vehicles_for_car_model,
 )
@@ -391,12 +391,12 @@ class BrandIndexView(_SeoPagesFeatureMixin, ListView):
     context_object_name = "brands"
 
     def get_queryset(self):
-        return seo_brands_queryset()
+        return seo_brands_cached()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         brands = context["brands"]
-        context["brand_count"] = brands.count() if hasattr(brands, "count") else len(brands)
+        context["brand_count"] = len(brands)
         context["seo_title"] = "Марки автомобилей из Китая | Техника Года"
         context["seo_description"] = (
             "Полный справочник марок легковых автомобилей с китайского рынка: "

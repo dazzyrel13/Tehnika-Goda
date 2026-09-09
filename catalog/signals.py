@@ -12,7 +12,7 @@ from .cache_helpers import (
     invalidate_nav_cache,
     invalidate_subtree_cache,
 )
-from .models import Brand, Category, Vehicle
+from .models import Brand, CarModel, Category, Vehicle
 
 # Stash previous price / avito id on the instance for post_save comparison.
 _AVITO_PRICE_ATTR = "_avito_prev_price_rub"
@@ -82,6 +82,11 @@ def vehicle_cache_invalidation(sender, **kwargs):
 def brand_cache_invalidation(sender, **kwargs):
     invalidate_nav_cache()
     invalidate_home_sections_cache()
+
+
+@receiver([post_save, post_delete], sender=CarModel)
+def car_model_cache_invalidation(sender, **kwargs):
+    invalidate_nav_cache()
 
 
 @receiver([post_save, post_delete], sender=Category)
