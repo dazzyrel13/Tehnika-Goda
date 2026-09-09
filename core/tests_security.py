@@ -36,6 +36,39 @@ class AdminIPAllowlistTests(TestCase):
         response = self.client.get(_admin_path())
         self.assertEqual(response.status_code, 403)
 
+    def test_ckeditor_blocked_for_other_ip(self):
+        response = self.client.get(
+            "/ckeditor5/image_upload/",
+            HTTP_X_REAL_IP="198.51.100.1",
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_ckeditor_allowlisted_ip_still_needs_auth(self):
+        response = self.client.get(
+            "/ckeditor5/image_upload/",
+            HTTP_X_REAL_IP="203.0.113.50",
+        )
+        # Anonymous staff check → 403 from CkeditorUploadGuard (not IP allowlist)
+        self.assertEqual(response.status_code, 403)
+
+
+class CkeditorUploadGuardTests(TestCase):
+    def test_anonymous_denied(self):
+        response = self.client.get("/ckeditor5/image_upload/")
+        self.assertEqual(response.status_code, 403)
+
+    def test_staff_without_otp_denied(self):
+        from django.contrib.auth import get_user_model
+
+        user = get_user_model().objects.create_user(
+            username="editor-staff",
+            password="correct-horse-12",
+            is_staff=True,
+        )
+        self.client.force_login(user)
+        response = self.client.get("/ckeditor5/image_upload/")
+        self.assertEqual(response.status_code, 403)
+
 
 @override_settings(
     ADMIN_URL_PREFIX="custom-admin-gate/",
@@ -70,7 +103,8 @@ class SecurityHeadersTests(TestCase):
         self.assertRegex(csp, r"script-src 'self'")
         self.assertNotRegex(csp, r"script-src[^;]*unsafe-inline")
         self.assertRegex(csp, r"img-src 'self' data: blob:")
-        self.assertNotRegex(csp, r"img-src[^;]*https:")
+        # Reject bare scheme token https: — host-specific https://… (Metrika) is fine.
+        self.assertNotRegex(csp, r"img-src[^;]*(?:^|[;\s])https:(?:\s|;|$)")
         self.assertNotIn("fonts.googleapis.com", csp)
         self.assertNotIn("fonts.gstatic.com", csp)
         self.assertRegex(csp, r"font-src 'self'")

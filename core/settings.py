@@ -41,6 +41,8 @@ ANALYTICS_ASYNC = env.bool("ANALYTICS_ASYNC", default=True)
 ANALYTICS_RETENTION_DAYS = env.int("ANALYTICS_RETENTION_DAYS", default=90)
 # When False (default), raw client IPs are not stored — visitor_id already mixes IP.
 ANALYTICS_STORE_IP = env.bool("ANALYTICS_STORE_IP", default=False)
+# Optional shared secret for detailed /healthz/ from non-loopback monitors.
+HEALTHZ_TOKEN = (env("HEALTHZ_TOKEN", default="") or "").strip()
 # Trust X-Real-IP / X-Forwarded-For from nginx (also implied by BEHIND_HTTPS_PROXY).
 TRUST_PROXY_HEADERS = env.bool("TRUST_PROXY_HEADERS", default=False)
 BEHIND_HTTPS_PROXY = env.bool("BEHIND_HTTPS_PROXY", default=False)
@@ -93,7 +95,6 @@ THIRD_PARTY_APPS = [
     "django_celery_results",
     "django_ckeditor_5",
     "django_cleanup.apps.CleanupConfig",
-    "django_user_agents",
     "django_otp",
     "django_otp.plugins.otp_static",
     "django_otp.plugins.otp_totp",
@@ -126,7 +127,7 @@ MIDDLEWARE = [
     "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_user_agents.middleware.UserAgentMiddleware",
+    "core.security_middleware.CkeditorUploadGuardMiddleware",
     "analytics.middleware.VisitAnalyticsMiddleware",
     "axes.middleware.AxesMiddleware",
 ]
@@ -351,7 +352,9 @@ for _host in ALLOWED_HOSTS:
     if not _host or _host.startswith(".") or _host in {"*", "localhost", "127.0.0.1"}:
         continue
     _add_csrf_origin(f"https://{_host}")
-    _add_csrf_origin(f"http://{_host}")
+    # Cleartext origins only when HTTPS is not enforced (local/dev).
+    if not env.bool("USE_HTTPS", default=False):
+        _add_csrf_origin(f"http://{_host}")
 
 # Logging
 Path(os.path.join(BASE_DIR, "logs")).mkdir(exist_ok=True)

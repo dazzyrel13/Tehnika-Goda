@@ -86,10 +86,12 @@ def _allowed_networks():
 
 class AdminIPAllowlistMiddleware:
     """
-    When ADMIN_ALLOWED_IPS is non-empty, only those IPs may access the admin path.
-    Empty list = disabled (default for local/dev).
+    When ADMIN_ALLOWED_IPS is non-empty, only those IPs may access admin and
+    CKEditor upload paths. Empty list = disabled (default for local/dev).
     Unparseable-only list = deny all (do not silently disable).
     """
+
+    PROTECTED_PREFIXES = ("/ckeditor5/",)
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -98,15 +100,42 @@ class AdminIPAllowlistMiddleware:
         networks = _allowed_networks()
         if networks is None:
             return self.get_response(request)
-        admin_prefix = _admin_prefix()
-        if request.path.startswith(admin_prefix) or request.path.rstrip(
-            "/"
-        ) + "/" == admin_prefix:
+        if self._is_protected_path(request.path):
             if not networks:
                 return HttpResponseForbidden("Admin access denied for this IP.")
             client = get_client_ip(request)
             if not client or not _ip_allowed(client, networks):
                 return HttpResponseForbidden("Admin access denied for this IP.")
+        return self.get_response(request)
+
+    def _is_protected_path(self, path: str) -> bool:
+        admin_prefix = _admin_prefix()
+        if path.startswith(admin_prefix) or path.rstrip("/") + "/" == admin_prefix:
+            return True
+        return any(path.startswith(prefix) for prefix in self.PROTECTED_PREFIXES)
+
+
+class CkeditorUploadGuardMiddleware:
+    """
+    CKEditor lives outside the admin URL prefix — require staff + OTP verification
+    so a stolen non-verified session cannot upload to MEDIA.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.path.startswith("/ckeditor5/"):
+            user = getattr(request, "user", None)
+            if (
+                user is None
+                or not getattr(user, "is_authenticated", False)
+                or not getattr(user, "is_staff", False)
+            ):
+                return HttpResponseForbidden("CKEditor access denied.")
+            is_verified = getattr(user, "is_verified", None)
+            if callable(is_verified) and not user.is_verified():
+                return HttpResponseForbidden("CKEditor access denied.")
         return self.get_response(request)
 
 

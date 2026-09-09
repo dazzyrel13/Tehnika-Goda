@@ -44,6 +44,12 @@ class Inquiry(models.Model):
         verbose_name = "Заявка (Лид)"
         verbose_name_plural = "Заявки (Лиды)"
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(
+                fields=["phone", "created_at"],
+                name="leads_inq_phone_created_idx",
+            ),
+        ]
 
     def __str__(self):
         return f"Заявка от {self.name} ({self.created_at.strftime('%d.%m %H:%M')})"

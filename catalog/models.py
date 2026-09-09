@@ -429,6 +429,10 @@ class Vehicle(models.Model):
                 fields=["is_published", "show_on_home", "-created_at"],
                 name="catalog_veh_pub_home_idx",
             ),
+            models.Index(
+                fields=["is_published", "body_type"],
+                name="catalog_veh_pub_body_idx",
+            ),
         ]
 
     def __str__(self):

@@ -38,7 +38,7 @@
 - Run `python manage.py check`.
 - Run `python manage.py check --deploy`.
 - Run `python manage.py test` / CI coverage (≥65%).
-- Verify `GET /healthz/` returns `{"status":"ok","db":true,"redis":true}` (Docker `healthcheck` on `web` uses this).
+- Verify `GET /healthz/` returns `{"status":"ok"}` publicly (200/503). Loopback/Docker healthcheck may also see `db`/`redis`. Optional `HEALTHZ_TOKEN` + header `X-Healthz-Token` for remote detailed probes.
 - Verify admin path and access restrictions.
 - Verify lead form rate limits work per client IP (not shared).
 

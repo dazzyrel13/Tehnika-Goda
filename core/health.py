@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 
+from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
 from django.http import JsonResponse
@@ -34,20 +35,30 @@ def _check_redis() -> bool:
         return False
 
 
+def _wants_detailed_health(request) -> bool:
+    """Expose db/redis only to loopback or a shared probe token."""
+    remote = (request.META.get("REMOTE_ADDR") or "").strip()
+    if remote in {"127.0.0.1", "::1"}:
+        return True
+    token = (getattr(settings, "HEALTHZ_TOKEN", "") or "").strip()
+    if token and request.headers.get("X-Healthz-Token") == token:
+        return True
+    return False
+
+
 @never_cache
 @require_GET
 def healthz(request):
     """
     Returns 200 when DB and Redis are reachable, otherwise 503.
-    Safe for load balancers — no secrets, no auth.
+    Public responses only include status; dependency detail is loopback/token only.
     """
     checks = {
         "db": _check_db(),
         "redis": _check_redis(),
     }
     ok = all(checks.values())
-    payload = {
-        "status": "ok" if ok else "unhealthy",
-        **checks,
-    }
+    payload = {"status": "ok" if ok else "unhealthy"}
+    if _wants_detailed_health(request):
+        payload.update(checks)
     return JsonResponse(payload, status=200 if ok else 503)
