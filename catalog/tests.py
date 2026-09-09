@@ -1120,6 +1120,42 @@ class VehicleAdminAddFormTests(TestCase):
         self.assertContains(response, "tg-spec-paste")
         self.assertContains(response, "[Название автомобиля]")
 
+    def test_change_form_renders_with_readonly_cny_rate(self):
+        from django.contrib.admin.sites import AdminSite
+        from django.contrib.auth import get_user_model
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.test import RequestFactory
+
+        from catalog.admin import VehicleAdmin
+
+        brand = Brand.objects.create(name="AdminBrand", slug="adminbrand")
+        category, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Cars"}
+        )
+        vehicle = Vehicle.objects.create(
+            title="Admin Car",
+            brand=brand,
+            category=category,
+            year=2024,
+            price_rub=1_000_000,
+            slug="admin-car-change",
+        )
+        user = get_user_model().objects.create_superuser(
+            "vehicle-change", "vc@example.com", "pass-not-used"
+        )
+        request = RequestFactory().get(f"/admin/catalog/vehicle/{vehicle.pk}/change/")
+        request.user = user
+        request.session = {}
+        request._messages = FallbackStorage(request)
+
+        response = VehicleAdmin(Vehicle, AdminSite()).change_view(
+            request, str(vehicle.pk)
+        )
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Цена, ¥")
+        self.assertContains(response, "1")
+
 
 class VehicleAdminGalleryGridTests(TestCase):
     def test_change_form_renders_horizontal_photo_grid(self):

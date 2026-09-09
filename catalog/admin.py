@@ -197,21 +197,24 @@ class VehicleAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["title"].help_text = "Например: Zeekr 001 2024 FR"
-        self.fields["price_cny"].label = "Цена, ¥ (юани)"
-        self.fields["price_cny"].help_text = (
-            "Основная цена в юанях. Рубли на сайте посчитаются по курсу из раздела «Курс юаня». "
-            "Оставьте пустым, если нужна фиксированная цена только в рублях."
-        )
-        self.fields["price_rub"].label = "Цена, ₽"
-        self.fields["price_rub"].help_text = (
-            "Цена для сайта. Если заполнены юани — пересчитается при сохранении. "
-            "Если указан ID Авито — цена уйдёт на Авито после сохранения."
-        )
-        self.fields["cny_rate"].label = "Курс на карточке"
-        self.fields["cny_rate"].help_text = (
-            "Подставляется автоматически при пересчёте из юаней. "
-            "Общий курс меняйте в разделе «Курс юаня»."
-        )
+        if "price_cny" in self.fields:
+            self.fields["price_cny"].label = "Цена, ¥ (юани)"
+            self.fields["price_cny"].help_text = (
+                "Основная цена в юанях. Рубли на сайте посчитаются по курсу из раздела «Курс юаня». "
+                "Оставьте пустым, если нужна фиксированная цена только в рублях."
+            )
+        if "price_rub" in self.fields:
+            self.fields["price_rub"].label = "Цена, ₽"
+            self.fields["price_rub"].help_text = (
+                "Цена для сайта. Если заполнены юани — пересчитается при сохранении. "
+                "Если указан ID Авито — цена уйдёт на Авито после сохранения."
+            )
+        if "cny_rate" in self.fields:
+            self.fields["cny_rate"].label = "Курс на карточке"
+            self.fields["cny_rate"].help_text = (
+                "Подставляется автоматически при пересчёте из юаней. "
+                "Общий курс меняйте в разделе «Курс юаня»."
+            )
         self.fields["main_image"].label = "Основное фото (обложка)"
         self.fields["main_image"].help_text = (
             "Крупное фото на карточке и первое в галерее внутри объявления. "
