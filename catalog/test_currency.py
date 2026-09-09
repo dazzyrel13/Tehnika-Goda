@@ -4,7 +4,11 @@ from unittest.mock import patch
 from django.test import TestCase
 
 from catalog.cbr import CbrRateError, fetch_cbr_cny_rate
-from catalog.currency import FALLBACK_CNY_RATE, recalculate_all_cny_prices
+from catalog.currency import (
+    FALLBACK_CNY_RATE,
+    migrate_legacy_rub_to_cny,
+    recalculate_all_cny_prices,
+)
 from catalog.models import Brand, Category, CurrencyRateSettings, Vehicle
 
 
@@ -130,3 +134,55 @@ class CurrencyPricingTests(TestCase):
         with patch("catalog.cbr.fetch_url_text", side_effect=RuntimeError("timeout")):
             with self.assertRaises(CbrRateError):
                 fetch_cbr_cny_rate()
+
+    def test_migrate_legacy_rub_fills_cny_and_applies_current_rate(self):
+        settings = CurrencyRateSettings.load()
+        settings.manual_cny_rate = Decimal("12.00")
+        settings.save()
+
+        vehicle = Vehicle.objects.create(
+            title="Legacy Rub Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            price_rub=Decimal("1000000"),
+            slug="legacy-rub-car",
+        )
+        vehicle.refresh_from_db()
+        self.assertIsNone(vehicle.price_cny)
+        self.assertTrue(vehicle.is_currency_fixed)
+
+        already = Vehicle.objects.create(
+            title="Already CNY",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            price_cny=Decimal("10000"),
+            slug="already-cny",
+        )
+        already.refresh_from_db()
+        old_cny = already.price_cny
+
+        result = migrate_legacy_rub_to_cny()
+        self.assertEqual(result["converted"], 1)
+
+        vehicle.refresh_from_db()
+        # 1_000_000 / 12.48 → 80128.21 ¥; × 12.00 → 961538.52 → 961539 ₽
+        self.assertEqual(vehicle.price_cny, Decimal("80128.21"))
+        self.assertEqual(vehicle.price_rub, Decimal("961539"))
+        self.assertFalse(vehicle.is_currency_fixed)
+
+        already.refresh_from_db()
+        self.assertEqual(already.price_cny, old_cny)
+        self.assertEqual(already.price_rub, Decimal("120000"))
+
+    def test_migrate_skips_zero_and_missing_rub(self):
+        Vehicle.objects.create(
+            title="No Price",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            slug="no-price",
+        )
+        result = migrate_legacy_rub_to_cny()
+        self.assertEqual(result["converted"], 0)

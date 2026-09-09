@@ -121,6 +121,24 @@ class CurrencyRateSettingsAdmin(admin.ModelAdmin):
             )
             return redirect_currency_change(obj)
 
+        if "_migrate_rub_to_cny" in request.POST:
+            from .currency import FALLBACK_CNY_RATE, migrate_legacy_rub_to_cny
+
+            obj.refresh_from_db()
+            result = migrate_legacy_rub_to_cny()
+            invalidate_vehicle_public_caches()
+            self.message_user(
+                request,
+                (
+                    f"Переведено из рублей в юани (÷{FALLBACK_CNY_RATE}): "
+                    f"{result['converted']}. "
+                    f"Пересчитано по текущему курсу "
+                    f"{obj.effective_rate()} ({obj.rate_source_label()}): "
+                    f"{result['recalculated']}."
+                ),
+            )
+            return redirect_currency_change(obj)
+
         return super().response_change(request, obj)
 
 
