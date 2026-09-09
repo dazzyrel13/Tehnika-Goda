@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.templatetags.static import static as static_url
 from django.urls import include, path
+from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView, TemplateView
 from two_factor.admin import AdminSiteOTPRequired
 from two_factor.urls import urlpatterns as tf_urls
@@ -164,7 +165,7 @@ urlpatterns = [
 
     path(
         "sitemap.xml",
-        sitemap,
+        cache_page(60 * 60)(sitemap),
         {"sitemaps": sitemaps},
         name="django.contrib.sitemaps.views.sitemap",
     ),

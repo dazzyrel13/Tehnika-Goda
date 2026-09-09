@@ -11,6 +11,15 @@ logger = logging.getLogger(__name__)
 
 def persist_visit_event(payload: dict) -> None:
     """Create a VisitEvent from a serializable payload dict."""
+    vehicle_id = payload.get("vehicle_id")
+    slug = (payload.get("vehicle_slug") or "").strip()
+    if vehicle_id is None and slug:
+        from catalog.models import Vehicle
+
+        vehicle_id = (
+            Vehicle.objects.filter(slug=slug).values_list("id", flat=True).first()
+        )
+
     VisitEvent.objects.create(
         visitor_id=payload.get("visitor_id", ""),
         session_key=payload.get("session_key", ""),
@@ -21,15 +30,17 @@ def persist_visit_event(payload: dict) -> None:
         utm_source=payload.get("utm_source", ""),
         utm_medium=payload.get("utm_medium", ""),
         utm_campaign=payload.get("utm_campaign", ""),
-        vehicle_id=payload.get("vehicle_id"),
+        vehicle_id=vehicle_id,
         is_vehicle_page=bool(payload.get("is_vehicle_page", False)),
     )
 
 
-@shared_task(name="analytics.record_visit_event_task")
+@shared_task(
+    name="analytics.record_visit_event_task",
+    ignore_result=True,
+)
 def record_visit_event_task(payload: dict):
     persist_visit_event(payload)
-    return "ok"
 
 
 @shared_task(name="analytics.cleanup_old_visit_events_task")

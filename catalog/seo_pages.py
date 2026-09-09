@@ -29,6 +29,7 @@ def vehicles_for_car_model(car_model: CarModel) -> QuerySet:
         Vehicle.objects.filter(is_published=True)
         .filter(car_model_vehicle_filter(car_model))
         .select_related("brand", "category")
+        .defer("description", "specs")
         .order_by("-is_featured", "-created_at")
     )
 

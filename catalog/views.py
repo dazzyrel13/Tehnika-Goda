@@ -235,7 +235,10 @@ class VehicleListView(ListView):
                 | Q(description__icontains=q)
             )
 
-        return queryset.order_by("-is_featured", "-created_at")
+        queryset = queryset.order_by("-is_featured", "-created_at")
+        # Card templates never render description/specs; keep them only in SELECT
+        # when free-text search needs description in the WHERE clause is fine with defer.
+        return queryset.defer("description", "specs")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -443,7 +446,7 @@ class ModelLandingView(_SeoPagesFeatureMixin, ListView):
         context["brand_models"] = list(
             published_car_models_for_brand(brand).exclude(pk=car_model.pk)
         )
-        context["has_stock"] = self.get_queryset().exists()
+        context["has_stock"] = bool(context.get("object_list"))
         callout = model_empty_callout(brand.name, car_model.name)
         context["empty_callout"] = callout
         context["empty_intro"] = callout["text"]

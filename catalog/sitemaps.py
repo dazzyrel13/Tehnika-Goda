@@ -19,7 +19,7 @@ class VehicleSitemap(SiteUrlSitemap):
     priority = 0.9
 
     def items(self):
-        return Vehicle.objects.filter(is_published=True)
+        return Vehicle.objects.filter(is_published=True).only("slug", "updated_at")
 
     def lastmod(self, obj):
         return obj.updated_at

@@ -213,6 +213,7 @@ def _section_vehicles(root_slug: str, limit: int) -> list:
             category_id__in=root.subtree_ids(),
         )
         .select_related("brand", "category")
+        .defer("description", "specs")
         .order_by("-created_at")[:limit]
     )
 

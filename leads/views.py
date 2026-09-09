@@ -12,7 +12,6 @@ from django_ratelimit.decorators import ratelimit
 
 from .forms import InquiryForm
 from .models import Inquiry
-from .telegram import send_inquiry_notification
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +40,13 @@ def _safe_redirect(request, fallback="catalog:index"):
 
 
 def _pick_utm(request, key, max_len):
-    """Prefer POST (form hidden fields), then session."""
-    raw = (request.POST.get(key) or request.session.get(key) or "").strip()
+    """Prefer POST (form hidden fields), then analytics cookie, then session."""
+    raw = (
+        request.POST.get(key)
+        or request.COOKIES.get(key)
+        or request.session.get(key)
+        or ""
+    ).strip()
     return raw[:max_len]
 
 
@@ -126,12 +130,10 @@ def submit_inquiry(request):
     inquiry.utm_source = _pick_utm(request, "utm_source", 100)
     inquiry.utm_medium = _pick_utm(request, "utm_medium", 100)
     inquiry.utm_campaign = _pick_utm(request, "utm_campaign", 120)
+    from analytics.visitor import visitor_id_for_lead
+
     inquiry.session_key = request.session.session_key or ""
-    inquiry.visitor_id = (
-        request.session.get("analytics_visitor_id")
-        or request.session.session_key
-        or ""
-    )[:64]
+    inquiry.visitor_id = visitor_id_for_lead(request)
     try:
         inquiry.save()
     except Exception:
@@ -139,18 +141,18 @@ def submit_inquiry(request):
         logger.exception("Inquiry save failed (ip=%s)", client_ip)
         raise
 
-    # Prefer Celery so a slow/failed Telegram call cannot block or drop the lead UX.
+    # Prefer Celery so a slow/failed Telegram call cannot block the lead UX.
     try:
         from .tasks import send_inquiry_telegram_task
 
         send_inquiry_telegram_task.delay(inquiry.pk)
         logger.info("New inquiry saved (id=%s); telegram queued", inquiry.pk)
     except Exception:
+        # Never call Telegram inline on the web worker — timeout would stall Gunicorn.
         logger.exception(
-            "Telegram queue failed (id=%s); sending inline", inquiry.pk
+            "Telegram queue failed (id=%s); lead kept, notification not sent",
+            inquiry.pk,
         )
-        send_inquiry_notification(inquiry)
-        logger.info("New inquiry saved (id=%s)", inquiry.pk)
 
     if _is_ajax(request):
         return JsonResponse({"status": "success", "message": SUCCESS_MESSAGE})

@@ -1,13 +1,19 @@
-import hashlib
 import logging
 import re
 
 from django.conf import settings
 
-from catalog.models import Vehicle
 from core.admin_url import DEFAULT_ADMIN_URL_PREFIX
 
 from .tasks import persist_visit_event, record_visit_event_task
+from .visitor import (
+    UTM_KEYS,
+    VISITOR_COOKIE_NAME,
+    new_visitor_id,
+    read_visitor_id,
+    set_utm_cookie,
+    set_visitor_cookie,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +39,6 @@ class VisitAnalyticsMiddleware:
         "/manifest.json",
     )
     VEHICLE_PATH_RE = re.compile(r"^/catalog/vehicle/(?P<slug>[-a-zA-Z0-9_]+)/?$")
-    UTM_KEYS = ("utm_source", "utm_medium", "utm_campaign")
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -82,26 +87,26 @@ class VisitAnalyticsMiddleware:
             if hits > 90:
                 return
 
-        if not request.session.session_key:
-            request.session.save()
-        session_key = request.session.session_key or ""
+        visitor_id = read_visitor_id(request)
+        if not visitor_id:
+            visitor_id = new_visitor_id()
+            set_visitor_cookie(response, visitor_id)
+        elif not request.COOKIES.get(VISITOR_COOKIE_NAME):
+            # Migrate legacy session id onto the cookie once.
+            set_visitor_cookie(response, visitor_id)
 
-        visitor_id = self._build_visitor_id(session_key, ip_address, user_agent)
-        if request.session.get("analytics_visitor_id") != visitor_id:
-            request.session["analytics_visitor_id"] = visitor_id
+        # Prefer existing session key if present; never create/touch session for analytics.
+        session_key = ""
+        session_name = getattr(settings, "SESSION_COOKIE_NAME", "sessionid")
+        if session_name in request.COOKIES and getattr(request, "session", None) is not None:
+            session_key = request.session.session_key or ""
+
         referer = (request.META.get("HTTP_REFERER", "") or "")[:500]
-        utm = self._capture_utm(request)
+        utm = self._capture_utm(request, response)
 
-        vehicle_id = None
-        is_vehicle_page = False
         match = self.VEHICLE_PATH_RE.match(path)
-        if match:
-            is_vehicle_page = True
-            vehicle = (
-                Vehicle.objects.filter(slug=match.group("slug")).only("id").first()
-            )
-            if vehicle:
-                vehicle_id = vehicle.id
+        is_vehicle_page = bool(match)
+        vehicle_slug = match.group("slug") if match else ""
 
         store_ip = getattr(settings, "ANALYTICS_STORE_IP", False)
         payload = {
@@ -114,7 +119,8 @@ class VisitAnalyticsMiddleware:
             "utm_source": utm.get("utm_source", ""),
             "utm_medium": utm.get("utm_medium", ""),
             "utm_campaign": utm.get("utm_campaign", ""),
-            "vehicle_id": vehicle_id,
+            "vehicle_id": None,
+            "vehicle_slug": vehicle_slug,
             "is_vehicle_page": is_vehicle_page,
         }
         self._enqueue_or_persist(payload)
@@ -133,15 +139,22 @@ class VisitAnalyticsMiddleware:
         persist_visit_event(payload)
 
     @staticmethod
-    def _build_visitor_id(session_key, ip_address, user_agent):
-        raw = f"{session_key}|{ip_address or ''}|{user_agent}"
-        return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:32]
-
-    def _capture_utm(self, request):
+    def _capture_utm(request, response):
         utm = {}
-        for key in self.UTM_KEYS:
-            value = (request.GET.get(key) or "").strip()[:120]
-            if value:
-                request.session[key] = value
-            utm[key] = request.session.get(key, "")
+        session_name = getattr(settings, "SESSION_COOKIE_NAME", "sessionid")
+        has_session = session_name in request.COOKIES
+        for key in UTM_KEYS:
+            from_query = (request.GET.get(key) or "").strip()[:120]
+            if from_query:
+                set_utm_cookie(response, key, from_query)
+                utm[key] = from_query
+                continue
+            from_cookie = (request.COOKIES.get(key) or "").strip()[:120]
+            if from_cookie:
+                utm[key] = from_cookie
+                continue
+            if has_session and getattr(request, "session", None) is not None:
+                utm[key] = (request.session.get(key) or "")[:120]
+            else:
+                utm[key] = ""
         return utm
