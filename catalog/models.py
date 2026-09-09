@@ -251,6 +251,78 @@ class InspectionReport(models.Model):
         super().save(*args, **kwargs)
 
 
+class CurrencyRateSettings(models.Model):
+    """
+    Singleton: site-wide CNY rate.
+
+    Manual rate (if set) overrides the last successful CBR fetch.
+    """
+
+    manual_cny_rate = models.DecimalField(
+        "Ручной курс юаня",
+        max_digits=8,
+        decimal_places=4,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        help_text=(
+            "Рублей за 1 юань. Если заполнено — используется вместо ЦБ "
+            "(удобно, когда сайт ЦБ недоступен)."
+        ),
+    )
+    cbr_cny_rate = models.DecimalField(
+        "Курс ЦБ (CNY)",
+        max_digits=8,
+        decimal_places=4,
+        null=True,
+        blank=True,
+        editable=False,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    cbr_fetched_at = models.DateTimeField(
+        "Курс ЦБ обновлён",
+        null=True,
+        blank=True,
+        editable=False,
+    )
+    updated_at = models.DateTimeField("Обновлено", auto_now=True)
+
+    class Meta:
+        verbose_name = "Курс юаня"
+        verbose_name_plural = "Курс юаня"
+
+    def __str__(self):
+        return f"Курс юаня (эффективный {self.effective_rate()})"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return
+
+    @classmethod
+    def load(cls) -> "CurrencyRateSettings":
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def effective_rate(self) -> Decimal:
+        from .currency import FALLBACK_CNY_RATE
+
+        if self.manual_cny_rate is not None:
+            return Decimal(self.manual_cny_rate)
+        if self.cbr_cny_rate is not None:
+            return Decimal(self.cbr_cny_rate)
+        return FALLBACK_CNY_RATE
+
+    def rate_source_label(self) -> str:
+        if self.manual_cny_rate is not None:
+            return "ручной"
+        if self.cbr_cny_rate is not None:
+            return "ЦБ РФ"
+        return "запасной (12.48)"
+
+
 class EngineType(models.TextChoices):
     PETROL = "petrol", "Бензин"
     ELECTRIC = "electric", "Электрический"
@@ -296,6 +368,10 @@ class Vehicle(models.Model):
         null=True,
         blank=True,
         db_index=True,
+        help_text=(
+            "Если указана — рубли считаются автоматически по курсу сайта "
+            "(ручной или ЦБ). Оставьте пустым, чтобы зафиксировать только рубли."
+        ),
     )
     price_rub = models.DecimalField(
         "Цена, ₽",
@@ -303,18 +379,27 @@ class Vehicle(models.Model):
         decimal_places=0,
         blank=True,
         null=True,
-        help_text="Цена для сайта в рублях",
+        help_text=(
+            "Цена на сайте. При заполненной цене в юанях пересчитывается сама."
+        ),
         db_index=True,
     )
     cny_rate = models.DecimalField(
-        "Курс юаня",
+        "Курс юаня (на карточке)",
         max_digits=8,
         decimal_places=4,
         default=Decimal("12.48"),
         validators=[MinValueValidator(Decimal("0.01"))],
-        help_text="Рублей за 1 юань. Показывается под ценой на сайте.",
+        help_text=(
+            "Курс, с которым посчитана цена — показывается под ценой на сайте. "
+            "Общий курс задаётся в разделе «Курс юаня»."
+        ),
     )
-    is_currency_fixed = models.BooleanField("Зафиксировать цену", default=False)
+    is_currency_fixed = models.BooleanField(
+        "Цена только в рублях",
+        default=False,
+        help_text="Включается автоматически, если юани не заданы.",
+    )
 
     # Avito price sync (site → Avito)
     avito_item_id = models.BigIntegerField(
@@ -549,7 +634,27 @@ class Vehicle(models.Model):
             self.slug = build_unique_vehicle_slug(self.slug, pk=self.pk)
 
         update_fields = kwargs.get("update_fields")
-        touch_image = update_fields is None or "main_image" in update_fields
+        price_touch_fields = {
+            "price_cny",
+            "price_rub",
+            "cny_rate",
+            "is_currency_fixed",
+        }
+        should_price = update_fields is None or bool(
+            price_touch_fields.intersection(update_fields)
+        )
+        if should_price:
+            from .currency import apply_currency_pricing
+
+            pricing_changed = apply_currency_pricing(self)
+            if update_fields is not None and pricing_changed:
+                kwargs["update_fields"] = list(
+                    set(update_fields) | set(pricing_changed)
+                )
+
+        touch_image = update_fields is None or "main_image" in (
+            kwargs.get("update_fields") or update_fields or []
+        )
         old_image_name = ""
         if touch_image and self.pk:
             old_image_name = (

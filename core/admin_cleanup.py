@@ -10,6 +10,7 @@ KEEP_LABELS = {
     "catalog.category",
     "catalog.vehicle",
     "catalog.inspectionreport",
+    "catalog.currencyratesettings",
     "content.review",
     "content.reviewplatformsettings",
     "leads.inquiry",

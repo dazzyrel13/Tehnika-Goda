@@ -1,0 +1,25 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block submit_buttons_bottom %}
+{{ block.super }}
+<div class="submit-row" style="margin-top: 0.75rem;">
+  <input
+    type="submit"
+    name="_fetch_cbr"
+    value="Обновить курс с ЦБ"
+    class="default"
+    style="background: #417690;"
+  >
+  <input
+    type="submit"
+    name="_recalc_cny"
+    value="Пересчитать все цены из юаней"
+    style="background: #666;"
+  >
+</div>
+<p class="help" style="margin-top: 0.5rem;">
+  «Обновить с ЦБ» не трогает ручной курс. «Пересчитать» сохраняет форму и обновляет
+  рубли у всех авто, где указана цена в юанях.
+</p>
+{% endblock %}

@@ -16,6 +16,7 @@ from .models import (
     Brand,
     CarModel,
     Category,
+    CurrencyRateSettings,
     EngineType,
     InspectionReport,
     Vehicle,
@@ -31,6 +32,108 @@ from .listing_ingest import (
     ingest_listing,
 )
 from .parser_service import EliteVehicleParser
+
+
+@admin.register(CurrencyRateSettings)
+class CurrencyRateSettingsAdmin(admin.ModelAdmin):
+    change_form_template = "admin/catalog/currencyratesettings/change_form.html"
+    readonly_fields = (
+        "cbr_cny_rate",
+        "cbr_fetched_at",
+        "effective_rate_display",
+        "updated_at",
+    )
+    fieldsets = (
+        (
+            "Курс для пересчёта цен",
+            {
+                "fields": (
+                    "manual_cny_rate",
+                    "effective_rate_display",
+                    ("cbr_cny_rate", "cbr_fetched_at"),
+                    "updated_at",
+                ),
+                "description": (
+                    "Приоритет: ручной курс (если заполнен) → курс ЦБ → запасной 12.48. "
+                    "Авто с ценой в юанях пересчитывают рубли по эффективному курсу. "
+                    "Если ЦБ недоступен — укажите курс вручную и нажмите "
+                    "«Пересчитать все цены из юаней»."
+                ),
+            },
+        ),
+    )
+
+    @admin.display(description="Эффективный курс сейчас")
+    def effective_rate_display(self, obj):
+        if obj is None or obj.pk is None:
+            return "—"
+        return f"{obj.effective_rate()} ₽/¥ ({obj.rate_source_label()})"
+
+    def has_add_permission(self, request):
+        return not CurrencyRateSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        from django.shortcuts import redirect
+        from django.urls import reverse
+
+        obj = CurrencyRateSettings.load()
+        return redirect(
+            reverse(
+                f"admin:{obj._meta.app_label}_{obj._meta.model_name}_change",
+                args=[obj.pk],
+            )
+        )
+
+    def response_change(self, request, obj):
+        from django.utils import timezone
+
+        from .cbr import CbrRateError, fetch_cbr_cny_rate
+        from .currency import recalculate_all_cny_prices
+
+        if "_fetch_cbr" in request.POST:
+            try:
+                rate = fetch_cbr_cny_rate()
+            except CbrRateError as exc:
+                self.message_user(request, str(exc), level=messages.ERROR)
+            else:
+                obj.cbr_cny_rate = rate
+                obj.cbr_fetched_at = timezone.now()
+                obj.save(update_fields=["cbr_cny_rate", "cbr_fetched_at", "updated_at"])
+                self.message_user(
+                    request,
+                    f"Курс ЦБ обновлён: {rate} ₽/¥. "
+                    f"Эффективный сейчас: {obj.effective_rate()} ({obj.rate_source_label()}).",
+                )
+            return redirect_currency_change(obj)
+
+        if "_recalc_cny" in request.POST:
+            # Form already saved by changeform_view before response_change.
+            obj.refresh_from_db()
+            updated = recalculate_all_cny_prices()
+            invalidate_vehicle_public_caches()
+            self.message_user(
+                request,
+                f"Пересчитано авто с ценой в юанях: {updated}. "
+                f"Курс: {obj.effective_rate()} ({obj.rate_source_label()}).",
+            )
+            return redirect_currency_change(obj)
+
+        return super().response_change(request, obj)
+
+
+def redirect_currency_change(obj):
+    from django.shortcuts import redirect
+    from django.urls import reverse
+
+    return redirect(
+        reverse(
+            f"admin:{obj._meta.app_label}_{obj._meta.model_name}_change",
+            args=[obj.pk],
+        )
+    )
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -84,7 +187,6 @@ class VehicleAdminForm(forms.ModelForm):
             "slug",
             "model",
             "specs",
-            "price_cny",
             "is_currency_fixed",
             "badge_text",
         )
@@ -95,14 +197,20 @@ class VehicleAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["title"].help_text = "Например: Zeekr 001 2024 FR"
+        self.fields["price_cny"].label = "Цена, ¥ (юани)"
+        self.fields["price_cny"].help_text = (
+            "Основная цена в юанях. Рубли на сайте посчитаются по курсу из раздела «Курс юаня». "
+            "Оставьте пустым, если нужна фиксированная цена только в рублях."
+        )
         self.fields["price_rub"].label = "Цена, ₽"
         self.fields["price_rub"].help_text = (
-            "Цена для сайта в рублях. Рядом укажите курс юаня — он выводится под ценой. "
+            "Цена для сайта. Если заполнены юани — пересчитается при сохранении. "
             "Если указан ID Авито — цена уйдёт на Авито после сохранения."
         )
-        self.fields["cny_rate"].label = "Курс юаня"
+        self.fields["cny_rate"].label = "Курс на карточке"
         self.fields["cny_rate"].help_text = (
-            "Сколько рублей за 1 юань. На сайте: «по курсу 12.48»."
+            "Подставляется автоматически при пересчёте из юаней. "
+            "Общий курс меняйте в разделе «Курс юаня»."
         )
         self.fields["main_image"].label = "Основное фото (обложка)"
         self.fields["main_image"].help_text = (
@@ -289,7 +397,11 @@ class VehicleAdmin(admin.ModelAdmin):
         "hide_from_home_selected",
         "sync_avito_price_now",
     ]
-    readonly_fields = ("avito_price_synced_at", "avito_price_sync_error")
+    readonly_fields = (
+        "avito_price_synced_at",
+        "avito_price_sync_error",
+        "cny_rate",
+    )
 
     fieldsets = (
         (
@@ -313,20 +425,20 @@ class VehicleAdmin(admin.ModelAdmin):
             "Цена и статус",
             {
                 "fields": (
-                    ("price_rub", "cny_rate"),
+                    ("price_cny", "price_rub"),
+                    "cny_rate",
                     "avito_item_id",
                     ("avito_price_synced_at", "avito_price_sync_error"),
                     ("is_published", "show_on_home", "is_new", "is_featured"),
                 ),
                 "description": (
+                    "Цена в юанях → рубли считаются по курсу из раздела «Курс юаня». "
+                    "Только рубли (юани пустые) → цена на сайте фиксированная. "
                     "Новые карточки и импорт по умолчанию скрыты. "
                     "«Опубликовано» — видно в каталоге. "
-                    "«На главной» — блок на главной (включается само; снимите, если только каталог). "
-                    "«Новые» — плашка и фильтр «Новые» (пробег 0–3 тыс. км ок). "
-                    "«Выкупленный» — плашка и фильтр «Выкупленные». "
-                    "Обе галочки можно включить одновременно — две плашки и оба фильтра. "
-                    "Курс юаня меняйте, когда цена в рублях уже не совпадает с расчётом. "
-                    "Авито: укажите ID или ссылку объявления — при смене цены она уйдёт на Авито."
+                    "«На главной» — блок на главной. "
+                    "«Новые» / «Выкупленный» — плашки и фильтры. "
+                    "Авито: укажите ID или ссылку — при смене цены она уйдёт на Авито."
                 ),
             },
         ),
