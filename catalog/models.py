@@ -361,7 +361,7 @@ class Vehicle(models.Model):
 
     # Pricing
     price_cny = models.DecimalField(
-        "Цена в CNY",
+        "Цена, ¥",
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(0)],

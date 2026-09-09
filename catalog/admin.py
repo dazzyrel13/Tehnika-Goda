@@ -367,6 +367,7 @@ class VehicleAdmin(admin.ModelAdmin):
         "title",
         "brand",
         "year",
+        "price_cny",
         "price_rub",
         "is_published",
         "show_on_home",
@@ -386,7 +387,14 @@ class VehicleAdmin(admin.ModelAdmin):
     search_fields = ("title", "brand__name", "model", "description", "color")
     autocomplete_fields = ("brand", "category", "report")
     inlines = [VehicleImageInline]
-    list_editable = ("is_published", "show_on_home", "is_new", "is_featured", "price_rub")
+    list_editable = (
+        "is_published",
+        "show_on_home",
+        "is_new",
+        "is_featured",
+        "price_cny",
+        "price_rub",
+    )
     list_per_page = 25
     save_on_top = False
     actions = [
