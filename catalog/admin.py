@@ -30,6 +30,7 @@ from .listing_ingest import (
     create_vehicle_draft,
     get_or_create_brand,
     ingest_listing,
+    sync_main_image_from_gallery,
 )
 from .parser_service import EliteVehicleParser
 
@@ -235,8 +236,8 @@ class VehicleAdminForm(forms.ModelForm):
             )
         self.fields["main_image"].label = "Основное фото (обложка)"
         self.fields["main_image"].help_text = (
-            "Крупное фото на карточке и первое в галерее внутри объявления. "
-            "Если пусто — возьмём первое фото из пачки ниже."
+            "Обложка в списке и на главной. Можно не трогать: после сохранения "
+            "сюда подставится первое фото из галереи (перетащите нужное на первое место)."
         )
         self.fields["mileage"].help_text = "0 — для новых авто"
         self.fields["engine_type"].choices = [("", "Не указан")] + list(
@@ -536,7 +537,7 @@ class VehicleAdmin(admin.ModelAdmin):
                 self.message_user(
                     request,
                     f"В галерею добавлено фото: {added}. "
-                    "Перетащите строки, если нужно изменить порядок, и сохраните ещё раз.",
+                    "Перетащите нужное на первое место и сохраните — оно станет обложкой.",
                 )
             if skipped:
                 self.message_user(
@@ -544,6 +545,13 @@ class VehicleAdmin(admin.ModelAdmin):
                     f"Пропущено файлов (не изображение): {skipped}.",
                     level=messages.WARNING,
                 )
+
+        # First gallery photo (after drag-reorder) becomes homepage / list cover.
+        if sync_main_image_from_gallery(vehicle):
+            self.message_user(
+                request,
+                "Основное фото обновлено по первому снимку в галерее.",
+            )
 
     def display_image(self, obj):
         if obj.main_image:

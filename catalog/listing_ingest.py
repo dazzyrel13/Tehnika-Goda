@@ -438,8 +438,34 @@ def attach_vehicle_images(vehicle: Vehicle, uploads) -> tuple[int, int]:
         first = vehicle.gallery.order_by("order", "id").first()
         if first and first.image:
             vehicle.main_image = first.image
-            vehicle.save(update_fields=["main_image"])
+            vehicle.save(update_fields=["main_image"], skip_image_queue=True)
     return added, skipped
+
+
+def sync_main_image_from_gallery(vehicle: Vehicle) -> bool:
+    """
+    Make the first gallery photo (by order) the site cover / list thumbnail.
+    Returns True when main_image was updated.
+    """
+    first = (
+        vehicle.gallery.exclude(image="")
+        .exclude(image__isnull=True)
+        .order_by("order", "id")
+        .first()
+    )
+    if not first or not first.image:
+        return False
+    new_name = (first.image.name or "").strip()
+    if not new_name:
+        return False
+    old_name = (
+        (vehicle.main_image.name or "").strip() if vehicle.main_image else ""
+    )
+    if new_name == old_name:
+        return False
+    vehicle.main_image = first.image
+    vehicle.save(update_fields=["main_image"], skip_image_queue=True)
+    return True
 
 
 def _read_upload(image: UploadedFile) -> bytes | None:

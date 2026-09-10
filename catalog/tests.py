@@ -1218,6 +1218,59 @@ class VehicleAdminGalleryGridTests(TestCase):
         self.assertContains(response, "vehicleimage_inline_sort.js")
 
 
+class SyncMainImageFromGalleryTests(TestCase):
+    def test_first_gallery_photo_becomes_main_image(self):
+        import tempfile
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.test import override_settings
+        from PIL import Image
+
+        from catalog.listing_ingest import sync_main_image_from_gallery
+
+        media_root = tempfile.mkdtemp()
+        self.addCleanup(lambda: __import__("shutil").rmtree(media_root, ignore_errors=True))
+
+        def _jpeg(name, color):
+            buf = BytesIO()
+            Image.new("RGB", (80, 60), color).save(buf, format="JPEG")
+            buf.seek(0)
+            return SimpleUploadedFile(name, buf.read(), content_type="image/jpeg")
+
+        with override_settings(
+            MEDIA_ROOT=media_root, IMAGE_PROCESSING_ASYNC=False
+        ):
+            brand = Brand.objects.create(name="CoverBrand", slug="coverbrand")
+            category, _ = Category.objects.get_or_create(
+                slug="cars", defaults={"name": "Cars"}
+            )
+            vehicle = Vehicle.objects.create(
+                title="Cover Car",
+                brand=brand,
+                category=category,
+                year=2024,
+                slug="cover-car-sync",
+                main_image=_jpeg("old-cover.jpg", (10, 10, 10)),
+            )
+            VehicleImage.objects.create(
+                vehicle=vehicle,
+                image=_jpeg("second.jpg", (200, 0, 0)),
+                order=2,
+            )
+            first = VehicleImage.objects.create(
+                vehicle=vehicle,
+                image=_jpeg("first.jpg", (0, 200, 0)),
+                order=1,
+            )
+            self.assertTrue(sync_main_image_from_gallery(vehicle))
+            vehicle.refresh_from_db()
+            self.assertEqual(vehicle.main_image.name, first.image.name)
+            self.assertFalse(sync_main_image_from_gallery(vehicle))
+            vehicle.gallery.all().delete()
+            vehicle.delete()
+
+
 class SpecSheetParseTests(TestCase):
     SAMPLE = (
         "[Название автомобиля] Volkswagen Bora (099526)\n"
