@@ -570,11 +570,24 @@ class Vehicle(models.Model):
             "fuel",
             "enginetype",
             "vehicleengine",
+            # Internal / Avito import plumbing — never show on the public card.
+            "avitoimageurls",
         }
     )
     EXTRA_SPEC_LABELS = {
         "enginevol": "Объём двигателя",
+        "enginesize": "Объём двигателя",
         "range": "Запас хода",
+        "generation": "Поколение",
+        "modification": "Модификация",
+        "complectation": "Комплектация",
+        "vin": "VIN",
+        "owners": "Владельцев по ПТС",
+        "pts": "ПТС",
+        "drive": "Привод",
+        "doors": "Дверей",
+        "wheel": "Руль",
+        "accident": "Состояние",
     }
 
     @property
@@ -583,13 +596,22 @@ class Vehicle(models.Model):
         specs = self.specs if isinstance(self.specs, dict) else {}
         cards: list[tuple[str, str]] = []
         for key, value in specs.items():
+            key_str = str(key or "").strip()
+            # Hidden/internal keys (e.g. _avito_image_urls).
+            if key_str.startswith("_"):
+                continue
+            if isinstance(value, (list, dict, tuple)):
+                continue
             text = str(value or "").strip()
             if not text:
                 continue
-            norm = "".join(ch for ch in str(key).lower() if ch.isalnum())
+            # Guard: raw URL dumps accidentally stored as a string.
+            if text.startswith("[") and "http" in text.lower():
+                continue
+            norm = "".join(ch for ch in key_str.lower() if ch.isalnum())
             if norm in self.EXTRA_SPEC_SKIP:
                 continue
-            label = self.EXTRA_SPEC_LABELS.get(norm) or str(key)
+            label = self.EXTRA_SPEC_LABELS.get(norm) or key_str
             cards.append((label, text))
         return cards
 

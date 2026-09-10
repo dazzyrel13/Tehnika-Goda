@@ -1271,6 +1271,32 @@ class SyncMainImageFromGalleryTests(TestCase):
             vehicle.delete()
 
 
+class ExtraSpecCardsDisplayTests(TestCase):
+    def test_hides_avito_internal_specs_and_labels_russian(self):
+        vehicle = Vehicle(
+            specs={
+                "_avito_image_urls": [
+                    "https://avito.ru/autoload/1.jpg",
+                    "https://avito.ru/autoload/2.jpg",
+                ],
+                "engine_size": "1.5",
+                "complectation": "Luxury",
+                "generation": "I (2024—2026)",
+                "color": "Белый",
+                "vin": "XTA123",
+            }
+        )
+        cards = dict(vehicle.extra_spec_cards)
+        self.assertNotIn("_avito_image_urls", cards)
+        self.assertFalse(any("http" in str(v).lower() for v in cards.values()))
+        self.assertEqual(cards.get("Объём двигателя"), "1.5")
+        self.assertEqual(cards.get("Комплектация"), "Luxury")
+        self.assertEqual(cards.get("Поколение"), "I (2024—2026)")
+        self.assertEqual(cards.get("VIN"), "XTA123")
+        self.assertNotIn("color", cards)
+        self.assertNotIn("Цвет", cards)
+
+
 class SpecSheetParseTests(TestCase):
     SAMPLE = (
         "[Название автомобиля] Volkswagen Bora (099526)\n"
