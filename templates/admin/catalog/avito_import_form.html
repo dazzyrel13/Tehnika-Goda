@@ -12,10 +12,9 @@
 <div class="tg-parse tg-parse--wide">
   <h1>Импорт с Авито (Excel)</h1>
   <p class="tg-parse__lead">
-    Загрузите файл автозагрузки Авито (.xlsx). Новые авто создаются как
-    <strong>черновики</strong> сразу с ID Авито и описанием в формате таблицы
-    ([Поле] значение). Если машина уже на сайте — при необходимости допишется
-    Avito ID, догрузятся фото и описание переведётся в шаблон.
+    Загрузите файл автозагрузки Авито (.xlsx). Карточки создаются быстро;
+    фото качаются <strong>в фоне</strong> (Celery), чтобы страница не зависала.
+    Если машина уже на сайте — при необходимости допишется Avito ID и описание.
   </p>
 
   {% if report %}
@@ -78,8 +77,12 @@
     </label>
     <label style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
       <input type="checkbox" name="no_photos" value="1" {% if no_photos %}checked{% endif %}>
-      Без фото
+      Без фото (только карточки)
     </label>
+    <p class="tg-parse__hint">
+      Фото по умолчанию ставятся в очередь воркера. Если фото так и не появятся —
+      CDN Авито может блокировать сервер; тогда грузите снимки вручную в карточке.
+    </p>
 
     <div class="tg-parse__actions">
       <button type="submit" class="tg-parse__submit">Импортировать</button>

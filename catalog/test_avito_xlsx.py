@@ -197,8 +197,8 @@ class AvitoXlsxImportTests(TestCase):
         self.assertEqual(report.skipped, 1)
         self.assertIn("другой AvitoId", report.skipped_reasons[0])
 
-    @patch("catalog.avito_xlsx._download_images", return_value=([], []))
-    def test_creates_unpublished_draft(self, _mock_photos):
+    @patch("catalog.avito_xlsx.enqueue_avito_photo_fetch")
+    def test_creates_unpublished_draft(self, _mock_enqueue):
         buf = _build_avito_xlsx(
             [
                 {
@@ -215,12 +215,14 @@ class AvitoXlsxImportTests(TestCase):
                     "Transmission": "Робот",
                     "FuelType": "Бензин",
                     "Power": "150",
+                    "ImageUrls": "https://avito.ru/autoload/a.jpg | https://avito.ru/autoload/b.jpg",
                 }
             ]
         )
-        report = import_avito_xlsx(buf, dry_run=False, download_photos=True)
+        report = import_avito_xlsx(buf, dry_run=False, photo_mode="async")
         self.assertEqual(report.created, 1)
         self.assertEqual(report.skipped, 0)
+        self.assertEqual(report.photos_queued, 1)
         vehicle = Vehicle.objects.get(pk=report.created_ids[0])
         self.assertFalse(vehicle.is_published)
         self.assertEqual(vehicle.avito_item_id, 555444333)
@@ -229,6 +231,8 @@ class AvitoXlsxImportTests(TestCase):
         self.assertIsNone(vehicle.price_cny)
         self.assertNotIn("<script>", vehicle.description)
         self.assertIn("[Название автомобиля] Volkswagen Lavida", vehicle.description)
+        self.assertIn("_avito_image_urls", vehicle.specs)
+        _mock_enqueue.assert_called_once_with(vehicle.pk)
 
     def test_dry_run_does_not_create(self):
         buf = _build_avito_xlsx(
@@ -325,9 +329,37 @@ class AvitoXlsxImportTests(TestCase):
                 }
             ]
         )
-        report = import_avito_xlsx(buf, dry_run=False, download_photos=False)
+        report = import_avito_xlsx(buf, dry_run=False, photo_mode="off")
         self.assertEqual(report.created, 0)
         self.assertEqual(report.descriptions_updated, 1)
         vehicle.refresh_from_db()
         self.assertIn("[Название автомобиля]", vehicle.description)
         self.assertIn("[Год выпуска] 2022", vehicle.description)
+
+    @patch("catalog.avito_xlsx._attach_listing_photos", return_value=(2, []))
+    def test_fetch_avito_photos_for_vehicle(self, mock_attach):
+        from catalog.avito_xlsx import (
+            AVITO_IMAGE_URLS_KEY,
+            fetch_avito_photos_for_vehicle,
+            store_avito_image_urls,
+        )
+
+        vehicle = Vehicle.objects.create(
+            title="Photo Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            mileage=1,
+            color="Белый",
+            price_rub=1,
+            slug="photo-car-fetch",
+            specs={},
+        )
+        store_avito_image_urls(
+            vehicle, ["https://avito.ru/autoload/1.jpg", "https://avito.ru/autoload/2.jpg"]
+        )
+        added = fetch_avito_photos_for_vehicle(vehicle.pk)
+        self.assertEqual(added, 2)
+        mock_attach.assert_called_once()
+        vehicle.refresh_from_db()
+        self.assertNotIn(AVITO_IMAGE_URLS_KEY, vehicle.specs or {})

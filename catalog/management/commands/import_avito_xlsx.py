@@ -7,7 +7,8 @@ from catalog.cache_helpers import invalidate_vehicle_public_caches
 class Command(BaseCommand):
     help = (
         "Import Avito autoload .xlsx into unpublished vehicle drafts. "
-        "Skips rows that already exist (AvitoId or title/year/mileage/color)."
+        "Skips rows that already exist (AvitoId or title/year/mileage/color). "
+        "Photos are queued to Celery by default."
     )
 
     def add_arguments(self, parser):
@@ -20,16 +21,28 @@ class Command(BaseCommand):
         parser.add_argument(
             "--no-photos",
             action="store_true",
-            help="Do not download ImageUrls.",
+            help="Do not download or queue ImageUrls.",
+        )
+        parser.add_argument(
+            "--sync-photos",
+            action="store_true",
+            help="Download photos inline (slow; can hang for large feeds).",
         )
 
     def handle(self, *args, **options):
+        if options["no_photos"]:
+            mode = "off"
+        elif options["sync_photos"]:
+            mode = "sync"
+        else:
+            mode = "async"
+
         path = options["xlsx_path"]
         try:
             report = import_avito_xlsx(
                 path,
                 dry_run=options["dry_run"],
-                download_photos=not options["no_photos"],
+                photo_mode=mode,
             )
         except Exception as exc:
             raise CommandError(str(exc)) from exc
@@ -56,6 +69,7 @@ class Command(BaseCommand):
             report.created
             or report.linked
             or report.photos_filled
+            or report.photos_queued
             or report.descriptions_updated
         ):
             invalidate_vehicle_public_caches()
@@ -66,4 +80,10 @@ class Command(BaseCommand):
         if report.linked:
             self.stdout.write(
                 self.style.SUCCESS(f"Привязан Avito ID к: {report.linked_ids}")
+            )
+        if report.photos_queued:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Фото в очереди Celery: {report.photos_queued} авто"
+                )
             )

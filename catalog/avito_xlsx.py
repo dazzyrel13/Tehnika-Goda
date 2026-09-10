@@ -34,6 +34,9 @@ logger = logging.getLogger(__name__)
 
 SHEET_NAME = "Автомобили-С пробегом"
 MAX_IMAGE_BYTES = 15 * 1024 * 1024
+# Fail fast: hung CDN must not block import for minutes per URL.
+IMAGE_FETCH_TIMEOUT = (5, 12)
+AVITO_IMAGE_URLS_KEY = "_avito_image_urls"
 IMAGE_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -88,6 +91,7 @@ class ImportReport:
     skipped: int = 0
     linked: int = 0
     photos_filled: int = 0
+    photos_queued: int = 0
     descriptions_updated: int = 0
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
@@ -99,7 +103,7 @@ class ImportReport:
     def summary(self) -> str:
         return (
             f"Создано: {self.created}, привязан Avito ID: {self.linked}, "
-            f"фото догружено: {self.photos_filled}, "
+            f"фото в очередь: {self.photos_queued}, фото сразу: {self.photos_filled}, "
             f"описание обновлено: {self.descriptions_updated}, "
             f"пропущено: {self.skipped}, "
             f"ошибок: {len(self.errors)}, предупреждений: {len(self.warnings)}."
@@ -396,7 +400,7 @@ def _fetch_image_bytes(url: str) -> bytes:
         with session.get(
             current,
             allow_redirects=False,
-            timeout=45,
+            timeout=IMAGE_FETCH_TIMEOUT,
             headers=IMAGE_HEADERS,
             stream=True,
         ) as resp:
@@ -418,6 +422,34 @@ def _fetch_image_bytes(url: str) -> bytes:
                 chunks.append(chunk)
             return b"".join(chunks)
     raise ValueError("Too many redirects")
+
+
+def store_avito_image_urls(vehicle: Vehicle, urls: list[str]) -> None:
+    specs = dict(vehicle.specs or {}) if isinstance(vehicle.specs, dict) else {}
+    specs[AVITO_IMAGE_URLS_KEY] = list(urls)[:MAX_GALLERY_UPLOADS]
+    vehicle.specs = specs
+    vehicle.save(update_fields=["specs"], skip_image_queue=True)
+
+
+def clear_avito_image_urls(vehicle: Vehicle) -> None:
+    specs = dict(vehicle.specs or {}) if isinstance(vehicle.specs, dict) else {}
+    if AVITO_IMAGE_URLS_KEY not in specs:
+        return
+    specs.pop(AVITO_IMAGE_URLS_KEY, None)
+    vehicle.specs = specs
+    vehicle.save(update_fields=["specs"], skip_image_queue=True)
+
+
+def enqueue_avito_photo_fetch(vehicle_id: int) -> None:
+    from .tasks import fetch_avito_vehicle_photos_task
+
+    try:
+        fetch_avito_vehicle_photos_task.delay(vehicle_id)
+    except Exception:
+        logger.exception(
+            "Avito photo queue failed for vehicle %s; running inline", vehicle_id
+        )
+        fetch_avito_photos_for_vehicle(vehicle_id)
 
 
 def _download_images(urls: list[str]) -> tuple[list[SimpleUploadedFile], list[str]]:
@@ -449,11 +481,11 @@ def _download_images(urls: list[str]) -> tuple[list[SimpleUploadedFile], list[st
 
 
 def _attach_listing_photos(
-    vehicle: Vehicle, listing: AvitoListing
+    vehicle: Vehicle, urls: list[str]
 ) -> tuple[int, list[str]]:
-    if not listing.image_urls:
+    if not urls:
         return 0, []
-    uploads, warnings = _download_images(listing.image_urls)
+    uploads, warnings = _download_images(urls)
     if not uploads:
         return 0, warnings
     added, skipped = attach_vehicle_images(vehicle, uploads)
@@ -462,27 +494,85 @@ def _attach_listing_photos(
     return added, warnings
 
 
+def fetch_avito_photos_for_vehicle(vehicle_id: int) -> int:
+    """
+    Download pending Avito ImageUrls for one vehicle (Celery or inline).
+    Returns number of photos attached.
+    """
+    try:
+        vehicle = Vehicle.objects.get(pk=vehicle_id)
+    except Vehicle.DoesNotExist:
+        logger.warning("Avito photos: vehicle %s not found", vehicle_id)
+        return 0
+
+    if not vehicle_needs_photos(vehicle):
+        clear_avito_image_urls(vehicle)
+        return 0
+
+    specs = vehicle.specs if isinstance(vehicle.specs, dict) else {}
+    urls = list(specs.get(AVITO_IMAGE_URLS_KEY) or [])
+    if not urls:
+        return 0
+
+    added, warnings = _attach_listing_photos(vehicle, urls)
+    for warning in warnings:
+        logger.info("Avito photos vehicle=%s: %s", vehicle_id, warning)
+    if added:
+        clear_avito_image_urls(vehicle)
+    return added
+
+
+def queue_or_fetch_photos(
+    vehicle: Vehicle,
+    urls: list[str],
+    *,
+    mode: str,
+) -> tuple[str, list[str]]:
+    """
+    mode: off | async | sync
+    Returns (action, warnings) where action is '', 'queued', or 'filled'.
+    """
+    if mode == "off" or not urls:
+        return "", []
+    if not vehicle_needs_photos(vehicle):
+        return "", []
+
+    store_avito_image_urls(vehicle, urls)
+    if mode == "async":
+        enqueue_avito_photo_fetch(vehicle.pk)
+        return "queued", []
+
+    added, warnings = _attach_listing_photos(vehicle, urls)
+    if added:
+        clear_avito_image_urls(vehicle)
+        return "filled", warnings
+    return "", warnings
+
+
 def enrich_existing_vehicle(
     vehicle: Vehicle,
     listing: AvitoListing,
     *,
-    download_photos: bool,
+    photo_mode: str,
     update_description: bool = True,
 ) -> tuple[list[str], dict[str, bool]]:
     """Fill missing Avito photos / reformat description on an existing row."""
     warnings: list[str] = []
-    changed = {"photos": False, "description": False}
+    changed = {"photos": False, "photos_queued": False, "description": False}
 
     if update_description and description_needs_reformat(vehicle.description):
         vehicle.description = build_spec_description(listing)
         vehicle.save(update_fields=["description"], skip_image_queue=True)
         changed["description"] = True
 
-    if download_photos and vehicle_needs_photos(vehicle):
-        added, photo_warnings = _attach_listing_photos(vehicle, listing)
-        warnings.extend(photo_warnings)
-        if added:
-            changed["photos"] = True
+    action, photo_warnings = queue_or_fetch_photos(
+        vehicle, listing.image_urls, mode=photo_mode
+    )
+    warnings.extend(photo_warnings)
+    if action == "filled":
+        changed["photos"] = True
+    elif action == "queued":
+        changed["photos_queued"] = True
 
     return warnings, changed
 
@@ -490,7 +580,7 @@ def enrich_existing_vehicle(
 def create_from_listing(
     listing: AvitoListing,
     *,
-    download_photos: bool = True,
+    photo_mode: str = "async",
 ) -> tuple[Vehicle, list[str]]:
     brand, _ = get_or_create_brand(listing.make)
     category, _ = get_or_create_category(
@@ -521,20 +611,41 @@ def create_from_listing(
         vehicle.avito_item_id = listing.avito_id
         vehicle.save(update_fields=["avito_item_id"], skip_image_queue=True)
 
-    if download_photos and listing.image_urls:
-        added, photo_warnings = _attach_listing_photos(vehicle, listing)
-        warnings.extend(photo_warnings)
-        if not added and listing.image_urls:
-            warnings.append("фото не прикрепились.")
+    action, photo_warnings = queue_or_fetch_photos(
+        vehicle, listing.image_urls, mode=photo_mode
+    )
+    warnings.extend(photo_warnings)
+    if action == "queued":
+        warnings.append("фото поставлены в очередь Celery.")
+    elif action != "filled" and listing.image_urls and photo_mode != "off":
+        warnings.append("фото не прикрепились.")
     return vehicle, warnings
+
+
+def _resolve_photo_mode(
+    *,
+    download_photos: bool | None = None,
+    photo_mode: str | None = None,
+) -> str:
+    if photo_mode in {"off", "async", "sync"}:
+        return photo_mode
+    if download_photos is False:
+        return "off"
+    if download_photos is True:
+        return "async"
+    return "async"
 
 
 def import_avito_listings(
     listings: list[AvitoListing],
     *,
     dry_run: bool = False,
-    download_photos: bool = True,
+    download_photos: bool | None = None,
+    photo_mode: str | None = None,
 ) -> ImportReport:
+    mode = _resolve_photo_mode(
+        download_photos=download_photos, photo_mode=photo_mode
+    )
     report = ImportReport()
     vehicles = list(
         Vehicle.objects.select_related("brand").only(
@@ -547,6 +658,7 @@ def import_avito_listings(
             "avito_item_id",
             "description",
             "main_image",
+            "specs",
             "brand__name",
         )
     )
@@ -589,8 +701,8 @@ def import_avito_listings(
                 if dry_run:
                     if description_needs_reformat(existing.description):
                         report.descriptions_updated += 1
-                    if download_photos and vehicle_needs_photos(existing):
-                        report.photos_filled += 1
+                    if mode != "off" and vehicle_needs_photos(existing):
+                        report.photos_queued += 1
                     if not linked_now:
                         report.skipped += 1
                         report.skipped_reasons.append(
@@ -602,13 +714,15 @@ def import_avito_listings(
                 warnings, changed = enrich_existing_vehicle(
                     existing,
                     listing,
-                    download_photos=download_photos,
+                    photo_mode=mode,
                 )
                 report.warnings.extend(
                     f"Строка {listing.row_number}: {w}" for w in warnings
                 )
                 if changed["photos"]:
                     report.photos_filled += 1
+                if changed.get("photos_queued"):
+                    report.photos_queued += 1
                 if changed["description"]:
                     report.descriptions_updated += 1
 
@@ -633,6 +747,8 @@ def import_avito_listings(
                     extras = []
                     if changed["photos"]:
                         extras.append("фото догружены")
+                    if changed.get("photos_queued"):
+                        extras.append("фото в очередь")
                     if changed["description"]:
                         extras.append("описание в шаблон")
                     if extras:
@@ -645,11 +761,11 @@ def import_avito_listings(
                 report.created_ids.append(0)
                 continue
 
-            vehicle, warnings = create_from_listing(
-                listing, download_photos=download_photos
-            )
+            vehicle, warnings = create_from_listing(listing, photo_mode=mode)
             report.created += 1
             report.created_ids.append(vehicle.pk)
+            if any("очередь" in w for w in warnings):
+                report.photos_queued += 1
             report.warnings.extend(
                 f"Строка {listing.row_number}: {w}" if not w.startswith("Строка") else w
                 for w in warnings
@@ -668,9 +784,13 @@ def import_avito_xlsx(
     source: str | Path | BinaryIO,
     *,
     dry_run: bool = False,
-    download_photos: bool = True,
+    download_photos: bool | None = None,
+    photo_mode: str | None = None,
 ) -> ImportReport:
     listings = parse_avito_xlsx(source)
     return import_avito_listings(
-        listings, dry_run=dry_run, download_photos=download_photos
+        listings,
+        dry_run=dry_run,
+        download_photos=download_photos,
+        photo_mode=photo_mode,
     )

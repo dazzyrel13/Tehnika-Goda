@@ -897,7 +897,7 @@ class VehicleAdmin(admin.ModelAdmin):
                         report = import_avito_xlsx(
                             upload,
                             dry_run=dry_run,
-                            download_photos=not no_photos,
+                            photo_mode="off" if no_photos else "async",
                         )
                     except Exception as exc:
                         messages.error(request, f"Импорт не удался: {exc}")
@@ -913,6 +913,7 @@ class VehicleAdmin(admin.ModelAdmin):
                                 report.created
                                 or report.linked
                                 or report.photos_filled
+                                or report.photos_queued
                                 or report.descriptions_updated
                             ):
                                 invalidate_vehicle_public_caches()
@@ -921,10 +922,11 @@ class VehicleAdmin(admin.ModelAdmin):
                                 if not report.errors
                                 else messages.WARNING
                             )
-                            self.message_user(
-                                request,
-                                report.summary(),
-                                level=level,
-                            )
+                            msg = report.summary()
+                            if report.photos_queued:
+                                msg += (
+                                    " Фото качаются в фоне — обновите список через пару минут."
+                                )
+                            self.message_user(request, msg, level=level)
 
         return render(request, "admin/catalog/avito_import_form.html", context)

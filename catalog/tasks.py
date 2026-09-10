@@ -135,3 +135,20 @@ def sync_avito_price_task(self, vehicle_id: int) -> bool:
         avito_price_sync_error="",
     )
     return True
+
+
+@shared_task(
+    name="catalog.fetch_avito_vehicle_photos",
+    ignore_result=True,
+    max_retries=1,
+    default_retry_delay=30,
+)
+def fetch_avito_vehicle_photos_task(vehicle_id: int) -> int:
+    """Download pending Avito ImageUrls for one vehicle in the background."""
+    from .avito_xlsx import fetch_avito_photos_for_vehicle
+
+    try:
+        return fetch_avito_photos_for_vehicle(vehicle_id)
+    except Exception:
+        logger.exception("Avito photo fetch failed vehicle_id=%s", vehicle_id)
+        return 0
