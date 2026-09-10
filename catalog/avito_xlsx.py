@@ -28,7 +28,7 @@ from .listing_ingest import (
     get_or_create_category,
 )
 from .models import Vehicle
-from .spec_sheet import LABEL_RE, html_to_text
+from .spec_sheet import html_to_text
 
 logger = logging.getLogger(__name__)
 
@@ -330,53 +330,44 @@ SPEC_LABELS = {
     "accident": "Состояние",
 }
 
+# Match manual card tile order (after year/mileage, before hp/box/body/color/engine).
+EXTRA_SPEC_CARD_ORDER = (
+    "pts",
+    "vin",
+    "doors",
+    "drive",
+    "wheel",
+    "owners",
+    "accident",
+    "generation",
+    "engine_size",
+    "modification",
+    "complectation",
+)
+
 
 def build_spec_description(listing: AvitoListing) -> str:
     """
-    Build site table-friendly text: [Field] value rows + marketing text.
+    Marketing text only for the description block.
+
+    Structured fields already live on Vehicle + specs and render as the same
+    tiles as manually created cards — do not duplicate them as a [Field] table.
     """
-    lines: list[str] = []
-
-    def add(label: str, value) -> None:
-        text = _cell_str(value)
-        if text:
-            lines.append(f"[{label}] {text}")
-
-    add("Название автомобиля", listing.short_title or listing.title)
-    add("Марка", listing.make)
-    add("Модель", listing.model)
-    if listing.year:
-        add("Год выпуска", listing.year)
-    if listing.mileage:
-        add("Пробег", f"{_format_mileage(listing.mileage)} километров")
-    add("Цвет", listing.color)
-    add("Коробка передач", listing.transmission)
-    add("Тип кузова", listing.body_type)
-    add("Тип двигателя", listing.fuel_type)
-    if listing.horsepower:
-        add("Мощность двигателя", f"{listing.horsepower} л.с.")
-    for key, label in SPEC_LABELS.items():
-        add(label, listing.specs.get(key))
-
-    rest = html_to_text(listing.description or "").strip()
-    # Drop rest if it already looks like a full bracket sheet (avoid nesting).
-    if rest and LABEL_RE.search(rest) and rest.count("[") >= 3:
-        return rest
-    if rest:
-        lines.append("")
-        lines.append(rest)
-    return "\n".join(lines).strip()
+    return html_to_text(listing.description or "").strip()
 
 
 def description_needs_reformat(raw: str | None) -> bool:
     text = raw or ""
     if not text.strip():
-        return True
-    sheet_ok = bool(LABEL_RE.search(text)) and text.count("[") + text.count("【") >= 2
-    if sheet_ok:
         return False
-    # Raw Avito HTML / plain marketing without bracket rows.
-    return True
+    lower = text.lower()
+    # Raw Avito HTML.
+    if "<p" in lower or "<strong" in lower or "<br" in lower:
+        return True
+    # Old import dump that duplicated the specs grid as a bracket sheet.
+    if "[Название автомобиля]" in text or "[Марка]" in text:
+        return True
+    return False
 
 
 def vehicle_needs_photos(vehicle: Vehicle) -> bool:

@@ -589,15 +589,58 @@ class Vehicle(models.Model):
         "wheel": "Руль",
         "accident": "Состояние",
     }
+    # Same order as typical manually filled cars on the detail page.
+    EXTRA_SPEC_CARD_ORDER = (
+        "pts",
+        "vin",
+        "doors",
+        "drive",
+        "wheel",
+        "owners",
+        "accident",
+        "generation",
+        "enginesize",
+        "enginevol",
+        "modification",
+        "complectation",
+        "range",
+    )
+    # Description [Field] rows that already have a tile in the specs grid.
+    DESCRIPTION_GRID_DUP_LABELS = frozenset(
+        {
+            "названиеавтомобиля",
+            "марка",
+            "модель",
+            "годвыпуска",
+            "пробег",
+            "цвет",
+            "коробкапередач",
+            "типкузова",
+            "типдвигателя",
+            "мощностьдвигателя",
+            "лошадиныесилы",
+            "объёмдвигателя",
+            "поколение",
+            "модификация",
+            "комплектация",
+            "vin",
+            "владельцевпоптс",
+            "птс",
+            "привод",
+            "дверей",
+            "руль",
+            "состояние",
+            "запасихода",
+        }
+    )
 
     @property
     def extra_spec_cards(self) -> list[tuple[str, str]]:
         """Spec cards that are not already shown as dedicated Russian fields."""
         specs = self.specs if isinstance(self.specs, dict) else {}
-        cards: list[tuple[str, str]] = []
+        prepared: list[tuple[str, str, str]] = []
         for key, value in specs.items():
             key_str = str(key or "").strip()
-            # Hidden/internal keys (e.g. _avito_image_urls).
             if key_str.startswith("_"):
                 continue
             if isinstance(value, (list, dict, tuple)):
@@ -605,15 +648,51 @@ class Vehicle(models.Model):
             text = str(value or "").strip()
             if not text:
                 continue
-            # Guard: raw URL dumps accidentally stored as a string.
             if text.startswith("[") and "http" in text.lower():
                 continue
             norm = "".join(ch for ch in key_str.lower() if ch.isalnum())
             if norm in self.EXTRA_SPEC_SKIP:
                 continue
             label = self.EXTRA_SPEC_LABELS.get(norm) or key_str
-            cards.append((label, text))
-        return cards
+            prepared.append((norm, label, text))
+
+        order_index = {
+            name: idx for idx, name in enumerate(self.EXTRA_SPEC_CARD_ORDER)
+        }
+        prepared.sort(
+            key=lambda item: (order_index.get(item[0], 1000), item[1].lower())
+        )
+        return [(label, text) for _norm, label, text in prepared]
+
+    @property
+    def public_spec_sheet(self):
+        """
+        Description sheet for the public page: drop rows already shown as tiles
+        (avoids Avito import dumps duplicating the grid as a second table).
+        """
+        from .spec_sheet import SpecSheet, parse_spec_sheet
+
+        sheet = parse_spec_sheet(self.description or "")
+        if not sheet.rows:
+            return sheet
+        filtered: list[tuple[str, str]] = []
+        prose_bits: list[str] = []
+        if sheet.rest:
+            prose_bits.append(sheet.rest)
+        for key, value in sheet.rows:
+            norm = "".join(ch for ch in str(key).lower() if ch.isalnum())
+            if norm in self.DESCRIPTION_GRID_DUP_LABELS:
+                text = str(value or "").strip()
+                chunks = [c.strip() for c in text.split("\n\n") if c.strip()]
+                if len(chunks) >= 2 and len(chunks[0]) <= 80:
+                    prose_bits.extend(chunks[1:])
+                elif len(text) > 50:
+                    # parse_spec_sheet collapses newlines — marketing glued to last field.
+                    prose_bits.append(text)
+                continue
+            filtered.append((key, value))
+        rest = "\n\n".join(bit for bit in prose_bits if bit)
+        return SpecSheet(rows=filtered, rest=rest)
 
     def _sync_color_from_specs(self) -> None:
         """Fill empty color from specs JSON so filters/facets stay index-friendly."""

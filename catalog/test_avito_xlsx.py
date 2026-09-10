@@ -230,7 +230,8 @@ class AvitoXlsxImportTests(TestCase):
         self.assertEqual(vehicle.price_rub, Decimal("1505000"))
         self.assertIsNone(vehicle.price_cny)
         self.assertNotIn("<script>", vehicle.description)
-        self.assertIn("[Название автомобиля] Volkswagen Lavida", vehicle.description)
+        self.assertNotIn("[Название автомобиля]", vehicle.description)
+        self.assertIn("Ok", vehicle.description)
         self.assertIn("_avito_image_urls", vehicle.specs)
         _mock_enqueue.assert_called_once_with(vehicle.pk)
 
@@ -253,7 +254,7 @@ class AvitoXlsxImportTests(TestCase):
         self.assertEqual(report.created, 1)
         self.assertEqual(Vehicle.objects.count(), 0)
 
-    def test_build_spec_description_has_bracket_rows(self):
+    def test_build_spec_description_is_marketing_only(self):
         from catalog.avito_xlsx import AvitoListing, build_spec_description
 
         listing = AvitoListing(
@@ -275,11 +276,10 @@ class AvitoXlsxImportTests(TestCase):
             specs={"vin": "ABC123"},
         )
         text = build_spec_description(listing)
-        self.assertIn("[Название автомобиля] Trumpchi M6 Pro", text)
-        self.assertIn("[Пробег] 26 000 километров", text)
-        self.assertIn("[Цвет] Белый", text)
-        self.assertIn("Гарантия 6 месяцев", text)
+        self.assertNotIn("[Название автомобиля]", text)
         self.assertNotIn("<p>", text)
+        self.assertIn("Гарантия 6 месяцев", text)
+        self.assertIn("Текст", text)
 
     @patch("catalog.avito_xlsx._fetch_image_bytes")
     def test_download_images_without_dns_pin(self, mock_fetch):
@@ -333,8 +333,8 @@ class AvitoXlsxImportTests(TestCase):
         self.assertEqual(report.created, 0)
         self.assertEqual(report.descriptions_updated, 1)
         vehicle.refresh_from_db()
-        self.assertIn("[Название автомобиля]", vehicle.description)
-        self.assertIn("[Год выпуска] 2022", vehicle.description)
+        self.assertNotIn("[Название автомобиля]", vehicle.description)
+        self.assertIn("Маркетинг", vehicle.description)
 
     @patch("catalog.avito_xlsx._attach_listing_photos", return_value=(2, []))
     def test_fetch_avito_photos_for_vehicle(self, mock_attach):

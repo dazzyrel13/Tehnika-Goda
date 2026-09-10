@@ -1296,6 +1296,37 @@ class ExtraSpecCardsDisplayTests(TestCase):
         self.assertNotIn("color", cards)
         self.assertNotIn("Цвет", cards)
 
+    def test_extra_spec_cards_follow_manual_order(self):
+        vehicle = Vehicle(
+            specs={
+                "complectation": "Luxury",
+                "pts": "Не оформлен",
+                "vin": "XTA123",
+                "generation": "I (2024—2026)",
+                "engine_size": "1.5",
+            }
+        )
+        labels = [label for label, _value in vehicle.extra_spec_cards]
+        self.assertEqual(
+            labels,
+            ["ПТС", "VIN", "Поколение", "Объём двигателя", "Комплектация"],
+        )
+
+    def test_public_spec_sheet_drops_grid_duplicates(self):
+        vehicle = Vehicle(
+            description=(
+                "[Название автомобиля] Changan UNI-Z\n"
+                "[Год выпуска] 2026\n"
+                "[Цвет] белый\n"
+                "[ПТС] Не оформлен\n"
+                "Маркетинговый текст про комплектацию Luxury"
+            ),
+            specs={"pts": "Не оформлен", "vin": "X"},
+        )
+        sheet = vehicle.public_spec_sheet
+        self.assertFalse(sheet.has_rows)
+        self.assertIn("Маркетинговый текст", sheet.rest)
+
 
 class SpecSheetParseTests(TestCase):
     SAMPLE = (

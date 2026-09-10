@@ -186,7 +186,7 @@
 
                 <div class="vehicle-description">
                     <h4>Описание комплектации:</h4>
-                    {% with sheet=vehicle.spec_sheet %}
+                    {% with sheet=vehicle.public_spec_sheet %}
                     {% if sheet.has_rows %}
                         <div class="vehicle-spec-sheet">
                             {% for key, value in sheet.rows %}
@@ -205,6 +205,8 @@
                         {% if sheet.rest %}
                             <div class="vehicle-description__rest">{{ sheet.rest|linebreaksbr }}</div>
                         {% endif %}
+                    {% elif sheet.rest %}
+                        <div class="vehicle-description__rest">{{ sheet.rest|linebreaksbr }}</div>
                     {% elif vehicle.description %}
                         {{ vehicle.description|sanitized_html }}
                     {% else %}
