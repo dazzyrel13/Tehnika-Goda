@@ -678,6 +678,11 @@ class VehicleAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.ingest_listing_view),
                 name="catalog_vehicle_ingest_listing",
             ),
+            path(
+                "import-avito-xlsx/",
+                self.admin_site.admin_view(self.import_avito_xlsx_view),
+                name="catalog_vehicle_import_avito_xlsx",
+            ),
         ]
         return custom_urls + urls
 
@@ -865,3 +870,56 @@ class VehicleAdmin(admin.ModelAdmin):
             "admin/catalog/ingest_form.html",
             {"categories": categories, "max_photos": MAX_GALLERY_UPLOADS},
         )
+
+    def import_avito_xlsx_view(self, request):
+        from .avito_xlsx import import_avito_xlsx
+
+        context = {
+            "title": "Импорт Авито (xlsx)",
+            "report": None,
+            "dry_run": False,
+            "no_photos": False,
+        }
+        if request.method == "POST":
+            dry_run = request.POST.get("dry_run") == "1"
+            no_photos = request.POST.get("no_photos") == "1"
+            context["dry_run"] = dry_run
+            context["no_photos"] = no_photos
+            upload = request.FILES.get("xlsx_file")
+            if not upload:
+                messages.error(request, "Выберите файл .xlsx")
+            else:
+                name = (getattr(upload, "name", "") or "").lower()
+                if not name.endswith(".xlsx"):
+                    messages.error(request, "Нужен файл с расширением .xlsx")
+                else:
+                    try:
+                        report = import_avito_xlsx(
+                            upload,
+                            dry_run=dry_run,
+                            download_photos=not no_photos,
+                        )
+                    except Exception as exc:
+                        messages.error(request, f"Импорт не удался: {exc}")
+                    else:
+                        context["report"] = report
+                        if dry_run:
+                            messages.info(
+                                request,
+                                "Проверка без записи. " + report.summary(),
+                            )
+                        else:
+                            if report.created:
+                                invalidate_vehicle_public_caches()
+                            level = (
+                                messages.SUCCESS
+                                if not report.errors
+                                else messages.WARNING
+                            )
+                            self.message_user(
+                                request,
+                                report.summary(),
+                                level=level,
+                            )
+
+        return render(request, "admin/catalog/avito_import_form.html", context)

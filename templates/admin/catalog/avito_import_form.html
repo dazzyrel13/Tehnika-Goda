@@ -1,0 +1,79 @@
+{% extends "admin/base_site.html" %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">Главная</a>
+&rsaquo; <a href="{% url 'admin:catalog_vehicle_changelist' %}">Автомобили</a>
+&rsaquo; Импорт Авито (xlsx)
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="tg-parse tg-parse--wide">
+  <h1>Импорт с Авито (Excel)</h1>
+  <p class="tg-parse__lead">
+    Загрузите файл автозагрузки Авито (.xlsx). Новые авто создаются как
+    <strong>черновики</strong>. Уже существующие (по ID Авито или по связке
+    название + год + пробег + цвет) не трогаем.
+  </p>
+
+  {% if report %}
+  <div class="tg-parse__hint" style="margin-bottom: 1.25rem;">
+    <p><strong>{{ report.summary }}</strong></p>
+    {% if report.skipped_reasons %}
+    <details open>
+      <summary>Пропущенные ({{ report.skipped }})</summary>
+      <ul>
+        {% for line in report.skipped_reasons|slice:":40" %}
+        <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+    {% if report.warnings %}
+    <details>
+      <summary>Предупреждения ({{ report.warnings|length }})</summary>
+      <ul>
+        {% for line in report.warnings|slice:":40" %}
+        <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+    {% if report.errors %}
+    <details open>
+      <summary>Ошибки ({{ report.errors|length }})</summary>
+      <ul>
+        {% for line in report.errors %}
+        <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <form method="POST" class="tg-parse__form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="xlsx_file">Файл Авито (.xlsx)</label>
+    <input type="file" name="xlsx_file" id="xlsx_file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+    <p class="tg-parse__hint">
+      Лист «Автомобили-С пробегом». Фото скачиваются из колонки ImageUrls, если доступны.
+    </p>
+
+    <label style="display:flex;align-items:center;gap:0.5rem;margin-top:1rem;">
+      <input type="checkbox" name="dry_run" value="1" {% if dry_run %}checked{% endif %}>
+      Только проверить (ничего не создавать)
+    </label>
+    <label style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
+      <input type="checkbox" name="no_photos" value="1" {% if no_photos %}checked{% endif %}>
+      Без фото
+    </label>
+
+    <div class="tg-parse__actions">
+      <button type="submit" class="tg-parse__submit">Импортировать</button>
+      <a href="{% url 'admin:catalog_vehicle_changelist' %}" class="tg-parse__cancel">К списку авто</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
