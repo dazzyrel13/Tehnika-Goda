@@ -8,6 +8,8 @@ from catalog.currency import (
     FALLBACK_CNY_RATE,
     migrate_legacy_rub_to_cny,
     recalculate_all_cny_prices,
+    round_price_rub_up,
+    rub_from_cny,
 )
 from catalog.models import Brand, Category, CurrencyRateSettings, Vehicle
 
@@ -167,14 +169,27 @@ class CurrencyPricingTests(TestCase):
         self.assertEqual(result["converted"], 1)
 
         vehicle.refresh_from_db()
-        # 1_000_000 / 12.48 → 80128.21 ¥; × 12.00 → 961538.52 → 961539 ₽
+        # 1_000_000 / 12.48 → 80128.21 ¥; × 12.00 → 961539 ₽ → up to 965000
         self.assertEqual(vehicle.price_cny, Decimal("80128.21"))
-        self.assertEqual(vehicle.price_rub, Decimal("961539"))
+        self.assertEqual(vehicle.price_rub, Decimal("965000"))
         self.assertFalse(vehicle.is_currency_fixed)
 
         already.refresh_from_db()
         self.assertEqual(already.price_cny, old_cny)
         self.assertEqual(already.price_rub, Decimal("120000"))
+
+    def test_round_price_rub_up_to_five_thousand(self):
+        self.assertEqual(round_price_rub_up(Decimal("1962583")), Decimal("1965000"))
+        self.assertEqual(round_price_rub_up(Decimal("1966812")), Decimal("1970000"))
+        self.assertEqual(round_price_rub_up(Decimal("1965000")), Decimal("1965000"))
+        self.assertEqual(round_price_rub_up(Decimal("1")), Decimal("5000"))
+
+    def test_rub_from_cny_rounds_up_to_step(self):
+        # 163548.58 * 12 = 1_962_583 → 1_965_000
+        self.assertEqual(
+            rub_from_cny(Decimal("163548.58"), Decimal("12")),
+            Decimal("1965000"),
+        )
 
     def test_migrate_skips_zero_and_missing_rub(self):
         Vehicle.objects.create(

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
 
 FALLBACK_CNY_RATE = Decimal("12.48")
+# Nice display prices: always round rubles up to this step.
+RUB_PRICE_STEP = Decimal("5000")
 
 
 def get_effective_cny_rate() -> Decimal:
@@ -13,13 +15,34 @@ def get_effective_cny_rate() -> Decimal:
     return CurrencyRateSettings.load().effective_rate()
 
 
+def round_price_rub_up(
+    price_rub: Decimal, step: Decimal | int | None = None
+) -> Decimal:
+    """
+    Round rubles up to a nice step (default 5_000).
+
+    1_962_583 → 1_965_000, 1_966_812 → 1_970_000, exact multiples stay as-is.
+    """
+    if step is None:
+        step = RUB_PRICE_STEP
+    step_d = Decimal(step)
+    amount = Decimal(price_rub)
+    if amount <= 0:
+        return Decimal("0")
+    if step_d <= 0:
+        return amount.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    units = (amount / step_d).to_integral_value(rounding=ROUND_CEILING)
+    return units * step_d
+
+
 def rub_from_cny(price_cny: Decimal, rate: Decimal | None = None) -> Decimal:
-    """Whole rubles, half-up."""
+    """Whole rubles from CNY, then round up to RUB_PRICE_STEP."""
     if rate is None:
         rate = get_effective_cny_rate()
-    return (Decimal(price_cny) * Decimal(rate)).quantize(
+    raw = (Decimal(price_cny) * Decimal(rate)).quantize(
         Decimal("1"), rounding=ROUND_HALF_UP
     )
+    return round_price_rub_up(raw)
 
 
 def apply_currency_pricing(vehicle) -> list[str]:
