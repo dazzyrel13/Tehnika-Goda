@@ -10,11 +10,13 @@ from io import BytesIO
 from pathlib import Path
 from typing import BinaryIO, Iterable
 
+from urllib.parse import urljoin
+
+import requests
 from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
 
-from utils.html_sanitize import sanitize_html
-from utils.safe_http import fetch_url_bytes, is_safe_request_url
+from utils.safe_http import is_safe_request_url
 
 from .avito import parse_avito_item_id
 from .engine_type import detect_engine_type
@@ -26,6 +28,7 @@ from .listing_ingest import (
     get_or_create_category,
 )
 from .models import Vehicle
+from .spec_sheet import LABEL_RE, html_to_text
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +87,8 @@ class ImportReport:
     created: int = 0
     skipped: int = 0
     linked: int = 0
+    photos_filled: int = 0
+    descriptions_updated: int = 0
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     created_ids: list[int] = field(default_factory=list)
@@ -94,6 +99,8 @@ class ImportReport:
     def summary(self) -> str:
         return (
             f"Создано: {self.created}, привязан Avito ID: {self.linked}, "
+            f"фото догружено: {self.photos_filled}, "
+            f"описание обновлено: {self.descriptions_updated}, "
             f"пропущено: {self.skipped}, "
             f"ошибок: {len(self.errors)}, предупреждений: {len(self.warnings)}."
         )
@@ -301,6 +308,118 @@ def find_existing_vehicle(
     return None
 
 
+def _format_mileage(mileage: int) -> str:
+    return f"{int(mileage):,}".replace(",", " ")
+
+
+SPEC_LABELS = {
+    "generation": "Поколение",
+    "modification": "Модификация",
+    "complectation": "Комплектация",
+    "vin": "VIN",
+    "owners": "Владельцев по ПТС",
+    "pts": "ПТС",
+    "drive": "Привод",
+    "engine_size": "Объём двигателя",
+    "doors": "Дверей",
+    "wheel": "Руль",
+    "accident": "Состояние",
+}
+
+
+def build_spec_description(listing: AvitoListing) -> str:
+    """
+    Build site table-friendly text: [Field] value rows + marketing text.
+    """
+    lines: list[str] = []
+
+    def add(label: str, value) -> None:
+        text = _cell_str(value)
+        if text:
+            lines.append(f"[{label}] {text}")
+
+    add("Название автомобиля", listing.short_title or listing.title)
+    add("Марка", listing.make)
+    add("Модель", listing.model)
+    if listing.year:
+        add("Год выпуска", listing.year)
+    if listing.mileage:
+        add("Пробег", f"{_format_mileage(listing.mileage)} километров")
+    add("Цвет", listing.color)
+    add("Коробка передач", listing.transmission)
+    add("Тип кузова", listing.body_type)
+    add("Тип двигателя", listing.fuel_type)
+    if listing.horsepower:
+        add("Мощность двигателя", f"{listing.horsepower} л.с.")
+    for key, label in SPEC_LABELS.items():
+        add(label, listing.specs.get(key))
+
+    rest = html_to_text(listing.description or "").strip()
+    # Drop rest if it already looks like a full bracket sheet (avoid nesting).
+    if rest and LABEL_RE.search(rest) and rest.count("[") >= 3:
+        return rest
+    if rest:
+        lines.append("")
+        lines.append(rest)
+    return "\n".join(lines).strip()
+
+
+def description_needs_reformat(raw: str | None) -> bool:
+    text = raw or ""
+    if not text.strip():
+        return True
+    sheet_ok = bool(LABEL_RE.search(text)) and text.count("[") + text.count("【") >= 2
+    if sheet_ok:
+        return False
+    # Raw Avito HTML / plain marketing without bracket rows.
+    return True
+
+
+def vehicle_needs_photos(vehicle: Vehicle) -> bool:
+    if vehicle.main_image:
+        return False
+    return not vehicle.gallery.exists()
+
+
+def _fetch_image_bytes(url: str) -> bytes:
+    """
+    Download image following redirects without DNS pinning.
+
+    Avito feed URLs redirect to *.img.avito.st; DNS-pinned fetch breaks TLS there.
+    Each hop is still validated with is_safe_request_url (public IPs only).
+    """
+    current = url
+    session = requests.Session()
+    for _ in range(6):
+        if not is_safe_request_url(current):
+            raise ValueError(f"Unsafe URL rejected: {current}")
+        with session.get(
+            current,
+            allow_redirects=False,
+            timeout=45,
+            headers=IMAGE_HEADERS,
+            stream=True,
+        ) as resp:
+            if resp.status_code in {301, 302, 303, 307, 308}:
+                loc = resp.headers.get("Location")
+                if not loc:
+                    raise ValueError("Redirect without Location")
+                current = urljoin(current, loc)
+                continue
+            resp.raise_for_status()
+            total = 0
+            chunks: list[bytes] = []
+            for chunk in resp.iter_content(chunk_size=64 * 1024):
+                if not chunk:
+                    continue
+                total += len(chunk)
+                if total > MAX_IMAGE_BYTES:
+                    raise ValueError(f"Response exceeds {MAX_IMAGE_BYTES} bytes")
+                chunks.append(chunk)
+            return b"".join(chunks)
+    raise ValueError("Too many redirects")
+
+
 def _download_images(urls: list[str]) -> tuple[list[SimpleUploadedFile], list[str]]:
     uploads: list[SimpleUploadedFile] = []
     warnings: list[str] = []
@@ -309,12 +428,7 @@ def _download_images(urls: list[str]) -> tuple[list[SimpleUploadedFile], list[st
             warnings.append(f"Небезопасный URL фото пропущен: {url[:80]}")
             continue
         try:
-            raw, _final = fetch_url_bytes(
-                url,
-                max_bytes=MAX_IMAGE_BYTES,
-                timeout=20,
-                headers=IMAGE_HEADERS,
-            )
+            raw = _fetch_image_bytes(url)
             img = Image.open(BytesIO(raw))
             img.verify()
             img = Image.open(BytesIO(raw))
@@ -332,6 +446,45 @@ def _download_images(urls: list[str]) -> tuple[list[SimpleUploadedFile], list[st
             warnings.append(f"Фото не скачалось ({url[:60]}…): {exc}")
             logger.info("Avito image download failed url=%s err=%s", url[:120], exc)
     return uploads, warnings
+
+
+def _attach_listing_photos(
+    vehicle: Vehicle, listing: AvitoListing
+) -> tuple[int, list[str]]:
+    if not listing.image_urls:
+        return 0, []
+    uploads, warnings = _download_images(listing.image_urls)
+    if not uploads:
+        return 0, warnings
+    added, skipped = attach_vehicle_images(vehicle, uploads)
+    if skipped:
+        warnings.append(f"пропущено файлов фото: {skipped}")
+    return added, warnings
+
+
+def enrich_existing_vehicle(
+    vehicle: Vehicle,
+    listing: AvitoListing,
+    *,
+    download_photos: bool,
+    update_description: bool = True,
+) -> tuple[list[str], dict[str, bool]]:
+    """Fill missing Avito photos / reformat description on an existing row."""
+    warnings: list[str] = []
+    changed = {"photos": False, "description": False}
+
+    if update_description and description_needs_reformat(vehicle.description):
+        vehicle.description = build_spec_description(listing)
+        vehicle.save(update_fields=["description"], skip_image_queue=True)
+        changed["description"] = True
+
+    if download_photos and vehicle_needs_photos(vehicle):
+        added, photo_warnings = _attach_listing_photos(vehicle, listing)
+        warnings.extend(photo_warnings)
+        if added:
+            changed["photos"] = True
+
+    return warnings, changed
 
 
 def create_from_listing(
@@ -359,31 +512,20 @@ def create_from_listing(
         color=listing.color,
         engine_type=detect_engine_type(listing.fuel_type),
         price_rub=listing.price_rub,
-        description=sanitize_html(listing.description),
+        description=build_spec_description(listing),
         specs=listing.specs,
         is_new=False,
     )
     warnings: list[str] = []
-    update_fields: list[str] = []
     if listing.avito_id:
         vehicle.avito_item_id = listing.avito_id
-        update_fields.append("avito_item_id")
-    if update_fields:
-        vehicle.save(update_fields=update_fields, skip_image_queue=True)
+        vehicle.save(update_fields=["avito_item_id"], skip_image_queue=True)
 
     if download_photos and listing.image_urls:
-        uploads, photo_warnings = _download_images(listing.image_urls)
+        added, photo_warnings = _attach_listing_photos(vehicle, listing)
         warnings.extend(photo_warnings)
-        if uploads:
-            added, skipped = attach_vehicle_images(vehicle, uploads)
-            if skipped:
-                warnings.append(
-                    f"Строка {listing.row_number}: пропущено файлов фото: {skipped}."
-                )
-            if not added:
-                warnings.append(
-                    f"Строка {listing.row_number}: фото не прикрепились."
-                )
+        if not added and listing.image_urls:
+            warnings.append("фото не прикрепились.")
     return vehicle, warnings
 
 
@@ -403,6 +545,8 @@ def import_avito_listings(
             "mileage",
             "color",
             "avito_item_id",
+            "description",
+            "main_image",
             "brand__name",
         )
     )
@@ -416,7 +560,7 @@ def import_avito_listings(
                 listing, by_avito_id=by_avito_id, candidates=vehicles
             )
             if existing is not None:
-                # Fingerprint match without Avito ID → fill ID so site→Avito price sync works.
+                linked_now = False
                 if (
                     listing.avito_id
                     and not existing.avito_item_id
@@ -430,32 +574,70 @@ def import_avito_listings(
                         report.linked += 1
                         report.linked_ids.append(existing.pk)
                         report.linked_reasons.append(reason + " (проверка)")
-                        continue
-                    existing.avito_item_id = listing.avito_id
-                    existing.save(
-                        update_fields=["avito_item_id"], skip_image_queue=True
-                    )
-                    by_avito_id[int(listing.avito_id)] = existing
-                    report.linked += 1
-                    report.linked_ids.append(existing.pk)
-                    report.linked_reasons.append(reason)
+                        linked_now = True
+                    else:
+                        existing.avito_item_id = listing.avito_id
+                        existing.save(
+                            update_fields=["avito_item_id"], skip_image_queue=True
+                        )
+                        by_avito_id[int(listing.avito_id)] = existing
+                        report.linked += 1
+                        report.linked_ids.append(existing.pk)
+                        report.linked_reasons.append(reason)
+                        linked_now = True
+
+                if dry_run:
+                    if description_needs_reformat(existing.description):
+                        report.descriptions_updated += 1
+                    if download_photos and vehicle_needs_photos(existing):
+                        report.photos_filled += 1
+                    if not linked_now:
+                        report.skipped += 1
+                        report.skipped_reasons.append(
+                            f"Строка {listing.row_number}: уже есть "
+                            f"«{existing.title}» (id={existing.pk}) — проверка"
+                        )
                     continue
 
-                report.skipped += 1
-                reason = (
-                    f"Строка {listing.row_number}: уже есть "
-                    f"«{existing.title}» (id={existing.pk})"
+                warnings, changed = enrich_existing_vehicle(
+                    existing,
+                    listing,
+                    download_photos=download_photos,
                 )
-                if listing.avito_id and existing.avito_item_id == listing.avito_id:
-                    reason += " — совпал AvitoId"
-                elif existing.avito_item_id and listing.avito_id:
-                    reason += (
-                        f" — совпали название/год/пробег/цвет, "
-                        f"на сайте уже другой AvitoId {existing.avito_item_id}"
+                report.warnings.extend(
+                    f"Строка {listing.row_number}: {w}" for w in warnings
+                )
+                if changed["photos"]:
+                    report.photos_filled += 1
+                if changed["description"]:
+                    report.descriptions_updated += 1
+
+                if not linked_now:
+                    report.skipped += 1
+                    reason = (
+                        f"Строка {listing.row_number}: уже есть "
+                        f"«{existing.title}» (id={existing.pk})"
                     )
-                else:
-                    reason += " — совпали название/год/пробег/цвет"
-                report.skipped_reasons.append(reason)
+                    if listing.avito_id and existing.avito_item_id == listing.avito_id:
+                        reason += " — совпал AvitoId"
+                    elif existing.avito_item_id and listing.avito_id:
+                        if existing.avito_item_id != listing.avito_id:
+                            reason += (
+                                f" — совпали название/год/пробег/цвет, "
+                                f"на сайте уже другой AvitoId {existing.avito_item_id}"
+                            )
+                        else:
+                            reason += " — совпали название/год/пробег/цвет"
+                    else:
+                        reason += " — совпали название/год/пробег/цвет"
+                    extras = []
+                    if changed["photos"]:
+                        extras.append("фото догружены")
+                    if changed["description"]:
+                        extras.append("описание в шаблон")
+                    if extras:
+                        reason += " (" + ", ".join(extras) + ")"
+                    report.skipped_reasons.append(reason)
                 continue
 
             if dry_run:

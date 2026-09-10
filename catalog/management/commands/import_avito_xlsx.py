@@ -52,7 +52,12 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("Dry run — ничего не создано."))
             return
 
-        if report.created or report.linked:
+        if (
+            report.created
+            or report.linked
+            or report.photos_filled
+            or report.descriptions_updated
+        ):
             invalidate_vehicle_public_caches()
         if report.created:
             self.stdout.write(

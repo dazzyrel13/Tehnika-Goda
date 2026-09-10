@@ -228,6 +228,7 @@ class AvitoXlsxImportTests(TestCase):
         self.assertEqual(vehicle.price_rub, Decimal("1505000"))
         self.assertIsNone(vehicle.price_cny)
         self.assertNotIn("<script>", vehicle.description)
+        self.assertIn("[Название автомобиля] Volkswagen Lavida", vehicle.description)
 
     def test_dry_run_does_not_create(self):
         buf = _build_avito_xlsx(
@@ -247,3 +248,86 @@ class AvitoXlsxImportTests(TestCase):
         report = import_avito_xlsx(buf, dry_run=True, download_photos=False)
         self.assertEqual(report.created, 1)
         self.assertEqual(Vehicle.objects.count(), 0)
+
+    def test_build_spec_description_has_bracket_rows(self):
+        from catalog.avito_xlsx import AvitoListing, build_spec_description
+
+        listing = AvitoListing(
+            row_number=1,
+            avito_id=1,
+            make="Trumpchi",
+            model="M6 Pro",
+            title="Trumpchi M6 Pro 2022",
+            short_title="Trumpchi M6 Pro",
+            year=2022,
+            mileage=26000,
+            color="Белый",
+            price_rub=Decimal("1500000"),
+            description="<p><strong>Гарантия 6 месяцев</strong></p><p>Текст</p>",
+            body_type="Минивэн",
+            transmission="Автомат",
+            fuel_type="Бензин",
+            horsepower=150,
+            specs={"vin": "ABC123"},
+        )
+        text = build_spec_description(listing)
+        self.assertIn("[Название автомобиля] Trumpchi M6 Pro", text)
+        self.assertIn("[Пробег] 26 000 километров", text)
+        self.assertIn("[Цвет] Белый", text)
+        self.assertIn("Гарантия 6 месяцев", text)
+        self.assertNotIn("<p>", text)
+
+    @patch("catalog.avito_xlsx._fetch_image_bytes")
+    def test_download_images_without_dns_pin(self, mock_fetch):
+        from io import BytesIO
+
+        from PIL import Image
+
+        from catalog.avito_xlsx import _download_images
+
+        buf = BytesIO()
+        Image.new("RGB", (1, 1), color=(255, 0, 0)).save(buf, format="JPEG")
+        mock_fetch.return_value = buf.getvalue()
+        uploads, warnings = _download_images(["https://avito.ru/autoload/test"])
+        self.assertEqual(len(uploads), 1)
+        self.assertEqual(warnings, [])
+
+    def test_enrich_existing_updates_description_and_skips_create(self):
+        vehicle = Vehicle.objects.create(
+            title="Trumpchi M6 Pro",
+            brand=self.brand,
+            category=self.category,
+            model="M6 Pro",
+            year=2022,
+            mileage=26000,
+            color="Белый",
+            price_rub=1,
+            avito_item_id=777666555,
+            description="<p>Сырое HTML с Авито</p>",
+            slug="trumpchi-enrich",
+        )
+        buf = _build_avito_xlsx(
+            [
+                {
+                    "AvitoId": "777666555",
+                    "Make": "Trumpchi",
+                    "Model": "M6 Pro",
+                    "Year": "2022",
+                    "Kilometrage": "26000",
+                    "Color": "Белый",
+                    "Title": "Trumpchi M6 Pro",
+                    "Price": "1500000",
+                    "Description": "<p>Маркетинг</p>",
+                    "BodyType": "Минивэн",
+                    "Transmission": "Автомат",
+                    "FuelType": "Бензин",
+                    "Power": "150",
+                }
+            ]
+        )
+        report = import_avito_xlsx(buf, dry_run=False, download_photos=False)
+        self.assertEqual(report.created, 0)
+        self.assertEqual(report.descriptions_updated, 1)
+        vehicle.refresh_from_db()
+        self.assertIn("[Название автомобиля]", vehicle.description)
+        self.assertIn("[Год выпуска] 2022", vehicle.description)
