@@ -200,7 +200,7 @@ class CatalogPagesTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Published Car")
         self.assertNotContains(response, "Hidden Car")
-        self.assertContains(response, "по курсу 12.48")
+        self.assertContains(response, "Доставка автовозом в любой город!")
         self.assertContains(response, "1 000 км")
         self.assertNotContains(response, ">1000 км")
 
@@ -399,8 +399,8 @@ class CatalogPagesTests(TestCase):
         self.assertContains(response, 'aria-label="Хлебные крошки"')
         self.assertContains(
             response,
-            "Цена под ключ до Благовещенска по курсу 12.48. "
-            "Актуальную цену на день заявки уточняйте у менеджера.",
+            "Цена под ключ до Благовещенска. "
+            "Доставка автовозом в любой город!",
         )
         self.assertNotContains(response, "Цена в карточке ориентировочная")
 
@@ -442,11 +442,12 @@ class CatalogPagesTests(TestCase):
         self.assertNotContains(response, ">bodyType<")
         self.assertNotContains(response, ">fuelType<")
 
-    def test_detail_uses_vehicle_cny_rate(self):
+    def test_detail_turnkey_note_ignores_cny_rate(self):
         self.vehicle.cny_rate = "13.10"
         self.vehicle.save(update_fields=["cny_rate"])
         response = self.client.get(self.vehicle.get_absolute_url())
-        self.assertContains(response, "по курсу 13.10")
+        self.assertContains(response, "Доставка автовозом в любой город!")
+        self.assertNotContains(response, "по курсу 13.10")
 
     def test_detail_renders_pasted_spec_sheet(self):
         self.vehicle.description = (

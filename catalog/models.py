@@ -540,8 +540,8 @@ class Vehicle(models.Model):
     @property
     def turnkey_price_note(self) -> str:
         return (
-            f"Цена под ключ до Благовещенска по курсу {self.cny_rate_display}. "
-            "Актуальную цену на день заявки уточняйте у менеджера."
+            "Цена под ключ до Благовещенска. "
+            "Доставка автовозом в любой город!"
         )
 
     @property
