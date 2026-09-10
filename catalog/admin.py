@@ -909,7 +909,7 @@ class VehicleAdmin(admin.ModelAdmin):
                                 "Проверка без записи. " + report.summary(),
                             )
                         else:
-                            if report.created:
+                            if report.created or report.linked:
                                 invalidate_vehicle_public_caches()
                             level = (
                                 messages.SUCCESS

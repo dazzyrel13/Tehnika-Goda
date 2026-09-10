@@ -128,8 +128,8 @@ class AvitoXlsxImportTests(TestCase):
         self.assertEqual(report.skipped, 1)
         self.assertEqual(Vehicle.objects.count(), 1)
 
-    def test_skip_by_title_year_mileage_color(self):
-        Vehicle.objects.create(
+    def test_link_avito_id_on_fingerprint_match_without_id(self):
+        vehicle = Vehicle.objects.create(
             title="Audi A3",
             brand=self.brand,
             category=self.category,
@@ -157,8 +157,45 @@ class AvitoXlsxImportTests(TestCase):
         )
         report = import_avito_xlsx(buf, dry_run=False, download_photos=False)
         self.assertEqual(report.created, 0)
+        self.assertEqual(report.skipped, 0)
+        self.assertEqual(report.linked, 1)
+        vehicle.refresh_from_db()
+        self.assertEqual(vehicle.avito_item_id, 999888777)
+        self.assertIn("привязан AvitoId", report.linked_reasons[0])
+
+    def test_skip_fingerprint_when_other_avito_id_already_set(self):
+        Vehicle.objects.create(
+            title="Audi A3",
+            brand=self.brand,
+            category=self.category,
+            model="A3",
+            year=2021,
+            mileage=37000,
+            color="Белый",
+            price_rub=1,
+            avito_item_id=111000111,
+            slug="audi-a3-other-id",
+        )
+        buf = _build_avito_xlsx(
+            [
+                {
+                    "AvitoId": "999888777",
+                    "Make": "Audi",
+                    "Model": "A3",
+                    "Year": "2021",
+                    "Kilometrage": "37000",
+                    "Color": "Белый",
+                    "Title": "Audi A3 1.4 AT, 2021, 37 000 км",
+                    "Price": "1820000",
+                    "BodyType": "Седан",
+                }
+            ]
+        )
+        report = import_avito_xlsx(buf, dry_run=False, download_photos=False)
+        self.assertEqual(report.created, 0)
+        self.assertEqual(report.linked, 0)
         self.assertEqual(report.skipped, 1)
-        self.assertIn("название/год/пробег/цвет", report.skipped_reasons[0])
+        self.assertIn("другой AvitoId", report.skipped_reasons[0])
 
     @patch("catalog.avito_xlsx._download_images", return_value=([], []))
     def test_creates_unpublished_draft(self, _mock_photos):

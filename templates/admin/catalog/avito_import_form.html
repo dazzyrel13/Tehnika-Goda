@@ -13,13 +13,24 @@
   <h1>Импорт с Авито (Excel)</h1>
   <p class="tg-parse__lead">
     Загрузите файл автозагрузки Авито (.xlsx). Новые авто создаются как
-    <strong>черновики</strong>. Уже существующие (по ID Авито или по связке
-    название + год + пробег + цвет) не трогаем.
+    <strong>черновики</strong> сразу с ID Авито. Если машина уже на сайте
+    (название + год + пробег + цвет), но без ID Авито — ID подставится в карточку.
+    Остальные совпадения не трогаем.
   </p>
 
   {% if report %}
   <div class="tg-parse__hint" style="margin-bottom: 1.25rem;">
     <p><strong>{{ report.summary }}</strong></p>
+    {% if report.linked_reasons %}
+    <details open>
+      <summary>Привязан Avito ID ({{ report.linked }})</summary>
+      <ul>
+        {% for line in report.linked_reasons|slice:":40" %}
+        <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
     {% if report.skipped_reasons %}
     <details open>
       <summary>Пропущенные ({{ report.skipped }})</summary>

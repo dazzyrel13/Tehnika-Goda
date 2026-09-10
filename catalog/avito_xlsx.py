@@ -83,14 +83,18 @@ class AvitoListing:
 class ImportReport:
     created: int = 0
     skipped: int = 0
+    linked: int = 0
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     created_ids: list[int] = field(default_factory=list)
+    linked_ids: list[int] = field(default_factory=list)
     skipped_reasons: list[str] = field(default_factory=list)
+    linked_reasons: list[str] = field(default_factory=list)
 
     def summary(self) -> str:
         return (
-            f"Создано: {self.created}, пропущено: {self.skipped}, "
+            f"Создано: {self.created}, привязан Avito ID: {self.linked}, "
+            f"пропущено: {self.skipped}, "
             f"ошибок: {len(self.errors)}, предупреждений: {len(self.warnings)}."
         )
 
@@ -412,6 +416,31 @@ def import_avito_listings(
                 listing, by_avito_id=by_avito_id, candidates=vehicles
             )
             if existing is not None:
+                # Fingerprint match without Avito ID → fill ID so site→Avito price sync works.
+                if (
+                    listing.avito_id
+                    and not existing.avito_item_id
+                    and listing.avito_id not in by_avito_id
+                ):
+                    reason = (
+                        f"Строка {listing.row_number}: к «{existing.title}» "
+                        f"(id={existing.pk}) привязан AvitoId {listing.avito_id}"
+                    )
+                    if dry_run:
+                        report.linked += 1
+                        report.linked_ids.append(existing.pk)
+                        report.linked_reasons.append(reason + " (проверка)")
+                        continue
+                    existing.avito_item_id = listing.avito_id
+                    existing.save(
+                        update_fields=["avito_item_id"], skip_image_queue=True
+                    )
+                    by_avito_id[int(listing.avito_id)] = existing
+                    report.linked += 1
+                    report.linked_ids.append(existing.pk)
+                    report.linked_reasons.append(reason)
+                    continue
+
                 report.skipped += 1
                 reason = (
                     f"Строка {listing.row_number}: уже есть "
@@ -419,6 +448,11 @@ def import_avito_listings(
                 )
                 if listing.avito_id and existing.avito_item_id == listing.avito_id:
                     reason += " — совпал AvitoId"
+                elif existing.avito_item_id and listing.avito_id:
+                    reason += (
+                        f" — совпали название/год/пробег/цвет, "
+                        f"на сайте уже другой AvitoId {existing.avito_item_id}"
+                    )
                 else:
                     reason += " — совпали название/год/пробег/цвет"
                 report.skipped_reasons.append(reason)

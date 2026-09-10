@@ -35,6 +35,10 @@ class Command(BaseCommand):
             raise CommandError(str(exc)) from exc
 
         self.stdout.write(report.summary())
+        for line in report.linked_reasons[:30]:
+            self.stdout.write(self.style.SUCCESS(f"  link: {line}"))
+        if len(report.linked_reasons) > 30:
+            self.stdout.write(f"  … и ещё {len(report.linked_reasons) - 30} привязок")
         for line in report.skipped_reasons[:30]:
             self.stdout.write(f"  skip: {line}")
         if len(report.skipped_reasons) > 30:
@@ -48,8 +52,13 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("Dry run — ничего не создано."))
             return
 
-        if report.created:
+        if report.created or report.linked:
             invalidate_vehicle_public_caches()
+        if report.created:
             self.stdout.write(
                 self.style.SUCCESS(f"Созданы id: {report.created_ids}")
+            )
+        if report.linked:
+            self.stdout.write(
+                self.style.SUCCESS(f"Привязан Avito ID к: {report.linked_ids}")
             )
