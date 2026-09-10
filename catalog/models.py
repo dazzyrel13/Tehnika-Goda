@@ -572,6 +572,21 @@ class Vehicle(models.Model):
             "vehicleengine",
             # Internal / Avito import plumbing — never show on the public card.
             "avitoimageurls",
+            # Avito extras belong in the description table, not as sidebar tiles
+            # (manual cards only show year/mileage/hp/box/body/color/engine).
+            "vin",
+            "pts",
+            "doors",
+            "drive",
+            "wheel",
+            "owners",
+            "accident",
+            "generation",
+            "enginesize",
+            "enginevol",
+            "modification",
+            "complectation",
+            "range",
         }
     )
     EXTRA_SPEC_LABELS = {
@@ -589,56 +604,12 @@ class Vehicle(models.Model):
         "wheel": "Руль",
         "accident": "Состояние",
     }
-    # Same order as typical manually filled cars on the detail page.
-    EXTRA_SPEC_CARD_ORDER = (
-        "pts",
-        "vin",
-        "doors",
-        "drive",
-        "wheel",
-        "owners",
-        "accident",
-        "generation",
-        "enginesize",
-        "enginevol",
-        "modification",
-        "complectation",
-        "range",
-    )
-    # Description [Field] rows that already have a tile in the specs grid.
-    DESCRIPTION_GRID_DUP_LABELS = frozenset(
-        {
-            "названиеавтомобиля",
-            "марка",
-            "модель",
-            "годвыпуска",
-            "пробег",
-            "цвет",
-            "коробкапередач",
-            "типкузова",
-            "типдвигателя",
-            "мощностьдвигателя",
-            "лошадиныесилы",
-            "объёмдвигателя",
-            "поколение",
-            "модификация",
-            "комплектация",
-            "vin",
-            "владельцевпоптс",
-            "птс",
-            "привод",
-            "дверей",
-            "руль",
-            "состояние",
-            "запасихода",
-        }
-    )
 
     @property
     def extra_spec_cards(self) -> list[tuple[str, str]]:
-        """Spec cards that are not already shown as dedicated Russian fields."""
+        """Extra tiles beyond the dedicated Russian fields (usually empty)."""
         specs = self.specs if isinstance(self.specs, dict) else {}
-        prepared: list[tuple[str, str, str]] = []
+        cards: list[tuple[str, str]] = []
         for key, value in specs.items():
             key_str = str(key or "").strip()
             if key_str.startswith("_"):
@@ -654,45 +625,38 @@ class Vehicle(models.Model):
             if norm in self.EXTRA_SPEC_SKIP:
                 continue
             label = self.EXTRA_SPEC_LABELS.get(norm) or key_str
-            prepared.append((norm, label, text))
-
-        order_index = {
-            name: idx for idx, name in enumerate(self.EXTRA_SPEC_CARD_ORDER)
-        }
-        prepared.sort(
-            key=lambda item: (order_index.get(item[0], 1000), item[1].lower())
-        )
-        return [(label, text) for _norm, label, text in prepared]
+            cards.append((label, text))
+        return cards
 
     @property
     def public_spec_sheet(self):
         """
-        Description sheet for the public page: drop rows already shown as tiles
-        (avoids Avito import dumps duplicating the grid as a second table).
+        Complectation table for the public page.
+
+        Prefer the stored [Field] description (manual / new Avito imports).
+        If description is plain marketing only, build a table from specs.
         """
-        from .spec_sheet import SpecSheet, parse_spec_sheet
+        from .avito_xlsx import (
+            DESCRIPTION_TABLE_FIELDS,
+            parse_marketing_feature_rows,
+        )
+        from .spec_sheet import SpecSheet, html_to_text, parse_spec_sheet
 
         sheet = parse_spec_sheet(self.description or "")
-        if not sheet.rows:
+        if sheet.has_rows:
             return sheet
-        filtered: list[tuple[str, str]] = []
-        prose_bits: list[str] = []
-        if sheet.rest:
-            prose_bits.append(sheet.rest)
-        for key, value in sheet.rows:
-            norm = "".join(ch for ch in str(key).lower() if ch.isalnum())
-            if norm in self.DESCRIPTION_GRID_DUP_LABELS:
-                text = str(value or "").strip()
-                chunks = [c.strip() for c in text.split("\n\n") if c.strip()]
-                if len(chunks) >= 2 and len(chunks[0]) <= 80:
-                    prose_bits.extend(chunks[1:])
-                elif len(text) > 50:
-                    # parse_spec_sheet collapses newlines — marketing glued to last field.
-                    prose_bits.append(text)
-                continue
-            filtered.append((key, value))
-        rest = "\n\n".join(bit for bit in prose_bits if bit)
-        return SpecSheet(rows=filtered, rest=rest)
+
+        rows: list[tuple[str, str]] = []
+        specs = self.specs if isinstance(self.specs, dict) else {}
+        for key, label in DESCRIPTION_TABLE_FIELDS:
+            value = str(specs.get(key) or "").strip()
+            if value:
+                rows.append((label, value))
+
+        prose = sheet.rest or html_to_text(self.description or "").strip()
+        feature_rows, rest = parse_marketing_feature_rows(prose)
+        rows.extend(feature_rows)
+        return SpecSheet(rows=rows, rest=rest)
 
     def _sync_color_from_specs(self) -> None:
         """Fill empty color from specs JSON so filters/facets stay index-friendly."""

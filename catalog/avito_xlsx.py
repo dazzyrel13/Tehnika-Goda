@@ -330,42 +330,107 @@ SPEC_LABELS = {
     "accident": "Состояние",
 }
 
-# Match manual card tile order (after year/mileage, before hp/box/body/color/engine).
-EXTRA_SPEC_CARD_ORDER = (
-    "pts",
-    "vin",
-    "doors",
-    "drive",
-    "wheel",
-    "owners",
-    "accident",
-    "generation",
-    "engine_size",
-    "modification",
-    "complectation",
+# Shown in the description table (not as sidebar tiles). Skip VIN/PTS publicly.
+DESCRIPTION_TABLE_FIELDS = (
+    ("engine_size", "Двигатель"),
+    ("modification", "Модификация"),
+    ("complectation", "Комплектация"),
+    ("generation", "Поколение"),
+    ("drive", "Привод"),
+    ("doors", "Дверей"),
+    ("wheel", "Руль"),
+    ("owners", "Владельцев по ПТС"),
+    ("accident", "Состояние"),
 )
+
+_BULLET_LINE_RE = re.compile(r"^[\s☑✅✓✔•●\*·\-—–]+")
+
+
+def parse_marketing_feature_rows(text: str) -> tuple[list[tuple[str, str]], str]:
+    """
+    Turn Avito marketing bullets into [Field] rows; leftover prose goes to rest.
+    """
+    rows: list[tuple[str, str]] = []
+    rest_lines: list[str] = []
+    for raw_line in (text or "").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        bullet = bool(_BULLET_LINE_RE.match(line))
+        cleaned = _BULLET_LINE_RE.sub("", line).strip()
+        if not cleaned:
+            continue
+        # Section header: "Комфорт и удобство:" / "Мультимедиа и управление:"
+        if cleaned.endswith(":") and len(cleaned) <= 60 and cleaned.count(":") == 1:
+            rows.append((cleaned[:-1].strip(), ""))
+            continue
+        if bullet:
+            if ":" in cleaned:
+                key, value = cleaned.split(":", 1)
+                key, value = key.strip(), value.strip()
+                if key:
+                    rows.append((key[:80], value or "Есть"))
+                    continue
+            rows.append((cleaned[:80], "Есть"))
+            continue
+        rest_lines.append(line)
+    return rows, "\n".join(rest_lines).strip()
 
 
 def build_spec_description(listing: AvitoListing) -> str:
     """
-    Marketing text only for the description block.
+    Complectation table like manual cards: [Field] value rows + marketing rest.
 
-    Structured fields already live on Vehicle + specs and render as the same
-    tiles as manually created cards — do not duplicate them as a [Field] table.
+    VIN/PTS stay in specs for admin but are not put into the public table.
     """
-    return html_to_text(listing.description or "").strip()
+    lines: list[str] = []
+
+    def add(label: str, value) -> None:
+        text = _cell_str(value)
+        if text:
+            lines.append(f"[{label}] {text}")
+
+    add("Название автомобиля", listing.short_title or listing.title)
+    add("Двигатель", listing.specs.get("engine_size"))
+    if listing.horsepower:
+        add("Мощность двигателя", f"{listing.horsepower} л.с.")
+    add("Коробка передач", listing.transmission)
+    add("Комплектация", listing.specs.get("complectation"))
+    add("Модификация", listing.specs.get("modification"))
+    add("Поколение", listing.specs.get("generation"))
+    add("Привод", listing.specs.get("drive"))
+    add("Тип кузова", listing.body_type)
+    add("Цвет", listing.color)
+    add("Тип двигателя", listing.fuel_type)
+    add("Дверей", listing.specs.get("doors"))
+    add("Руль", listing.specs.get("wheel"))
+    add("Владельцев по ПТС", listing.specs.get("owners"))
+    add("Состояние", listing.specs.get("accident"))
+
+    marketing = html_to_text(listing.description or "").strip()
+    feature_rows, rest = parse_marketing_feature_rows(marketing)
+    for key, value in feature_rows:
+        if value:
+            lines.append(f"[{key}] {value}")
+        else:
+            lines.append(f"[{key}]")
+    if rest:
+        lines.append("")
+        lines.append(rest)
+    return "\n".join(lines).strip()
 
 
 def description_needs_reformat(raw: str | None) -> bool:
+    from .spec_sheet import parse_spec_sheet
+
     text = raw or ""
     if not text.strip():
-        return False
+        return True
     lower = text.lower()
-    # Raw Avito HTML.
     if "<p" in lower or "<strong" in lower or "<br" in lower:
         return True
-    # Old import dump that duplicated the specs grid as a bracket sheet.
-    if "[Название автомобиля]" in text or "[Марка]" in text:
+    # Plain marketing without a complectation table.
+    if not parse_spec_sheet(text).has_rows:
         return True
     return False
 

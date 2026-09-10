@@ -230,8 +230,7 @@ class AvitoXlsxImportTests(TestCase):
         self.assertEqual(vehicle.price_rub, Decimal("1505000"))
         self.assertIsNone(vehicle.price_cny)
         self.assertNotIn("<script>", vehicle.description)
-        self.assertNotIn("[Название автомобиля]", vehicle.description)
-        self.assertIn("Ok", vehicle.description)
+        self.assertIn("[Название автомобиля] Volkswagen Lavida", vehicle.description)
         self.assertIn("_avito_image_urls", vehicle.specs)
         _mock_enqueue.assert_called_once_with(vehicle.pk)
 
@@ -254,7 +253,7 @@ class AvitoXlsxImportTests(TestCase):
         self.assertEqual(report.created, 1)
         self.assertEqual(Vehicle.objects.count(), 0)
 
-    def test_build_spec_description_is_marketing_only(self):
+    def test_build_spec_description_is_complectation_table(self):
         from catalog.avito_xlsx import AvitoListing, build_spec_description
 
         listing = AvitoListing(
@@ -268,18 +267,30 @@ class AvitoXlsxImportTests(TestCase):
             mileage=26000,
             color="Белый",
             price_rub=Decimal("1500000"),
-            description="<p><strong>Гарантия 6 месяцев</strong></p><p>Текст</p>",
+            description=(
+                "<p><strong>Гарантия 6 месяцев</strong></p>"
+                "<p>☑ Кожаный салон</p><p>☑ Камера 360°</p>"
+            ),
             body_type="Минивэн",
             transmission="Автомат",
             fuel_type="Бензин",
             horsepower=150,
-            specs={"vin": "ABC123"},
+            specs={
+                "vin": "ABC123",
+                "pts": "Не оформлен",
+                "engine_size": "1.5",
+                "complectation": "Luxury",
+            },
         )
         text = build_spec_description(listing)
-        self.assertNotIn("[Название автомобиля]", text)
+        self.assertIn("[Название автомобиля] Trumpchi M6 Pro", text)
+        self.assertIn("[Двигатель] 1.5", text)
+        self.assertIn("[Комплектация] Luxury", text)
+        self.assertIn("[Кожаный салон] Есть", text)
+        self.assertNotIn("[VIN]", text)
+        self.assertNotIn("[ПТС]", text)
         self.assertNotIn("<p>", text)
         self.assertIn("Гарантия 6 месяцев", text)
-        self.assertIn("Текст", text)
 
     @patch("catalog.avito_xlsx._fetch_image_bytes")
     def test_download_images_without_dns_pin(self, mock_fetch):
@@ -333,7 +344,7 @@ class AvitoXlsxImportTests(TestCase):
         self.assertEqual(report.created, 0)
         self.assertEqual(report.descriptions_updated, 1)
         vehicle.refresh_from_db()
-        self.assertNotIn("[Название автомобиля]", vehicle.description)
+        self.assertIn("[Название автомобиля]", vehicle.description)
         self.assertIn("Маркетинг", vehicle.description)
 
     @patch("catalog.avito_xlsx._attach_listing_photos", return_value=(2, []))

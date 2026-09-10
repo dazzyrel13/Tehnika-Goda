@@ -1272,7 +1272,7 @@ class SyncMainImageFromGalleryTests(TestCase):
 
 
 class ExtraSpecCardsDisplayTests(TestCase):
-    def test_hides_avito_internal_specs_and_labels_russian(self):
+    def test_hides_avito_internal_specs_and_extra_tiles(self):
         vehicle = Vehicle(
             specs={
                 "_avito_image_urls": [
@@ -1282,50 +1282,33 @@ class ExtraSpecCardsDisplayTests(TestCase):
                 "engine_size": "1.5",
                 "complectation": "Luxury",
                 "generation": "I (2024—2026)",
-                "color": "Белый",
                 "vin": "XTA123",
+                "pts": "Не оформлен",
+                "color": "Белый",
             }
         )
         cards = dict(vehicle.extra_spec_cards)
-        self.assertNotIn("_avito_image_urls", cards)
-        self.assertFalse(any("http" in str(v).lower() for v in cards.values()))
-        self.assertEqual(cards.get("Объём двигателя"), "1.5")
-        self.assertEqual(cards.get("Комплектация"), "Luxury")
-        self.assertEqual(cards.get("Поколение"), "I (2024—2026)")
-        self.assertEqual(cards.get("VIN"), "XTA123")
-        self.assertNotIn("color", cards)
-        self.assertNotIn("Цвет", cards)
+        self.assertEqual(cards, {})
 
-    def test_extra_spec_cards_follow_manual_order(self):
+    def test_public_spec_sheet_builds_table_from_specs_when_plain_text(self):
         vehicle = Vehicle(
+            description="Changan UNI-Z 2026.\n✅ Кожаный салон\n✅ Камера 360",
             specs={
-                "complectation": "Luxury",
-                "pts": "Не оформлен",
-                "vin": "XTA123",
-                "generation": "I (2024—2026)",
                 "engine_size": "1.5",
-            }
-        )
-        labels = [label for label, _value in vehicle.extra_spec_cards]
-        self.assertEqual(
-            labels,
-            ["ПТС", "VIN", "Поколение", "Объём двигателя", "Комплектация"],
-        )
-
-    def test_public_spec_sheet_drops_grid_duplicates(self):
-        vehicle = Vehicle(
-            description=(
-                "[Название автомобиля] Changan UNI-Z\n"
-                "[Год выпуска] 2026\n"
-                "[Цвет] белый\n"
-                "[ПТС] Не оформлен\n"
-                "Маркетинговый текст про комплектацию Luxury"
-            ),
-            specs={"pts": "Не оформлен", "vin": "X"},
+                "complectation": "Luxury",
+                "vin": "XTA123",
+                "pts": "Не оформлен",
+            },
         )
         sheet = vehicle.public_spec_sheet
-        self.assertFalse(sheet.has_rows)
-        self.assertIn("Маркетинговый текст", sheet.rest)
+        self.assertTrue(sheet.has_rows)
+        as_dict = dict(sheet.rows)
+        self.assertEqual(as_dict.get("Двигатель"), "1.5")
+        self.assertEqual(as_dict.get("Комплектация"), "Luxury")
+        self.assertNotIn("VIN", as_dict)
+        self.assertNotIn("ПТС", as_dict)
+        self.assertEqual(as_dict.get("Кожаный салон"), "Есть")
+        self.assertEqual(as_dict.get("Камера 360"), "Есть")
 
 
 class SpecSheetParseTests(TestCase):
