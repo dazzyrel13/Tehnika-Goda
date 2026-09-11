@@ -3471,7 +3471,7 @@ header.is-scrolled {
 
 .home-review__avatar--photo {
     object-fit: cover;
-    object-position: center top;
+    object-position: center;
     background: #e8eaee;
     padding: 0;
 }

@@ -44,7 +44,7 @@ HOME_REVIEWS: tuple[dict, ...] = (
         "client_name": "V K",
         "city": "",
         "vehicle_purchased": "Geely Coolray",
-        "avatar_file": "",
+        "avatar_file": "vk-avatar.webp",
         "comment": (
             "Хочу поблагодарить за качественную организацию сделки по импорту "
             "автомобиля Geely Coolray. Процесс подбора, логистики и таможенного "
