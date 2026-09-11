@@ -118,9 +118,12 @@ class CatalogPagesTests(TestCase):
         )
         invalidate_nav_cache()
         response = self.client.get(reverse("home"))
-        self.assertContains(response, "Подобрать авто")
-        self.assertContains(response, "Подобрать коммерческий транспорт")
-        self.assertContains(response, "Подобрать спецтехнику")
+        self.assertContains(response, "Подбор по параметрам")
+        self.assertContains(response, 'data-picker-tab="cars"')
+        self.assertContains(response, 'data-picker-tab="trucks"')
+        self.assertContains(response, 'data-picker-tab="special"')
+        self.assertContains(response, "Коммерческий")
+        self.assertContains(response, "Спецтехника")
         self.assertContains(response, "Тип транспорта")
         self.assertContains(response, "Тип техники")
         self.assertContains(response, "Грузовики")
@@ -427,7 +430,7 @@ class CatalogPagesTests(TestCase):
             "transmission": "Робот",
             "bodyType": "Минивэн",
             "fuelType": "Бензин",
-            "engine_vol": "1.5",
+            "engine_size": "1.5",
         }
         self.vehicle.save()
         response = self.client.get(self.vehicle.get_absolute_url())
@@ -435,12 +438,18 @@ class CatalogPagesTests(TestCase):
         self.assertContains(response, "Коробка передач")
         self.assertContains(response, "Тип двигателя")
         self.assertContains(response, "Бензин")
-        self.assertContains(response, "Объём двигателя")
+        sheet = response.context["vehicle"].public_spec_sheet
+        self.assertTrue(
+            any(label == "Двигатель" and "1.5" in value for label, value in sheet.rows),
+            msg=f"expected engine volume row in {sheet.rows!r}",
+        )
         self.assertNotContains(response, ">color<")
         self.assertNotContains(response, ">gearbox<")
         self.assertNotContains(response, ">transmission<")
         self.assertNotContains(response, ">bodyType<")
         self.assertNotContains(response, ">fuelType<")
+        self.assertNotContains(response, ">engine_size<")
+        self.assertNotContains(response, ">engine_vol<")
 
     def test_detail_turnkey_note_ignores_cny_rate(self):
         self.vehicle.cny_rate = "13.10"

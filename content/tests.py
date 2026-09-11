@@ -77,6 +77,19 @@ class InfoPagesArticleJsonLdTests(TestCase):
 
 class ReviewPlatformStatsTests(TestCase):
     def setUp(self):
+        from content.models import ReviewPlatformSettings
+
+        settings_obj = ReviewPlatformSettings.load()
+        settings_obj.yandex_rating = None
+        settings_obj.yandex_count = None
+        settings_obj.twogis_rating = None
+        settings_obj.twogis_count = None
+        settings_obj.avito_rating = None
+        settings_obj.avito_count = None
+        settings_obj.yandex_url = ""
+        settings_obj.twogis_url = ""
+        settings_obj.avito_url = ""
+        settings_obj.save()
         invalidate_home_reviews_cache()
 
     def test_empty_reviews_show_no_fake_scores(self):

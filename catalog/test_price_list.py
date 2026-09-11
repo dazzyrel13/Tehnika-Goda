@@ -80,6 +80,6 @@ class AvtoPodZakazPageTests(TestCase):
         self.assertContains(response, "Авто из Китая. Прайс")
         self.assertContains(response, "BMW из Китая")
         self.assertContains(response, "BMW X1 Test SEO")
-        self.assertContains(response, "Под заказ")
+        self.assertContains(response, "Из Китая")
         self.assertContains(response, "FAQPage")
         self.assertContains(response, 'id="bmw"')
