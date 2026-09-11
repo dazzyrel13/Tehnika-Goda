@@ -126,6 +126,7 @@ class ReviewAdmin(admin.ModelAdmin):
                     "client_name",
                     "city",
                     "vehicle_purchased",
+                    "avatar",
                     "comment",
                     "rating",
                     "date",

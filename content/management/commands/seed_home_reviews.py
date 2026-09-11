@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from datetime import date
+from pathlib import Path
 
+from django.conf import settings
+from django.core.files import File
 from django.core.management.base import BaseCommand
 
 from catalog.cache_helpers import invalidate_home_reviews_cache
@@ -15,6 +18,7 @@ HOME_REVIEWS: tuple[dict, ...] = (
         "client_name": "Яна Банщикова",
         "city": "",
         "vehicle_purchased": "",
+        "avatar_file": "yana-banshchikova.webp",
         "comment": (
             "Решила заказать автомобиль из Китая и обратилась в компанию Техника Года. "
             "Ребята подробно объяснили нюансы, расписали условия работы. "
@@ -40,6 +44,7 @@ HOME_REVIEWS: tuple[dict, ...] = (
         "client_name": "V K",
         "city": "",
         "vehicle_purchased": "Geely Coolray",
+        "avatar_file": "",
         "comment": (
             "Хочу поблагодарить за качественную организацию сделки по импорту "
             "автомобиля Geely Coolray. Процесс подбора, логистики и таможенного "
@@ -61,15 +66,30 @@ class Command(BaseCommand):
     help = "Create or update curated homepage reviews (idempotent by source_url)."
 
     def handle(self, *args, **options):
+        avatar_dir = Path(settings.BASE_DIR) / "data" / "reviews"
         created = 0
         updated = 0
         for payload in HOME_REVIEWS:
             url = payload["source_url"]
-            defaults = {k: v for k, v in payload.items() if k != "source_url"}
+            avatar_name = (payload.get("avatar_file") or "").strip()
+            defaults = {
+                k: v
+                for k, v in payload.items()
+                if k not in {"source_url", "avatar_file"}
+            }
             obj, was_created = Review.objects.update_or_create(
                 source_url=url,
                 defaults=defaults,
             )
+            if avatar_name:
+                path = avatar_dir / avatar_name
+                if path.exists():
+                    with path.open("rb") as fh:
+                        obj.avatar.save(path.name, File(fh), save=True)
+                else:
+                    self.stdout.write(
+                        self.style.WARNING(f"Avatar missing: {path}")
+                    )
             if was_created:
                 created += 1
                 self.stdout.write(self.style.SUCCESS(f"Created: {obj.client_name}"))

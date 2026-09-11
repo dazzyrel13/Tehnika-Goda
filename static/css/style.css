@@ -3469,6 +3469,13 @@ header.is-scrolled {
 .home-review__avatar--2 { background: #1d4ed8; }
 .home-review__avatar--3 { background: #12141a; }
 
+.home-review__avatar--photo {
+    object-fit: cover;
+    object-position: center top;
+    background: #e8eaee;
+    padding: 0;
+}
+
 .home-review__who {
     min-width: 0;
 }

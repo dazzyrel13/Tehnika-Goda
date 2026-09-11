@@ -6,6 +6,13 @@ from django.db import models
 from django.utils import timezone
 
 
+def review_avatar_path(instance, filename: str) -> str:
+    ext = (filename.rsplit(".", 1)[-1] or "webp").lower()
+    if ext not in {"jpg", "jpeg", "png", "webp", "gif"}:
+        ext = "webp"
+    return f"reviews/avatars/{timezone.now():%Y/%m}/{uuid.uuid4().hex[:12]}.{ext}"
+
+
 class ReviewPlatformSettings(models.Model):
     """
     Singleton: общие ссылки на профили компании на площадках отзывов.
@@ -77,6 +84,12 @@ class Review(models.Model):
     client_name = models.CharField("Имя клиента", max_length=100)
     city = models.CharField("Город клиента", max_length=100, blank=True)
     vehicle_purchased = models.CharField("Купленное авто", max_length=200, blank=True)
+    avatar = models.ImageField(
+        "Аватар",
+        upload_to=review_avatar_path,
+        blank=True,
+        help_text="Круглое фото клиента на карточке отзыва. Если пусто — показываются инициалы.",
+    )
     comment = models.TextField("Комментарий/Отзыв")
     rating = models.PositiveIntegerField(
         "Рейтинг (1-5)",

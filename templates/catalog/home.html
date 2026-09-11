@@ -532,7 +532,11 @@
             {% for review in home_reviews %}
             <article class="home-review reveal">
                 <div class="home-review__head">
+                    {% if review.avatar %}
+                    <img src="{{ review.avatar.url }}" alt="" class="home-review__avatar home-review__avatar--photo" width="44" height="44" loading="lazy" decoding="async">
+                    {% else %}
                     <span class="home-review__avatar home-review__avatar--{{ review.avatar_tone }}" aria-hidden="true">{{ review.initials }}</span>
+                    {% endif %}
                     <div class="home-review__who">
                         <strong class="home-review__name">{{ review.client_name }}</strong>
                         {% if review.subtitle %}
