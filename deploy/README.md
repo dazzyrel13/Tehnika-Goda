@@ -1,5 +1,14 @@
 # Short ops notes (RF / free stack). Details also in PRODUCTION_CHECKLIST.md and README.
 
+## Host nginx (Timeweb VPS)
+```bash
+sudo cp /etc/nginx/sites-available/tehnikagoda.ru /etc/nginx/sites-available/tehnikagoda.ru.bak
+sudo cp nginx/tehnikagoda.http.conf /etc/nginx/conf.d/tehnikagoda.http.conf
+sudo cp nginx/tehnikagoda.ru.host.conf /etc/nginx/sites-available/tehnikagoda.ru
+sudo nginx -t && sudo systemctl reload nginx
+```
+If cert paths differ, edit the `ssl_certificate*` lines before reload.
+
 ## Uptime Kuma
 ```bash
 docker compose -f docker-compose.monitoring.yml up -d

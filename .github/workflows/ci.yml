@@ -33,7 +33,7 @@ jobs:
           --health-retries 10
 
     env:
-      SECRET_KEY: ci-test-secret-key-not-for-production
+      SECRET_KEY: ci-test-secret-key-not-for-production-use-long-enough-value-48chars
       DEBUG: "False"
       USE_HTTPS: "False"
       ALLOW_INSECURE_PRODUCTION: "True"
@@ -64,10 +64,20 @@ jobs:
           python manage.py check
           python manage.py migrate --noinput
 
+      - name: Django deploy checks
+        env:
+          USE_HTTPS: "True"
+          ALLOW_INSECURE_PRODUCTION: "False"
+          SITE_URL: https://tehnikagoda.ru
+          ALLOWED_HOSTS: tehnikagoda.ru,www.tehnikagoda.ru,localhost,127.0.0.1
+          BEHIND_HTTPS_PROXY: "True"
+          TRUST_PROXY_HEADERS: "True"
+        run: python manage.py check --deploy
+
       - name: Run tests with coverage
         run: |
           coverage run manage.py test --verbosity=1
-          coverage report
+          coverage report --fail-under=65
           coverage xml
 
       - name: Upload coverage artifact

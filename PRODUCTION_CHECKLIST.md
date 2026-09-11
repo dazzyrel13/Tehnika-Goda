@@ -27,7 +27,7 @@
 - Run `python manage.py collectstatic --noinput`.
 - After deploy, once: `python manage.py generate_image_variants` (card srcset 400/800 for existing photos).
 - Ensure logs directory exists and is writable (`logs/`).
-- Reload nginx after pulling `nginx/nginx.conf` (gzip, HTTP/2, rate limits on leads/search/login, `/healthz/`, `server_tokens off`, unknown Host on :80 returns 444).
+- Reload host nginx after pulling `nginx/tehnikagoda.http.conf` + `nginx/tehnikagoda.ru.host.conf` (gzip, rate limits on leads/search/login, `/healthz/`, security headers, `server_tokens off`). Backup the live site file first; keep Let's Encrypt cert paths. Docker-only setups still use `nginx/nginx.conf`.
 - Schedule DB backups: copy lines from `deploy/crontab.example` (daily `scripts/backup.sh`). Test restore once. Optionally `BACKUP_MEDIA=1`.
 - Confirm Celery worker **and** beat are running (`docker compose -f docker-compose.prod.yml ps`).
 - Optional: `docker compose -f docker-compose.monitoring.yml up -d` (Uptime Kuma on `:3001`) and monitor `https://tehnikagoda.ru/healthz/`.
@@ -37,7 +37,7 @@
 ## Health Checks
 - Run `python manage.py check`.
 - Run `python manage.py check --deploy`.
-- Run `python manage.py test` / CI coverage (≥65%).
+- Run `python manage.py test` / CI coverage (`coverage report --fail-under=65`).
 - Verify `GET /healthz/` returns `{"status":"ok"}` publicly (200/503). Loopback/Docker healthcheck may also see `db`/`redis`. Optional `HEALTHZ_TOKEN` + header `X-Healthz-Token` for remote detailed probes.
 - Verify admin path and access restrictions.
 - Verify lead form rate limits work per client IP (not shared).

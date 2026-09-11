@@ -69,7 +69,6 @@ p,
 li,
 label,
 summary,
-.home-hero__stat-label,
 .vehicle-meta-label {
     text-shadow: none;
 }
@@ -1118,10 +1117,6 @@ input[type=number] {
 .bg-detail,
 .bg-dossier,
 .bg-about,
-.bg-how-to-buy,
-.bg-delivery,
-.bg-customs,
-.bg-blog,
 .bg-faq {
     background-color: var(--bg-page);
     background-image: none;
@@ -2523,45 +2518,6 @@ a.car-card__body:focus-visible {
     text-underline-offset: 3px;
 }
 
-.why-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-}
-
-.why-card {
-    background: #fff;
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius);
-    padding: 24px;
-    box-shadow: var(--shadow-soft);
-}
-
-.why-card__icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    background: var(--accent-yellow);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    margin-bottom: 14px;
-    color: #0f1419;
-}
-
-.why-card h3 {
-    font-size: 18px;
-    margin: 0 0 8px;
-}
-
-.why-card p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 14px;
-    line-height: 1.5;
-}
-
 .faq-list {
     display: flex;
     flex-direction: column;
@@ -2960,7 +2916,6 @@ header.is-scrolled {
         text-shadow: none;
     }
 
-    .why-grid,
     .ed-inspect__grid,
     .ed-delivery {
         grid-template-columns: 1fr;
@@ -3367,7 +3322,6 @@ header.is-scrolled {
     }
 
     .process-grid,
-    .why-grid,
     .ed-inspect__grid {
         grid-template-columns: 1fr;
     }
@@ -4761,10 +4715,6 @@ body.bg-catalog-cars .leads-cta-section,
 body.bg-catalog-trucks .leads-cta-section,
 body.bg-catalog-special .leads-cta-section,
 .bg-about .leads-cta-section,
-.bg-how-to-buy .leads-cta-section,
-.bg-delivery .leads-cta-section,
-.bg-customs .leads-cta-section,
-.bg-blog .leads-cta-section,
 body.bg-faq .leads-cta-section {
     background-image: none;
     background-color: transparent;

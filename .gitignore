@@ -24,10 +24,14 @@ env/
 # Django
 db.sqlite3
 db.sqlite3-journal
+*.db
 *.log
 logs/
 staticfiles/
 media/
+
+# Local audit / scratch
+data/mobile_audit/
 
 # Data dumps / backups (may contain PII)
 datadump.json

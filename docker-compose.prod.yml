@@ -18,6 +18,7 @@ services:
 
   web:
     build: .
+    image: tehnikagoda_app:latest
     container_name: tehnikagoda_web
     command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 180
     volumes:
@@ -57,7 +58,7 @@ services:
       start_period: 40s
 
   celery_worker:
-    build: .
+    image: tehnikagoda_app:latest
     container_name: tehnikagoda_celery_worker
     command: celery -A core worker -l INFO
     volumes:
@@ -82,7 +83,7 @@ services:
     restart: always
 
   celery_beat:
-    build: .
+    image: tehnikagoda_app:latest
     container_name: tehnikagoda_celery_beat
     command: celery -A core beat -l INFO
     volumes:

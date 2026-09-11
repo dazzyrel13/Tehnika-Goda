@@ -10,6 +10,10 @@
 <link rel="preload" href="{% static 'images/team/leadership.webp' %}?v=1" as="image">
 {% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/fonts-caveat.css' %}?v=1">
+{% endblock %}
+
 {% block json_ld %}
 {{ block.super }}
 <script type="application/ld+json">
@@ -634,5 +638,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/home.js' %}?v=4"></script>
+<script src="{% static 'js/home.js' %}?v=4" defer></script>
 {% endblock %}

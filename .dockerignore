@@ -34,11 +34,13 @@ htmlcov
 db.sqlite3
 db.sqlite3-journal
 *.sqlite3
+*.db
 datadump.json
 gallery_dump.json
 *_dump.json
 *_backup.json
 tehnikagoda_sqlite_backup.json
+data/mobile_audit
 
 # Runtime / build artifacts
 logs
