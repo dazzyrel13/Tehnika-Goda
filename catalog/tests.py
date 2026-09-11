@@ -83,7 +83,7 @@ class CatalogPagesTests(TestCase):
         self.assertNotIn("fonts.gstatic.com", html)
         self.assertIn("fonts/manrope-cyrillic-wght.woff2", html)
         self.assertIn("Автомобили под заказ из Китая", html)
-        self.assertIn("Автомобили под заказ из Китая | Техника Года", html)
+        self.assertIn("Авто из Китая под заказ | Техника Года", html)
 
     def test_home_repeat_visit_uses_cache(self):
         from django.db import connection

@@ -6,7 +6,7 @@ from __future__ import annotations
 CATEGORY_SEO: dict[str, tuple[str, str]] = {
     "cars": (
         "Автомобили под заказ из Китая",
-        "Автомобили под заказ из Китая с собственной площадки: проверка до оплаты, "
+        "Авто из Китая под заказ с собственной площадки: проверка до оплаты, "
         "прозрачный расчёт и цена под ключ до выдачи в Благовещенске.",
     ),
     "cars_sedan": (
@@ -128,7 +128,7 @@ def brand_heading(brand_name: str) -> tuple[str, str]:
 
 def brand_meta_description(brand_name: str) -> str:
     return (
-        f"{brand_name} под заказ из Китая — подбор, фото и видео с площадки, "
+        f"{brand_name} — авто из Китая под заказ: подбор, фото и видео с площадки, "
         "бесплатный просчёт и цена под ключ до Благовещенска. Техника Года."
     )
 
@@ -136,7 +136,7 @@ def brand_meta_description(brand_name: str) -> str:
 def model_meta_description(brand_name: str, model_name: str) -> str:
     full = f"{brand_name} {model_name}".strip()
     return (
-        f"{full} под заказ из Китая — подбор комплектации, проверка до оплаты "
+        f"{full} — авто из Китая под заказ: подбор комплектации, проверка до оплаты "
         "и расчёт под ключ до Благовещенска. Техника Года."
     )
 
@@ -145,7 +145,7 @@ def model_heading(brand_name: str, model_name: str) -> tuple[str, str]:
     full = f"{brand_name} {model_name}".strip()
     return (
         f"{full} из Китая",
-        f"{full} под заказ с площадки в Китае: подбор комплектации, проверка до оплаты "
+        f"{full} — авто из Китая под заказ с площадки в Китае: подбор комплектации, проверка до оплаты "
         "и расчёт под ключ до выдачи в Благовещенске.",
     )
 

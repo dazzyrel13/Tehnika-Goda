@@ -74,9 +74,9 @@ class HomeView(ListView):
         context["home_reviews"] = home_reviews(limit=6)
         context["review_platforms"] = review_platforms()
         context["home_promos"] = home_promos()
-        context["seo_title"] = "Автомобили под заказ из Китая | Техника Года"
+        context["seo_title"] = "Авто из Китая под заказ | Техника Года"
         context["seo_description"] = (
-            "Автомобили под заказ из Китая с площадки Техника Года. "
+            "Авто из Китая под заказ с площадки Техника Года. "
             "Проверка до оплаты, гарантия 6 месяцев на ДВС и КПП, цена под ключ до Благовещенска."
         )
         return context
@@ -324,6 +324,8 @@ class VehicleListView(ListView):
             context["seo_intro"] = intro
             context["seo_title"] = f"{h1} | Техника Года"
             context["seo_description"] = intro
+            if cat_slug == "cars" and not brand_slug:
+                context["seo_title"] = "Авто из Китая под заказ | Техника Года"
         elif brand_slug:
             brand = Brand.objects.filter(slug=brand_slug).first()
             brand_name = brand.name if brand else brand_slug
@@ -343,8 +345,11 @@ class VehicleListView(ListView):
                 "Автомобили под заказ из Китая: легковые, коммерческий транспорт и спецтехника. "
                 "Подбор под задачу, проверка до оплаты и расчёт под ключ до выдачи в Благовещенске."
             )
-            context["seo_title"] = "Автомобили под заказ из Китая | Техника Года"
-            context["seo_description"] = context["seo_intro"]
+            context["seo_title"] = "Авто из Китая под заказ | Техника Года"
+            context["seo_description"] = (
+                "Авто из Китая под заказ: легковые, коммерческий транспорт и спецтехника. "
+                "Подбор под задачу, проверка до оплаты и расчёт под ключ до выдачи в Благовещенске."
+            )
 
         # Prefer clean canonical for indexable single-dimension routes.
         if not thin_listing:
