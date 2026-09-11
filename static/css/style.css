@@ -4007,8 +4007,91 @@ a.home-reviews-platform:hover {
 
 @media (max-width: 720px) {
     .price-landing__group {
-        padding-left: 18px;
-        padding-right: 18px;
+        padding: 14px 12px;
+    }
+
+    .price-landing__group-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        margin-bottom: 10px;
+    }
+
+    .price-landing__group-head h2 {
+        font-size: 16px;
+        line-height: 1.25;
+    }
+
+    .price-landing__group-head a {
+        font-size: 13px;
+    }
+
+    .price-landing__group .ed-delivery__table-wrap {
+        overflow: visible;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+        margin: 0 -4px;
+    }
+
+    .price-landing__table {
+        font-size: 13px;
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .price-landing__table thead {
+        display: none;
+    }
+
+    .price-landing__table tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        gap: 4px 12px;
+        padding: 11px 4px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .price-landing__table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .price-landing__table td {
+        display: block;
+        padding: 0;
+        border: none;
+        white-space: normal;
+    }
+
+    .price-landing__table td:first-child {
+        min-width: 0;
+        font-size: 13px;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    .price-landing__table td:nth-child(2) {
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+        text-align: right;
+        justify-self: end;
+    }
+
+    /* Status is the same for every row — hide on phones */
+    .price-landing__table td:nth-child(3) {
+        display: none;
+    }
+
+    .price-landing__table tbody tr:hover td {
+        background: transparent;
+    }
+
+    .price-landing__brands {
+        gap: 6px;
+        margin-bottom: 16px;
     }
 }
 
@@ -6102,7 +6185,7 @@ body.vehicle-lightbox-open {
     }
 
     .price-landing__group {
-        padding: 16px;
+        padding: 14px 12px;
         margin-bottom: 12px;
     }
 
