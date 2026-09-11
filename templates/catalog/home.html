@@ -566,8 +566,13 @@
         {% else %}
         <div class="home-reviews-empty reveal" aria-live="polite">
             <div class="home-reviews-empty__card">
+                {% if has_review_platform_links %}
+                <p class="home-reviews-empty__title">Отзывы на внешних площадках</p>
+                <p class="home-reviews-empty__text">Карточки на сайте ещё собираем. Пока можно открыть отзывы по ссылкам на Яндекс Карты, 2ГИС и Авито ниже.</p>
+                {% else %}
                 <p class="home-reviews-empty__title">Скоро здесь появятся отзывы</p>
                 <p class="home-reviews-empty__text">Мы собираем отзывы клиентов с 2ГИС, Авито и Яндекс Карт. Место для карточек уже готово.</p>
+                {% endif %}
             </div>
         </div>
         {% endif %}

@@ -15,16 +15,19 @@ class ReviewPlatformSettings(models.Model):
     yandex_url = models.URLField(
         "Ссылка на Яндекс Карты",
         blank=True,
+        max_length=500,
         help_text="Профиль или карточка организации в Яндекс Картах",
     )
     twogis_url = models.URLField(
         "Ссылка на 2ГИС",
         blank=True,
+        max_length=500,
         help_text="Карточка организации в 2ГИС",
     )
     avito_url = models.URLField(
         "Ссылка на Авито",
         blank=True,
+        max_length=500,
         help_text="Профиль продавца или отзывы на Авито",
     )
     updated_at = models.DateTimeField("Обновлено", auto_now=True)
@@ -39,7 +42,9 @@ class ReviewPlatformSettings(models.Model):
     def save(self, *args, **kwargs):
         self.pk = 1
         super().save(*args, **kwargs)
-        cache.delete("catalog:review_platforms")
+        from catalog.cache_helpers import invalidate_home_reviews_cache
+
+        invalidate_home_reviews_cache()
 
     def delete(self, *args, **kwargs):
         # Prevent deleting the singleton row.
@@ -88,6 +93,7 @@ class Review(models.Model):
     source_url = models.URLField(
         "Ссылка на отзыв",
         blank=True,
+        max_length=500,
         help_text="Прямая ссылка на этот отзыв. Если пусто — берётся общая ссылка площадки.",
     )
     is_published = models.BooleanField("Опубликовано", default=True)

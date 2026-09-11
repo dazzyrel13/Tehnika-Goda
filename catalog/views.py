@@ -73,6 +73,9 @@ class HomeView(ListView):
         context["home_faqs"] = home_faqs()
         context["home_reviews"] = home_reviews(limit=6)
         context["review_platforms"] = review_platforms()
+        context["has_review_platform_links"] = any(
+            (p.get("url") or "").strip() for p in context["review_platforms"]
+        )
         context["home_promos"] = home_promos()
         context["seo_title"] = "Авто из Китая под заказ | Техника Года"
         context["seo_description"] = (

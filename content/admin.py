@@ -70,9 +70,10 @@ class ReviewPlatformSettingsAdmin(admin.ModelAdmin):
             {
                 "fields": ("yandex_url", "twogis_url", "avito_url"),
                 "description": (
-                    "Эти ссылки открываются из виджетов рейтингов на главной "
-                    "и используются как запасной вариант, если у конкретного "
-                    "отзыва не указана своя ссылка. "
+                    "Эти ссылки делают кликабельными виджеты Яндекс / 2ГИС / Авито "
+                    "внизу блока отзывов на главной. "
+                    "Тексты отзывов сами по себе не появляются — их нужно добавить "
+                    "отдельно в разделе «Отзывы клиентов» (имя, текст, оценка, площадка). "
                     "Вставьте полные URL (https://…)."
                 ),
             },
@@ -131,7 +132,9 @@ class ReviewAdmin(admin.ModelAdmin):
                 ),
                 "description": (
                     "На главной показываются до 6 опубликованных отзывов "
-                    "(сортировка: порядок, затем дата)."
+                    "(сортировка: порядок, затем дата). "
+                    "Сюда нужно вручную добавить текст отзыва — "
+                    "сайт не подтягивает его автоматически по ссылке."
                 ),
             },
         ),
@@ -157,9 +160,15 @@ class ReviewAdmin(admin.ModelAdmin):
     @admin.action(description="Опубликовать выбранные отзывы")
     def publish_reviews(self, request, queryset):
         updated = queryset.update(is_published=True)
+        from catalog.cache_helpers import invalidate_home_reviews_cache
+
+        invalidate_home_reviews_cache()
         self.message_user(request, f"Опубликовано отзывов: {updated}")
 
     @admin.action(description="Снять с публикации")
     def unpublish_reviews(self, request, queryset):
         updated = queryset.update(is_published=False)
+        from catalog.cache_helpers import invalidate_home_reviews_cache
+
+        invalidate_home_reviews_cache()
         self.message_user(request, f"Снято с публикации: {updated}")
