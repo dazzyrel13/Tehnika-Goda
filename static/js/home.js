@@ -117,6 +117,17 @@
             syncProcess();
         }
 
+        const searchFold = document.querySelector(".home-deep-search__fold");
+        if (searchFold) {
+            const mqSearch = window.matchMedia("(max-width: 960px)");
+            const syncSearchFold = () => {
+                searchFold.open = !mqSearch.matches;
+            };
+            if (mqSearch.addEventListener) mqSearch.addEventListener("change", syncSearchFold);
+            else if (mqSearch.addListener) mqSearch.addListener(syncSearchFold);
+            syncSearchFold();
+        }
+
         const selects = document.querySelectorAll(".home-deep-search select");
         if (!selects.length) return;
 

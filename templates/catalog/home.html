@@ -162,13 +162,16 @@
 
     <div class="home-search-block reveal">
         <div class="home-deep-search" data-home-picker>
-            <div class="home-deep-search__head">
-                <h4>Подбор по параметрам</h4>
-            </div>
+            <details class="home-deep-search__fold" open>
+                <summary class="home-deep-search__fold-summary">
+                    <span class="home-deep-search__fold-title">Подбор по параметрам</span>
+                    <span class="home-deep-search__fold-hint">Открыть фильтры</span>
+                </summary>
+                <div class="home-deep-search__fold-body">
             <div class="home-deep-search__tabs" role="tablist" aria-label="Ниша подбора">
-                <button type="button" class="home-deep-search__tab is-active" role="tab" id="picker-tab-cars" aria-controls="picker-panel-cars" aria-selected="true" data-picker-tab="cars">Подобрать авто</button>
-                <button type="button" class="home-deep-search__tab" role="tab" id="picker-tab-trucks" aria-controls="picker-panel-trucks" aria-selected="false" data-picker-tab="trucks">Подобрать коммерческий транспорт</button>
-                <button type="button" class="home-deep-search__tab" role="tab" id="picker-tab-special" aria-controls="picker-panel-special" aria-selected="false" data-picker-tab="special">Подобрать спецтехнику</button>
+                <button type="button" class="home-deep-search__tab is-active" role="tab" id="picker-tab-cars" aria-controls="picker-panel-cars" aria-selected="true" data-picker-tab="cars">Авто</button>
+                <button type="button" class="home-deep-search__tab" role="tab" id="picker-tab-trucks" aria-controls="picker-panel-trucks" aria-selected="false" data-picker-tab="trucks">Коммерческий</button>
+                <button type="button" class="home-deep-search__tab" role="tab" id="picker-tab-special" aria-controls="picker-panel-special" aria-selected="false" data-picker-tab="special">Спецтехника</button>
             </div>
 
             <form action="{% url 'catalog:category' category_slug='cars' %}" method="GET" class="home-deep-search__grid" role="tabpanel" aria-labelledby="picker-tab-cars" data-picker-panel="cars" id="picker-panel-cars">
@@ -263,6 +266,8 @@
                     <button type="submit" class="btn-elite home-deep-search__submit">Найти</button>
                 </div>
             </form>
+                </div>
+            </details>
         </div>
     </div>
 
@@ -594,5 +599,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/home.js' %}?v=2"></script>
+<script src="{% static 'js/home.js' %}?v=3"></script>
 {% endblock %}
