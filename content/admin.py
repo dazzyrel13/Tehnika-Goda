@@ -78,6 +78,25 @@ class ReviewPlatformSettingsAdmin(admin.ModelAdmin):
                 ),
             },
         ),
+        (
+            "Рейтинги с площадок",
+            {
+                "fields": (
+                    "yandex_rating",
+                    "yandex_count",
+                    "twogis_rating",
+                    "twogis_count",
+                    "avito_rating",
+                    "avito_count",
+                ),
+                "description": (
+                    "Числа для виджетов на главной — как на самой площадке "
+                    "(не по количеству карточек, которые вы добавили на сайт). "
+                    "Если поле пустое, виджет считает только отзывы из раздела "
+                    "«Отзывы клиентов»."
+                ),
+            },
+        ),
     )
 
     def has_add_permission(self, request):

@@ -140,3 +140,25 @@ class ReviewPlatformStatsTests(TestCase):
         self.assertEqual(platforms["yandex"]["url"], "https://yandex.ru/maps/org/test")
         self.assertEqual(platforms["2gis"]["url"], "https://2gis.ru/firm/test")
         self.assertEqual(platforms["avito"]["url"], "https://www.avito.ru/user/test")
+
+    def test_manual_platform_rating_overrides_local_count(self):
+        from decimal import Decimal
+
+        from content.models import ReviewPlatformSettings
+
+        Review.objects.create(
+            client_name="Иван",
+            comment="Отлично",
+            rating=5,
+            source=Review.SOURCE_YANDEX,
+            is_published=True,
+        )
+        settings_obj = ReviewPlatformSettings.load()
+        settings_obj.yandex_rating = Decimal("5.0")
+        settings_obj.yandex_count = 7
+        settings_obj.save()
+        invalidate_home_reviews_cache()
+        platforms = {p["key"]: p for p in review_platforms()}
+        self.assertEqual(platforms["yandex"]["score"], "5.0")
+        self.assertEqual(platforms["yandex"]["count"], 7)
+        self.assertIn("7 оценок", platforms["yandex"]["label"])

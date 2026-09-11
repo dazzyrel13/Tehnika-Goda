@@ -354,12 +354,14 @@ def review_platforms() -> list[dict]:
     """
     Виджеты рейтингов площадок для главной.
 
-    Score/count считаются по опубликованным Review в БД.
-    URL площадки — из админки («Ссылки на отзывы»), иначе из .env.
+    Рейтинг/число оценок — из админки («Ссылки на отзывы»), если заданы;
+    иначе считаются по опубликованным Review в БД.
+    URL площадки — из админки, иначе из .env.
     """
-    from content.models import Review, platform_url_for_source
+    from content.models import Review, ReviewPlatformSettings, platform_url_for_source
 
     def build() -> list[dict]:
+        settings_obj = ReviewPlatformSettings.load()
         stats = {
             row["source"]: row
             for row in Review.objects.filter(is_published=True)
@@ -395,9 +397,14 @@ def review_platforms() -> list[dict]:
         ]
 
         for item in platforms:
-            row = stats.get(item["source"]) or {}
-            count = int(row.get("count") or 0)
-            avg = row.get("avg")
+            manual_avg, manual_count = settings_obj.rating_for_source(item["source"])
+            if manual_count is not None:
+                count = manual_count
+                avg = manual_avg
+            else:
+                row = stats.get(item["source"]) or {}
+                count = int(row.get("count") or 0)
+                avg = row.get("avg")
             item["count"] = count
             if count > 0 and avg is not None:
                 item["score"] = f"{float(avg):.1f}"

@@ -25,17 +25,62 @@ class ReviewPlatformSettings(models.Model):
         max_length=500,
         help_text="Профиль или карточка организации в Яндекс Картах",
     )
+    yandex_rating = models.DecimalField(
+        "Рейтинг Яндекс Карт",
+        max_digits=2,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Как на площадке (например 5.0). Пусто — считать по отзывам на сайте.",
+    )
+    yandex_count = models.PositiveIntegerField(
+        "Оценок в Яндекс Картах",
+        null=True,
+        blank=True,
+        help_text="Число оценок на площадке. Пусто — считать по отзывам на сайте.",
+    )
     twogis_url = models.URLField(
         "Ссылка на 2ГИС",
         blank=True,
         max_length=500,
         help_text="Карточка организации в 2ГИС",
     )
+    twogis_rating = models.DecimalField(
+        "Рейтинг 2ГИС",
+        max_digits=2,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Как на площадке (например 5.0). Пусто — считать по отзывам на сайте.",
+    )
+    twogis_count = models.PositiveIntegerField(
+        "Оценок в 2ГИС",
+        null=True,
+        blank=True,
+        help_text="Число оценок на площадке. Пусто — считать по отзывам на сайте.",
+    )
     avito_url = models.URLField(
         "Ссылка на Авито",
         blank=True,
         max_length=500,
         help_text="Профиль продавца или отзывы на Авито",
+    )
+    avito_rating = models.DecimalField(
+        "Рейтинг Авито",
+        max_digits=2,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Как на площадке. Пусто — считать по отзывам на сайте.",
+    )
+    avito_count = models.PositiveIntegerField(
+        "Оценок на Авито",
+        null=True,
+        blank=True,
+        help_text="Число оценок на площадке. Пусто — считать по отзывам на сайте.",
     )
     updated_at = models.DateTimeField("Обновлено", auto_now=True)
 
@@ -69,6 +114,22 @@ class ReviewPlatformSettings(models.Model):
             "avito": self.avito_url,
         }
         return (mapping.get(source) or "").strip()
+
+    def rating_for_source(self, source: str) -> tuple[float | None, int | None]:
+        """Manual platform rating/count from admin, if set."""
+        if source == "yandex":
+            rating, count = self.yandex_rating, self.yandex_count
+        elif source == "2gis":
+            rating, count = self.twogis_rating, self.twogis_count
+        elif source == "avito":
+            rating, count = self.avito_rating, self.avito_count
+        else:
+            return None, None
+        if count is None or int(count) <= 0:
+            return None, None
+        if rating is None:
+            return None, int(count)
+        return float(rating), int(count)
 
 
 class Review(models.Model):

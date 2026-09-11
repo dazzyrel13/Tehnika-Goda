@@ -101,3 +101,20 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(f"Done. created={created} updated={updated}")
         )
+        self._sync_platform_ratings()
+
+    def _sync_platform_ratings(self) -> None:
+        """Public platform scores shown on homepage widgets (not local card count)."""
+        from decimal import Decimal
+
+        from content.models import ReviewPlatformSettings
+
+        settings_obj = ReviewPlatformSettings.load()
+        settings_obj.yandex_rating = Decimal("5.0")
+        settings_obj.yandex_count = 7
+        settings_obj.twogis_rating = Decimal("5.0")
+        settings_obj.twogis_count = 7
+        settings_obj.save()
+        self.stdout.write(
+            self.style.SUCCESS("Platform widgets: Yandex 5.0 · 7, 2GIS 5.0 · 7")
+        )
