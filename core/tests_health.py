@@ -47,6 +47,14 @@ class HealthzTests(TestCase):
         self.assertEqual(response.status_code, 503)
         self.assertFalse(response.json()["redis"])
 
+    @override_settings(SECURE_SSL_REDIRECT=True, SECURE_REDIRECT_EXEMPT=[r"^healthz/"])
+    def test_healthz_not_redirected_when_ssl_redirect_on(self):
+        response = self.client.get(
+            reverse("healthz"), REMOTE_ADDR="127.0.0.1", secure=False
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "ok")
+
 
 class HealthzSkipAnalyticsTests(SimpleTestCase):
     def test_healthz_is_in_analytics_skip_prefixes(self):

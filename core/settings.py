@@ -399,6 +399,8 @@ LOGGING = {
 # Production Security Settings
 if env("USE_HTTPS") and not TESTING:
     SECURE_SSL_REDIRECT = True
+    # Docker/local probes hit gunicorn over plain HTTP on :8000 — do not 301 them to https.
+    SECURE_REDIRECT_EXEMPT = [r"^healthz/"]
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000

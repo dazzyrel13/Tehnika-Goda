@@ -43,12 +43,13 @@ services:
       - redis
     restart: always
     healthcheck:
+      # http.client does not follow redirects (urllib would chase SECURE_SSL_REDIRECT to https:// and hang).
       test:
         [
           "CMD",
           "python",
           "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz/', timeout=5).read()",
+          "import http.client; c=http.client.HTTPConnection('127.0.0.1',8000,timeout=5); c.request('GET','/healthz/'); r=c.getresponse(); assert r.status==200, r.status",
         ]
       interval: 30s
       timeout: 5s
