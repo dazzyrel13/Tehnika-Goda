@@ -51,27 +51,27 @@
                         <span class="ed-hero__feature-mark" aria-hidden="true"></span>
                         <div>
                             <strong>Проверка до оплаты</strong>
-                            <span>Осмотр, полная диагностика технического состояния автомобиля, история автомобиля, фото/видео отчёты</span>
+                            <span class="ed-hero__feature-detail">Осмотр, полная диагностика технического состояния автомобиля, история автомобиля, фото/видео отчёты</span>
                         </div>
                     </li>
                     <li>
                         <span class="ed-hero__feature-mark" aria-hidden="true"></span>
                         <div>
                             <strong>Гарантия 6 месяцев</strong>
-                            <span>На двигатель и коробку — условия в договоре</span>
+                            <span class="ed-hero__feature-detail">На двигатель и коробку — условия в договоре</span>
                         </div>
                     </li>
                     <li>
                         <span class="ed-hero__feature-mark" aria-hidden="true"></span>
                         <div>
                             <strong>Цена под ключ</strong>
-                            <span>Цена с учётом всех расходов и таможенных платежей в г. Благовещенске.</span>
+                            <span class="ed-hero__feature-detail">Цена с учётом всех расходов и таможенных платежей в г. Благовещенске.</span>
                         </div>
                     </li>
                 </ul>
                 <div class="ed-hero__actions">
-                    <a href="{% url 'catalog:category' category_slug='cars' %}" class="btn-elite">Смотреть каталог</a>
-                    <a href="#leads-section" class="btn-elite btn-elite-ghost">Запросить расчёт под ключ</a>
+                    <a href="#leads-section" class="btn-elite ed-hero__cta-primary">Оставить заявку</a>
+                    <a href="{% url 'catalog:category' category_slug='cars' %}" class="btn-elite btn-elite-ghost ed-hero__cta-secondary">Смотреть каталог</a>
                 </div>
             </div>
             <figure class="ed-hero__photo">
@@ -95,6 +95,21 @@
             </figure>
         </div>
     </section>
+
+    <nav class="home-mobile-quick" aria-label="Быстрые ссылки">
+        <a class="home-mobile-quick__item" href="{% url 'catalog:category' category_slug='cars' %}">
+            <span class="home-mobile-quick__label">Каталог</span>
+        </a>
+        <a class="home-mobile-quick__item" href="{% url 'avto_pod_zakaz' %}">
+            <span class="home-mobile-quick__label">Прайс</span>
+        </a>
+        <a class="home-mobile-quick__item" href="#how-we-work">
+            <span class="home-mobile-quick__label">Как купить</span>
+        </a>
+        <a class="home-mobile-quick__item" href="#leads-section">
+            <span class="home-mobile-quick__label">Заявка</span>
+        </a>
+    </nav>
 
     <section class="ed-metrics" aria-label="Ключевые факты">
         <div class="ed-metrics__inner">
@@ -355,27 +370,35 @@
             <h2>От заявки до выдачи</h2>
             <p>Четыре этапа сделки без лишних сюрпризов.</p>
         </div>
-        <div class="process-grid">
-            <div class="process-card reveal">
-                <span class="process-card__meta">Бесплатно</span>
-                <h3>Подбор</h3>
+        <div class="process-grid process-grid--steps">
+            <details class="process-card" open>
+                <summary class="process-card__summary">
+                    <span class="process-card__meta">Бесплатно</span>
+                    <h3>Подбор</h3>
+                </summary>
                 <p>Подберём под ваш бюджет и пожелания.</p>
-            </div>
-            <div class="process-card reveal reveal-delay-1">
-                <span class="process-card__meta">До оплаты</span>
-                <h3>Проверка</h3>
+            </details>
+            <details class="process-card" open>
+                <summary class="process-card__summary">
+                    <span class="process-card__meta">До оплаты</span>
+                    <h3>Проверка</h3>
+                </summary>
                 <p>Осмотр, полная диагностика технического состояния автомобиля, история автомобиля, фото/видео отчёты.</p>
-            </div>
-            <div class="process-card reveal reveal-delay-2" id="customs">
-                <span class="process-card__meta">До 30 рабочих дней</span>
-                <h3>Ввоз и таможня</h3>
+            </details>
+            <details class="process-card" id="customs" open>
+                <summary class="process-card__summary">
+                    <span class="process-card__meta">До 30 рабочих дней</span>
+                    <h3>Ввоз и таможня</h3>
+                </summary>
                 <p>Таможенное оформление, получение СБКТС, ЭПТС.</p>
-            </div>
-            <div class="process-card reveal reveal-delay-3">
-                <span class="process-card__meta">Благовещенск</span>
-                <h3>Получение</h3>
+            </details>
+            <details class="process-card" open>
+                <summary class="process-card__summary">
+                    <span class="process-card__meta">Благовещенск</span>
+                    <h3>Получение</h3>
+                </summary>
                 <p>Выдача автомобиля в г. Благовещенске или доставка в регионы автовозом.</p>
-            </div>
+            </details>
         </div>
         <p class="home-process-note">Доставка по РФ в цену под ключ не входит — ориентиры по городам ниже. Как устроена оплата — <a href="#how-we-work">четыре этапа выше</a>.</p>
     </div>
@@ -571,5 +594,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/home.js' %}?v=1"></script>
+<script src="{% static 'js/home.js' %}?v=2"></script>
 {% endblock %}

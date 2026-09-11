@@ -96,6 +96,27 @@
             });
         }
 
+        const processCards = document.querySelectorAll(".process-grid--steps .process-card");
+        if (processCards.length) {
+            const mq = window.matchMedia("(max-width: 960px)");
+            const syncProcess = () => {
+                processCards.forEach((card, index) => {
+                    card.open = mq.matches ? index === 0 : true;
+                });
+            };
+            processCards.forEach((card) => {
+                card.addEventListener("toggle", () => {
+                    if (!mq.matches || !card.open) return;
+                    processCards.forEach((other) => {
+                        if (other !== card) other.open = false;
+                    });
+                });
+            });
+            if (mq.addEventListener) mq.addEventListener("change", syncProcess);
+            else if (mq.addListener) mq.addListener(syncProcess);
+            syncProcess();
+        }
+
         const selects = document.querySelectorAll(".home-deep-search select");
         if (!selects.length) return;
 
