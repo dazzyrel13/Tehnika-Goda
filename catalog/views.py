@@ -76,6 +76,9 @@ class HomeView(ListView):
         context["has_review_platform_links"] = any(
             (p.get("url") or "").strip() for p in context["review_platforms"]
         )
+        context["show_avito_review_placeholder"] = not any(
+            getattr(r, "source", "") == "avito" for r in context["home_reviews"]
+        )
         context["home_promos"] = home_promos()
         context["seo_title"] = "Авто из Китая под заказ | Техника Года"
         context["seo_description"] = (

@@ -3476,6 +3476,27 @@ header.is-scrolled {
     padding: 0;
 }
 
+.home-review__avatar--avito {
+    background: #f3f4f6;
+    border: 1px solid var(--glass-border);
+}
+
+.home-review__avatar--avito img {
+    display: block;
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.home-review--placeholder {
+    background: #fafbfc;
+    border-style: dashed;
+}
+
+.home-review--placeholder .home-review__text {
+    color: var(--text-muted);
+}
+
 .home-review__who {
     min-width: 0;
 }
