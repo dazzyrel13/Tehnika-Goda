@@ -1,10 +1,14 @@
+from io import BytesIO
+from pathlib import Path
+
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from PIL import Image
-from io import BytesIO
 
 from content.models import PromoBanner
+from content.promos import resync_default_promos
 
 
 def _png_bytes(size=200):
@@ -62,3 +66,35 @@ class PromoBannerTests(TestCase):
         self.assertContains(response, "Зимние шины в подарок")
         self.assertContains(response, "До 30 сентября")
         self.assertNotContains(response, "Скрытая")
+
+    def test_resync_replace_all_dedupes(self):
+        for i in range(3):
+            b = PromoBanner(
+                title="Авто в кредит",
+                teaser="dup",
+                is_published=True,
+                sort_order=i,
+            )
+            b.image.save(
+                f"dup{i}.png",
+                SimpleUploadedFile(
+                    f"dup{i}.png", _png_bytes(), content_type="image/png"
+                ),
+                save=False,
+            )
+            b.save()
+
+        base = Path(settings.BASE_DIR) / "data" / "promos"
+        if not (base / "credit.webp").exists():
+            self.skipTest("data/promos/credit.webp missing")
+        count = resync_default_promos(replace_all=True)
+        self.assertEqual(count, 2)
+        self.assertEqual(PromoBanner.objects.count(), 2)
+        self.assertEqual(
+            list(
+                PromoBanner.objects.order_by("sort_order").values_list(
+                    "title", flat=True
+                )
+            ),
+            ["Авто в кредит", "Зимние шины в подарок"],
+        )
