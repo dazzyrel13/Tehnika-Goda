@@ -36,6 +36,24 @@ HOME_REVIEWS: tuple[dict, ...] = (
         "order": 10,
         "is_published": True,
     },
+    {
+        "client_name": "V K",
+        "city": "",
+        "vehicle_purchased": "Geely Coolray",
+        "comment": (
+            "Хочу поблагодарить за качественную организацию сделки по импорту "
+            "автомобиля Geely Coolray. Процесс подбора, логистики и таможенного "
+            "оформления был выполнен на высоком профессиональном уровне. "
+            "Спасибо за надежность, ответственный подход к делу и соблюдение "
+            "всех договоренностей."
+        ),
+        "rating": 5,
+        "source": Review.SOURCE_2GIS,
+        "source_url": "https://2gis.ru/reviews/70000001116002059/review/288215305",
+        "date": date(2026, 9, 2),
+        "order": 20,
+        "is_published": True,
+    },
 )
 
 
