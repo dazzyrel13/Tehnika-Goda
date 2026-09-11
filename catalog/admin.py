@@ -19,6 +19,7 @@ from .models import (
     CurrencyRateSettings,
     EngineType,
     InspectionReport,
+    PriceListItem,
     Vehicle,
     VehicleImage,
 )
@@ -938,3 +939,21 @@ class VehicleAdmin(admin.ModelAdmin):
                             self.message_user(request, msg, level=level)
 
         return render(request, "admin/catalog/avito_import_form.html", context)
+
+
+@admin.register(PriceListItem)
+class PriceListItemAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "brand",
+        "price_rub",
+        "brand_slug",
+        "sort_order",
+        "is_active",
+        "updated_at",
+    )
+    list_filter = ("brand", "is_active")
+    search_fields = ("title", "brand", "brand_slug")
+    list_editable = ("price_rub", "sort_order", "is_active")
+    ordering = ("sort_order", "brand", "title")
+

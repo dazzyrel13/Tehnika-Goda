@@ -3372,6 +3372,131 @@ a.home-reviews-platform:hover {
     }
 }
 
+/* —— Price landing /avto-pod-zakaz/ —— */
+.price-landing__hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 22px 0 0;
+}
+
+.price-landing__note {
+    margin: 16px 0 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.price-landing__note a {
+    color: var(--accent-blue);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.price-landing__brands {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 24px;
+}
+
+.price-landing__brand-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border: 1px solid rgba(18, 20, 26, 0.12);
+    background: #fff;
+    color: var(--text-main);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.price-landing__brand-chip:hover {
+    border-color: var(--accent-yellow);
+    background: #fff8e6;
+}
+
+.price-landing__group {
+    padding: 22px 24px;
+    margin-bottom: 16px;
+}
+
+.price-landing__group-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px 16px;
+    margin-bottom: 14px;
+}
+
+.price-landing__group-head h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.price-landing__group-head a {
+    font-size: 14px;
+    color: var(--accent-blue);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.price-landing__table td:nth-child(2),
+.price-landing__table th:nth-child(2) {
+    white-space: nowrap;
+    font-weight: 700;
+}
+
+.price-landing__table td:last-child {
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.price-landing__updated {
+    margin: 8px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.price-landing__faq {
+    display: grid;
+    gap: 10px;
+}
+
+.price-landing__faq-item {
+    padding: 0;
+}
+
+.price-landing__faq-item summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.price-landing__faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.price-landing__faq-item p {
+    margin: 0;
+    padding: 0 20px 18px;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.65;
+}
+
+@media (max-width: 720px) {
+    .price-landing__group {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+}
+
 /* —— About company case —— */
 .about-case__intro {
     max-width: 960px;

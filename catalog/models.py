@@ -827,3 +827,46 @@ class VehicleImage(models.Model):
             return
 
         write_responsive_variants(self.image)
+
+
+class PriceListItem(models.Model):
+    """Ориентировочная позиция общего прайса «авто под заказ»."""
+
+    brand = models.CharField("Марка", max_length=80, db_index=True)
+    brand_slug = models.SlugField(
+        "Slug марки в каталоге",
+        max_length=120,
+        blank=True,
+        help_text="Если заполнен — ссылка на страницу марки в каталоге.",
+    )
+    title = models.CharField("Модель / комплектация", max_length=200)
+    price_rub = models.PositiveIntegerField("Цена от, ₽")
+    sort_order = models.PositiveIntegerField("Порядок", default=0)
+    is_active = models.BooleanField("Показывать", default=True, db_index=True)
+    updated_at = models.DateTimeField("Обновлено", auto_now=True)
+
+    class Meta:
+        verbose_name = "Позиция прайса"
+        verbose_name_plural = "Прайс «авто под заказ»"
+        ordering = ["sort_order", "brand", "title"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["title"],
+                name="catalog_pricelistitem_title_uniq",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.title} — {self.price_rub} ₽"
+
+    @property
+    def brand_anchor(self) -> str:
+        from django.utils.text import slugify
+
+        return slugify(unidecode(self.brand)) or "brand"
+
+    def catalog_brand_url(self) -> str | None:
+        if not self.brand_slug:
+            return None
+        return reverse("catalog:brand", kwargs={"brand_slug": self.brand_slug})
+

@@ -15,6 +15,7 @@ from catalog.sitemaps import (
     CategorySitemap,
     VehicleSitemap,
 )
+from catalog.avto_pod_zakaz import AvtoPodZakazView
 from catalog.views import HomeView
 from content.sitemaps import StaticViewSitemap
 from core.health import healthz
@@ -109,6 +110,11 @@ urlpatterns = [
             page_key="services",
         ),
         name="services",
+    ),
+    path(
+        "avto-pod-zakaz/",
+        AvtoPodZakazView.as_view(),
+        name="avto_pod_zakaz",
     ),
     # Favicon at site root (browsers request /favicon.ico by default)
     path(

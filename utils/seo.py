@@ -109,6 +109,29 @@ def build_article_json_ld(
     return article
 
 
+def build_faq_page_json_ld(*, faqs: list[tuple[str, str]], page_url: str) -> dict:
+    """Schema.org FAQPage from (question, answer) pairs."""
+    entities = []
+    for question, answer in faqs:
+        q = " ".join((question or "").split()).strip()
+        a = " ".join((answer or "").split()).strip()
+        if not q or not a:
+            continue
+        entities.append(
+            {
+                "@type": "Question",
+                "name": q,
+                "acceptedAnswer": {"@type": "Answer", "text": a},
+            }
+        )
+    return {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "url": page_url,
+        "mainEntity": entities,
+    }
+
+
 def canonical_url_for_request(request) -> str:
     """Build a canonical URL from the request, stripping tracking params."""
     parsed = urlparse(request.get_full_path())

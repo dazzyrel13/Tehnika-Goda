@@ -1,0 +1,174 @@
+{% extends 'info/base_info.html' %}
+{% load catalog_extras %}
+
+{% block body_class %}bg-about{% endblock %}
+
+{% block json_ld %}
+{{ block.super }}
+{% if faq_json_ld %}
+<script type="application/ld+json">{{ faq_json_ld }}</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="info-page price-landing">
+    <div class="container">
+        <div class="home-section__head info-page__intro">
+            <div class="home-section__eyebrow">Прайс-лист · Под заказ</div>
+            <h1>Автомобили под заказ из Китая</h1>
+            <p>
+                Подбираем и&nbsp;привозим авто под заказ: BMW, Audi, Toyota, Volkswagen,
+                китайские марки и&nbsp;другие. Ниже&nbsp;— ориентировочный прайс.
+                Работаем с&nbsp;клиентами по&nbsp;всей России: Москва, Санкт-Петербург и&nbsp;регионы.
+                Итоговую цену и&nbsp;сроки подтверждаем до&nbsp;оплаты.
+            </p>
+            <p class="price-landing__hero-actions">
+                <a href="{% url 'home' %}#leads-section" class="btn-elite">Рассчитать автомобиль</a>
+                <a href="#price-matrix" class="btn-elite btn-elite-ghost">Смотреть прайс</a>
+            </p>
+        </div>
+
+        <div class="services-page__block glass-panel">
+            <div class="home-section__eyebrow">Под заказ</div>
+            <h2>Почему авто из Китая под заказ</h2>
+            <p class="services-page__lead">
+                Это не&nbsp;витрина салона: вы&nbsp;заказываете конкретную модель с&nbsp;проверкой
+                до&nbsp;оплаты и&nbsp;сопровождением ввоза. Цена в&nbsp;прайсе&nbsp;— ориентир «от»,
+                финал фиксируем в&nbsp;договоре.
+            </p>
+            <ul class="about-case__bullets services-page__bullets">
+                <li>Площадка и&nbsp;дилеры в&nbsp;Китае&nbsp;— подбор под бюджет и&nbsp;задачу</li>
+                <li>Проверка автомобиля до&nbsp;оплаты (осмотр, история, фото/видео)</li>
+                <li>Таможня и&nbsp;документы (ЭПТС) сразу на&nbsp;ваше имя</li>
+                <li>Доставка автовозом в&nbsp;любой город России</li>
+                <li>Гарантия 6&nbsp;месяцев на&nbsp;ДВС и&nbsp;КПП для авто с&nbsp;нашей площадки</li>
+            </ul>
+        </div>
+
+        <div class="services-page__block glass-panel">
+            <div class="home-section__eyebrow">Цена</div>
+            <h2>Что входит в ориентир из прайса</h2>
+            <ul class="about-case__bullets services-page__bullets">
+                <li>Стоимость автомобиля в&nbsp;Китае</li>
+                <li>Логистика по&nbsp;Китаю</li>
+                <li>Таможенные платежи и&nbsp;сопровождение ввоза</li>
+                <li>Пакет документов (лаборатория, ЭПТС и&nbsp;сопутствующее)</li>
+            </ul>
+            <p class="price-landing__note">
+                Автовоз по&nbsp;России, редкие опции и&nbsp;курс на&nbsp;дату сделки считаются отдельно.
+                Подробный порядок оплаты&nbsp;— на&nbsp;странице
+                <a href="{% url 'services' %}">услуг</a>.
+                Прайс не&nbsp;является публичной офертой.
+            </p>
+        </div>
+
+        <div class="home-section services-page__section" id="price-matrix">
+            <div class="home-section__head">
+                <div class="home-section__eyebrow">Прайс</div>
+                <h2>Цены на автомобили под заказ</h2>
+                <p>
+                    Уникальные позиции из&nbsp;матрицы заказа: при нескольких комплектациях
+                    показываем цену&nbsp;<strong>от</strong>. Нажмите марку, чтобы перейти к&nbsp;блоку.
+                </p>
+            </div>
+
+            {% if price_brand_nav %}
+            <nav class="price-landing__brands" aria-label="Марки в прайсе">
+                {% for nav in price_brand_nav %}
+                <a class="price-landing__brand-chip" href="#{{ nav.anchor }}">{{ nav.brand }}</a>
+                {% endfor %}
+            </nav>
+            {% endif %}
+
+            {% if price_groups %}
+                {% for group in price_groups %}
+                <div class="glass-panel price-landing__group" id="{{ group.anchor }}">
+                    <div class="price-landing__group-head">
+                        <h2>{{ group.heading }}</h2>
+                        {% if group.catalog_url %}
+                        <a href="{{ group.catalog_url }}">Смотреть {{ group.brand }} в каталоге</a>
+                        {% endif %}
+                    </div>
+                    <div class="ed-delivery__table-wrap">
+                        <table class="ed-delivery__table price-landing__table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Модель</th>
+                                    <th scope="col">Цена от</th>
+                                    <th scope="col">Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in group.items %}
+                                <tr>
+                                    <td>{{ item.title }}</td>
+                                    <td>{{ item.price_rub|price_rub_display }}</td>
+                                    <td>Под заказ</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+                <p class="price-landing__updated">
+                    Прайс обновлён:
+                    <time datetime="{{ price_updated_at|date:'c' }}">{{ price_updated_at|date:"d.m.Y" }}</time>
+                </p>
+            {% else %}
+                <div class="glass-panel">
+                    <p>
+                        Прайс скоро появится на&nbsp;странице. Оставьте заявку&nbsp;— пришлём актуальные
+                        цены по&nbsp;нужной модели.
+                    </p>
+                    <a href="{% url 'home' %}#leads-section" class="btn-elite">Оставить заявку</a>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if SEO_MODEL_PAGES_ENABLED and price_groups %}
+        <div class="services-page__block glass-panel">
+            <div class="home-section__eyebrow">Каталог</div>
+            <h2>Марки автомобилей из Китая</h2>
+            <p class="services-page__lead">
+                Откройте страницу марки в&nbsp;каталоге или оставьте заявку на&nbsp;подбор под заказ.
+            </p>
+            <nav class="price-landing__brands price-landing__brands--catalog" aria-label="Ссылки на марки">
+                {% for group in price_groups %}
+                    {% if group.catalog_url %}
+                    <a class="price-landing__brand-chip" href="{{ group.catalog_url }}">{{ group.brand }}</a>
+                    {% endif %}
+                {% endfor %}
+                <a class="price-landing__brand-chip" href="{% url 'catalog:brands_index' %}">Все марки</a>
+            </nav>
+        </div>
+        {% endif %}
+
+        <div class="home-section services-page__section" id="faq">
+            <div class="home-section__head">
+                <div class="home-section__eyebrow">FAQ</div>
+                <h2>Частые вопросы про авто под заказ</h2>
+            </div>
+            <div class="price-landing__faq">
+                {% for question, answer in faqs %}
+                <details class="price-landing__faq-item glass-panel">
+                    <summary>{{ question }}</summary>
+                    <p>{{ answer }}</p>
+                </details>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="glass-panel info-page__cta services-page__cta">
+            <h3>Нужен расчёт под вашу модель?</h3>
+            <p>
+                Напишите марку, бюджет и&nbsp;город доставки&nbsp;— подготовим коммерческий расчёт
+                и&nbsp;варианты под заказ из&nbsp;Китая. Телефон:
+                <a href="tel:+79241490013">8 (924) 149-00-13</a>,
+                почта: <a href="mailto:sale@tehnikagoda.ru">sale@tehnikagoda.ru</a>.
+            </p>
+            <a href="{% url 'home' %}#leads-section" class="btn-elite">Оставить заявку</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -31,18 +31,20 @@ class StaticSitemapTests(TestCase):
         sm = StaticViewSitemap()
         paths = [sm.location(item) for item in sm.items()]
         self.assertIn("/services/", paths)
+        self.assertIn("/avto-pod-zakaz/", paths)
 
 
 class ServicesPageTests(TestCase):
     def test_services_page_renders_price_example(self):
         response = self.client.get(reverse("services"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Информация об услугах и прайс-лист")
+        self.assertContains(response, "Информация об услугах")
         self.assertContains(response, "Honda XR-V")
         self.assertContains(response, "1&nbsp;680&nbsp;000")
         self.assertContains(response, "года выпуска")
         self.assertContains(response, "типа двигателя")
         self.assertContains(response, "Оставить заявку")
+        self.assertContains(response, "/avto-pod-zakaz/")
 
     def test_services_page_has_article_json_ld(self):
         response = self.client.get(reverse("services"))
