@@ -13,7 +13,8 @@
 
 services:
   uptime-kuma:
-    image: louislam/uptime-kuma:1
+    # Timeweb mirror — avoids Docker Hub anonymous 429 on VPS.
+    image: dockerhub.timeweb.cloud/louislam/uptime-kuma:1
     container_name: tehnikagoda_uptime_kuma
     restart: unless-stopped
     ports:
