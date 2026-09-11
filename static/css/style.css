@@ -3033,14 +3033,12 @@ header.is-scrolled {
     }
 
     .ed-metrics__inner {
-        display: flex;
-        grid-template-columns: none;
-        gap: 8px;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        padding: 10px;
-        scrollbar-width: none;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0;
+        overflow: visible;
+        scroll-snap-type: none;
+        padding: 0;
     }
 
     .ed-metrics__inner::-webkit-scrollbar {
@@ -3048,29 +3046,39 @@ header.is-scrolled {
     }
 
     .ed-metrics__item {
-        flex: 0 0 auto;
-        width: min(46vw, 168px);
-        scroll-snap-align: start;
+        flex: none;
+        width: auto;
         border: 0;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.55);
-        padding: 12px 12px;
+        border-radius: 0;
+        background: transparent;
+        padding: 10px 10px;
         text-align: left;
+        border-right: 1px solid rgba(18, 20, 26, 0.14);
+        border-bottom: 1px solid rgba(18, 20, 26, 0.14);
     }
 
-    .ed-metrics__item:nth-child(odd),
-    .ed-metrics__item:nth-last-child(-n + 2),
+    .ed-metrics__item:nth-child(2n) {
+        border-right: 0;
+    }
+
+    .ed-metrics__item:nth-last-child(-n + 2) {
+        border-bottom: 0;
+    }
+
     .ed-metrics__item:last-child {
-        border: 0;
+        border-right: 0;
     }
 
     .ed-metrics__item strong {
-        font-size: 0.92rem;
-        line-height: 1.2;
+        font-size: 0.78rem;
+        line-height: 1.15;
+        letter-spacing: 0;
     }
 
     .ed-metrics__item span {
-        font-size: 0.78rem;
+        font-size: 0.7rem;
+        line-height: 1.2;
+        margin-top: 2px;
     }
 
     .home-featured-grid {
@@ -3389,14 +3397,11 @@ header.is-scrolled {
     }
 
     .ed-metrics__inner {
-        display: flex;
-        grid-template-columns: none;
-        gap: 8px;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        padding: 10px;
-        scrollbar-width: none;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0;
+        overflow: visible;
+        padding: 0;
     }
 
     .home-section {
