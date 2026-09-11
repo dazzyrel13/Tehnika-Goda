@@ -251,18 +251,38 @@
         </div>
     </div>
 
-    <section class="home-promo-banner reveal" aria-label="Авто в кредит">
-        <a href="#leads-section" class="home-promo-banner__link">
-            <img
-                class="home-promo-banner__media"
-                src="{% static 'images/home/credit-banner.webp' %}?v=8"
-                alt="Купи авто мечты в кредит — выгодные условия, быстрое одобрение, автомобили под заказ из Китая. Техника Года, Благовещенск"
-                width="1024"
-                height="1024"
-                loading="lazy"
-                decoding="async"
-            >
-        </a>
+    <section class="home-promos reveal" aria-labelledby="home-promos-heading">
+        <div class="home-section__head">
+            <div class="home-section__eyebrow">Спецпредложения</div>
+            <h2 id="home-promos-heading">Акции</h2>
+            <p>Актуальные предложения при заказе автомобиля из&nbsp;Китая.</p>
+        </div>
+        {% if home_promos %}
+        <div class="home-promos__grid">
+            {% for promo in home_promos %}
+            <article class="promo-card">
+                <a class="promo-card__media" href="{{ promo.href }}">
+                    <img
+                        src="{{ promo.image.url }}"
+                        alt="{{ promo.title }}"
+                        width="600"
+                        height="600"
+                        loading="lazy"
+                        decoding="async"
+                    >
+                </a>
+                <div class="promo-card__body">
+                    <h3 class="promo-card__title">
+                        <a href="{{ promo.href }}">{{ promo.title }}</a>
+                    </h3>
+                    <p class="promo-card__teaser">{{ promo.teaser }}</p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="home-offer-empty">Сейчас активных акций нет — следите за обновлениями.</p>
+        {% endif %}
     </section>
 
     <div class="home-section home-section--offers">

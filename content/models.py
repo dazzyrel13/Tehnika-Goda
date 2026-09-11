@@ -1,3 +1,5 @@
+import uuid
+
 from django.core.cache import cache
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -161,3 +163,66 @@ def platform_url_for_source(source: str) -> str:
         Review.SOURCE_AVITO: getattr(settings, "REVIEW_AVITO_URL", ""),
         Review.SOURCE_YANDEX: getattr(settings, "REVIEW_YANDEX_URL", ""),
     }.get(source, "")
+
+
+def promo_banner_path(instance, filename: str) -> str:
+    ext = (filename.rsplit(".", 1)[-1] or "webp").lower()
+    if ext not in {"jpg", "jpeg", "png", "webp", "gif"}:
+        ext = "webp"
+    return f"promos/{timezone.now():%Y/%m}/{uuid.uuid4().hex[:12]}.{ext}"
+
+
+class PromoBanner(models.Model):
+    """Баннер акции на главной: картинка + короткий текст."""
+
+    title = models.CharField("Заголовок", max_length=120)
+    teaser = models.CharField(
+        "Короткий текст",
+        max_length=180,
+        help_text="1–2 строки под баннером на главной.",
+    )
+    image = models.ImageField("Баннер", upload_to=promo_banner_path)
+    link_url = models.CharField(
+        "Ссылка",
+        max_length=300,
+        blank=True,
+        default="#leads-section",
+        help_text="Куда ведёт клик. Например #leads-section или /avto-pod-zakaz/.",
+    )
+    is_published = models.BooleanField("Опубликовано", default=True, db_index=True)
+    sort_order = models.PositiveIntegerField("Порядок", default=0)
+    updated_at = models.DateTimeField("Обновлено", auto_now=True)
+
+    class Meta:
+        verbose_name = "Акция"
+        verbose_name_plural = "Акции"
+        ordering = ["sort_order", "-updated_at"]
+
+    def __str__(self) -> str:
+        return self.title
+
+    def save(self, *args, **kwargs):
+        from utils.image_processing import process_image_to_webp, should_process_image
+
+        update_fields = kwargs.get("update_fields")
+        touch_image = update_fields is None or "image" in update_fields
+        if touch_image and self.image and should_process_image(self.image):
+            processed = process_image_to_webp(self.image, quality=85, max_width=1200)
+            if processed:
+                self.image = processed
+        super().save(*args, **kwargs)
+        try:
+            cache.delete("content:home_promos")
+        except Exception:
+            pass
+
+    def delete(self, *args, **kwargs):
+        try:
+            cache.delete("content:home_promos")
+        except Exception:
+            pass
+        super().delete(*args, **kwargs)
+
+    @property
+    def href(self) -> str:
+        return (self.link_url or "").strip() or "#leads-section"

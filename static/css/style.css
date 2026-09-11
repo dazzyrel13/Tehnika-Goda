@@ -1575,6 +1575,92 @@ section.home-page {
     padding-top: 48px;
 }
 
+.home-promos {
+    width: min(980px, calc(100% - 48px));
+    margin: 40px auto 0;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+}
+
+.home-promos .home-section__head {
+    margin-bottom: 20px;
+}
+
+.home-promos + .home-section.home-section--offers {
+    padding-top: 36px;
+}
+
+.home-promos__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(12px, 2vw, 18px);
+}
+
+.promo-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: #fff;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(18, 20, 26, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .promo-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--accent-yellow);
+        box-shadow: 0 16px 32px rgba(18, 20, 26, 0.14);
+    }
+}
+
+.promo-card__media {
+    display: block;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #f3f3f3;
+}
+
+.promo-card__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.promo-card__body {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.promo-card__title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.promo-card__title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.promo-card__title a:hover {
+    color: var(--accent-blue);
+}
+
+.promo-card__teaser {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
 .home-promo-banner {
     /* Square artwork: natural proportions, no stretch or letterboxing. */
     width: min(860px, calc(100% - 48px));
@@ -2682,6 +2768,16 @@ header.is-scrolled {
         width: calc(100% - 28px);
         margin-top: 18px;
         border-radius: 12px;
+    }
+
+    .home-promos {
+        width: calc(100% - 28px);
+        margin-top: 28px;
+    }
+
+    .home-promos__grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
     }
 
     .home-promo-banner {

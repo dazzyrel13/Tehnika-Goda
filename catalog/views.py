@@ -12,6 +12,7 @@ from django_ratelimit.decorators import ratelimit
 
 from utils.image_processing import variant_url
 from utils.seo import absolute_url, serialize_json_ld
+from content.promos import home_promos
 
 from .cache_helpers import (
     available_colors,
@@ -72,6 +73,7 @@ class HomeView(ListView):
         context["home_faqs"] = home_faqs()
         context["home_reviews"] = home_reviews(limit=6)
         context["review_platforms"] = review_platforms()
+        context["home_promos"] = home_promos()
         context["seo_title"] = "Автомобили под заказ из Китая | Техника Года"
         context["seo_description"] = (
             "Автомобили под заказ из Китая с площадки Техника Года. "

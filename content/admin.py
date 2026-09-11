@@ -1,6 +1,65 @@
 from django.contrib import admin
+from django.utils.html import format_html
 
-from .models import Review, ReviewPlatformSettings
+from .models import PromoBanner, Review, ReviewPlatformSettings
+
+
+@admin.register(PromoBanner)
+class PromoBannerAdmin(admin.ModelAdmin):
+    list_display = (
+        "preview",
+        "title",
+        "teaser",
+        "is_published",
+        "sort_order",
+        "updated_at",
+    )
+    list_display_links = ("preview", "title")
+    list_editable = ("is_published", "sort_order")
+    list_filter = ("is_published",)
+    search_fields = ("title", "teaser", "link_url")
+    ordering = ("sort_order", "-updated_at")
+    readonly_fields = ("preview_large", "updated_at")
+    fieldsets = (
+        (
+            "Акция",
+            {
+                "fields": (
+                    "title",
+                    "teaser",
+                    "image",
+                    "preview_large",
+                    "link_url",
+                ),
+                "description": (
+                    "Баннер автоматически сжимается в WebP. "
+                    "На главной показываются опубликованные акции (порядок — поле ниже)."
+                ),
+            },
+        ),
+        (
+            "Публикация",
+            {"fields": ("is_published", "sort_order", "updated_at")},
+        ),
+    )
+
+    @admin.display(description="Превью")
+    def preview(self, obj: PromoBanner):
+        if not obj.image:
+            return "—"
+        return format_html(
+            '<img src="{}" alt="" style="height:48px;width:auto;border-radius:4px;" />',
+            obj.image.url,
+        )
+
+    @admin.display(description="Баннер")
+    def preview_large(self, obj: PromoBanner):
+        if not obj.pk or not obj.image:
+            return "Сохраните, чтобы увидеть превью"
+        return format_html(
+            '<img src="{}" alt="" style="max-width:360px;height:auto;border-radius:8px;" />',
+            obj.image.url,
+        )
 
 
 @admin.register(ReviewPlatformSettings)
