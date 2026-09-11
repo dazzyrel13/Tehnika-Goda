@@ -5641,3 +5641,725 @@ body.vehicle-lightbox-open {
         top: calc(70px + env(safe-area-inset-top, 0px)) !important;
     }
 }
+
+/* —— Site-wide mobile page polish —— */
+.catalog-page {
+    padding: 60px 0;
+}
+
+.faq-page__intro {
+    max-width: 850px;
+    margin: 0 auto 48px;
+    text-align: center;
+}
+
+.faq-page__intro h1 {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+}
+
+.faq-page__intro p {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.faq-page__list {
+    max-width: 850px;
+    margin: 0 auto 48px;
+}
+
+.faq-page__empty {
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.leasing-page__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.leasing-page__card {
+    padding: 28px;
+}
+
+.leasing-page__card h4 {
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+
+.leasing-page__card p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.leasing-page__calc {
+    padding: 40px;
+    margin-bottom: 40px;
+}
+
+.leasing-page__calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+.leasing-page__calc-title {
+    margin: 0 0 8px;
+    font-size: 22px;
+}
+
+.leasing-page__calc-lead {
+    margin: 0 0 24px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.leasing-page__field {
+    margin-bottom: 22px;
+}
+
+.leasing-page__field--last {
+    margin-bottom: 0;
+}
+
+.leasing-page__field label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.leasing-page__field input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent-red);
+}
+
+.leasing-page__field-value {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-weight: 700;
+}
+
+.leasing-page__result {
+    padding: 36px 28px;
+    text-align: center;
+    border-color: rgba(255, 179, 0, 0.25);
+    background: rgba(255, 179, 0, 0.05);
+}
+
+.leasing-page__result-label {
+    margin-bottom: 10px;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.leasing-page__result-value {
+    margin-bottom: 8px;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 900;
+}
+
+.leasing-page__result-note {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.leasing-page__disclaimer {
+    margin: 24px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.55;
+    max-width: 920px;
+}
+
+.leasing-page__cta {
+    border-color: rgba(255, 179, 0, 0.2);
+    background: linear-gradient(135deg, rgba(255, 179, 0, 0.06), transparent);
+}
+
+.privacy-page__panel {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 36px;
+    border-radius: 20px;
+}
+
+.privacy-page__panel h1 {
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
+    margin: 0 0 24px;
+}
+
+.privacy-page__body {
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-size: 15px;
+}
+
+.privacy-page__body strong {
+    color: var(--text-main);
+}
+
+.privacy-page__body h3 {
+    font-size: 1.1rem;
+    margin: 28px 0 14px;
+}
+
+.privacy-page__body p {
+    margin: 0 0 14px;
+}
+
+.privacy-page__body ul {
+    padding-left: 18px;
+    margin: 0 0 18px;
+}
+
+.privacy-page__body li {
+    margin-bottom: 8px;
+}
+
+.privacy-page__updated {
+    margin-top: 36px !important;
+    font-size: 12px;
+    opacity: 0.45;
+}
+
+.dossier-page {
+    padding: 60px 0 40px;
+}
+
+.dossier-page__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    margin-bottom: 36px;
+}
+
+.dossier-page__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-bottom: 14px;
+}
+
+.dossier-page__badge {
+    background: var(--accent-yellow);
+    color: #141820;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.dossier-page__date {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.dossier-page__title {
+    font-size: clamp(1.5rem, 4vw, 2.75rem);
+    margin: 0 0 8px;
+    line-height: 1.15;
+}
+
+.dossier-page__uid {
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+}
+
+.dossier-page__price {
+    padding: 16px 28px;
+    border-radius: 14px;
+    border-color: var(--accent-red);
+    flex-shrink: 0;
+}
+
+.dossier-page__price-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.dossier-page__price-value {
+    font-size: clamp(1.35rem, 3vw, 2rem);
+    font-weight: 900;
+}
+
+.dossier-page__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 28px;
+}
+
+.dossier-page__panel {
+    padding: 24px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.dossier-page__panel-title {
+    font-size: 16px;
+    margin: 0 0 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.dossier-page__panel-title--accent {
+    color: var(--accent-red);
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.dossier-page__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: var(--text-muted);
+}
+
+.dossier-page__row strong {
+    color: var(--text-main);
+}
+
+.dossier-page__verdict {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-line;
+}
+
+.dossier-page__pdf {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.dossier-page__shots-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.dossier-page__shots-head h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.dossier-page__shots-head p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.dossier-page__shots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.dossier-page__shot {
+    display: block;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 220px;
+    border: 1px solid var(--glass-border);
+}
+
+.dossier-page__shot img,
+.dossier-shot-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.dossier-page__shots-note {
+    text-align: center;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.dossier-page__shots-note p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+@media (max-width: 960px) {
+    .info-page,
+    .faq-page.info-page {
+        padding: 36px 0 28px;
+    }
+
+    .info-page__intro {
+        margin-bottom: 28px;
+    }
+
+    .info-page__intro h1 {
+        font-size: clamp(1.35rem, 6vw, 1.85rem);
+        margin: 8px 0 12px;
+    }
+
+    .info-page__intro p {
+        font-size: 15px;
+        line-height: 1.55;
+    }
+
+    .info-page__cta {
+        margin-top: 36px;
+        padding: 24px 18px;
+    }
+
+    .info-page__cta h3 {
+        font-size: 1.2rem;
+    }
+
+    .info-feature-mark {
+        font-size: 1.35rem;
+        margin-bottom: 8px;
+    }
+
+    .info-page__intro h1.about-case__manifesto {
+        font-size: 15px;
+        line-height: 1.55;
+        margin-top: 10px;
+    }
+
+    .about-case__intro {
+        margin-bottom: 32px;
+    }
+
+    .about-case__lead {
+        margin-bottom: 40px;
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .about-case__lead-copy h2 {
+        font-size: 1.25rem;
+    }
+
+    .about-case__lead-copy p {
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .about-case__bullets li {
+        font-size: 14px;
+    }
+
+    .services-page__block {
+        padding: 18px 16px 20px;
+        margin-bottom: 28px;
+    }
+
+    .services-page__block h2 {
+        font-size: 1.25rem;
+    }
+
+    .services-page__lead {
+        font-size: 14px;
+    }
+
+    .services-price {
+        padding: 16px;
+    }
+
+    .price-landing__hero-actions {
+        margin-top: 16px;
+        gap: 10px;
+    }
+
+    .price-landing__hero-actions .btn-elite {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .price-landing__group {
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
+    .price-landing__group-head h2 {
+        font-size: 17px;
+    }
+
+    .price-landing__brand-chip {
+        padding: 7px 12px;
+        font-size: 12px;
+    }
+
+    .catalog-page {
+        padding: 28px 0 24px;
+    }
+
+    .catalog-seo-intro {
+        margin-bottom: 18px;
+        text-align: left;
+    }
+
+    .catalog-seo-intro__title {
+        font-size: 1.35rem;
+        margin-bottom: 8px;
+    }
+
+    .catalog-seo-intro__text {
+        font-size: 14px;
+        line-height: 1.5;
+        text-align: left;
+    }
+
+    .catalog-filters {
+        padding: 12px;
+        margin-bottom: 16px;
+        border-radius: 12px;
+    }
+
+    .catalog-filters__grid {
+        gap: 10px;
+    }
+
+    .catalog-filters__field label,
+    .catalog-filters__q label {
+        margin-bottom: 4px;
+        font-size: 10px;
+    }
+
+    .catalog-filters__field input,
+    .catalog-filters__q input {
+        padding: 9px 10px;
+        font-size: 16px;
+    }
+
+    .catalog-models-bar {
+        margin-bottom: 16px;
+        padding: 12px;
+    }
+
+    .seo-landing-section {
+        padding: 28px 0 24px;
+    }
+
+    .seo-landing-section__subtitle {
+        margin: 24px 0 12px;
+        font-size: 18px;
+    }
+
+    .seo-empty-callout {
+        padding: 24px 16px 20px;
+    }
+
+    .brands-index-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .brands-index-card {
+        padding: 14px 12px;
+    }
+
+    .brands-index-card__name {
+        font-size: 14px;
+    }
+
+    .vehicle-gallery-main {
+        max-height: 240px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+    }
+
+    .vehicle-gallery-main__img {
+        width: 100%;
+        height: 240px;
+        max-height: 240px;
+        object-fit: cover;
+    }
+
+    .vehicle-detail-title {
+        font-size: 1.35rem;
+    }
+
+    .vehicle-price-main {
+        font-size: 1.45rem;
+    }
+
+    .vehicle-detail-sidebar {
+        padding: 16px;
+    }
+
+    .vehicle-meta-label {
+        font-size: 9px;
+        font-size: clamp(8px, 2.6cqi, 10px);
+    }
+
+    .vehicle-meta-value {
+        font-size: 11px;
+        font-size: clamp(10px, 3.2cqi, 12px);
+    }
+
+    .vehicle-meta-item {
+        padding: 6px 5px;
+    }
+
+    .faq-page__intro {
+        margin-bottom: 28px;
+        text-align: left;
+    }
+
+    .faq-page__list {
+        margin-bottom: 28px;
+    }
+
+    .faq-item {
+        padding: 14px 14px;
+    }
+
+    .faq-item summary {
+        font-size: 15px;
+        line-height: 1.35;
+    }
+
+    .faq-item__answer {
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .leasing-page__cards {
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .leasing-page__card {
+        padding: 18px 16px;
+    }
+
+    .leasing-page__card h4 {
+        font-size: 16px;
+    }
+
+    .leasing-page__calc {
+        padding: 18px 16px;
+        margin-bottom: 24px;
+    }
+
+    .leasing-page__calc-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .leasing-page__calc-title {
+        font-size: 1.15rem;
+    }
+
+    .leasing-page__result {
+        padding: 22px 16px;
+    }
+
+    .leasing-page__field {
+        margin-bottom: 18px;
+    }
+
+    .privacy-page__panel {
+        padding: 20px 16px;
+        border-radius: 14px;
+    }
+
+    .privacy-page__body {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .privacy-page__body h3 {
+        font-size: 1rem;
+        margin: 22px 0 10px;
+    }
+
+    .dossier-page {
+        padding: 28px 0 24px;
+    }
+
+    .dossier-page__header {
+        flex-direction: column;
+        align-items: stretch;
+        margin-bottom: 20px;
+        gap: 14px;
+    }
+
+    .dossier-page__layout {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .dossier-page__panel {
+        padding: 16px;
+        margin-bottom: 14px;
+    }
+
+    .dossier-page__shots {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .dossier-page__shot {
+        height: 180px;
+    }
+
+    .dossier-page__shots-head {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .mobile-actions {
+        padding: 10px 8px calc(10px + env(safe-area-inset-bottom, 0px));
+    }
+
+    body {
+        padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+@media (max-width: 480px) {
+    .brands-index-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .vehicle-gallery-main,
+    .vehicle-gallery-main__img {
+        max-height: 210px;
+        height: 210px;
+    }
+
+    .vehicle-gallery-thumb {
+        height: 72px;
+    }
+}
