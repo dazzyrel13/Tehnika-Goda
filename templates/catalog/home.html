@@ -566,6 +566,26 @@
                 {% endwith %}
             </article>
             {% endfor %}
+            {% if show_avito_review_placeholder %}
+            <article class="home-review home-review--placeholder reveal" aria-label="Отзывы на Авито">
+                <div class="home-review__head">
+                    <span class="home-review__avatar home-review__avatar--avito" aria-hidden="true">
+                        <img src="{% static 'images/brands/avito.png' %}" alt="" width="22" height="22" loading="lazy" decoding="async">
+                    </span>
+                    <div class="home-review__who">
+                        <strong class="home-review__name">Авито</strong>
+                        <span class="home-review__subtitle">Отзывы покупателей</span>
+                    </div>
+                </div>
+                <div class="home-review__content">
+                    <p class="home-review__text">На Авито пока нет актуальных отзывов от реальных покупателей. Как только они появятся — обязательно добавим.</p>
+                </div>
+                <span class="home-review__source-link home-review__source-link--avito is-static">
+                    <img src="{% static 'images/brands/avito.png' %}" alt="" class="home-review__source-icon" width="18" height="18" loading="lazy" decoding="async">
+                    Скоро на Авито
+                </span>
+            </article>
+            {% endif %}
         </div>
         {% else %}
         <div class="home-reviews-empty reveal" aria-live="polite">
