@@ -77,7 +77,7 @@ class AvtoPodZakazPageTests(TestCase):
         )
         response = self.client.get(reverse("avto_pod_zakaz"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Автомобили под заказ из Китая")
+        self.assertContains(response, "Авто из Китая. Прайс")
         self.assertContains(response, "BMW из Китая")
         self.assertContains(response, "BMW X1 Test SEO")
         self.assertContains(response, "Под заказ")
