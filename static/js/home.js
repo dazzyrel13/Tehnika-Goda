@@ -76,6 +76,55 @@
             });
         });
 
+        const reviewsCarousel = document.querySelector(".home-reviews-carousel");
+        if (reviewsCarousel) {
+            const scroller = reviewsCarousel.querySelector(".js-reviews-scroller");
+            const prevBtn = reviewsCarousel.querySelector(".js-reviews-prev");
+            const nextBtn = reviewsCarousel.querySelector(".js-reviews-next");
+            const hint = reviewsCarousel.querySelector(".js-reviews-hint");
+            const mq = window.matchMedia("(max-width: 960px)");
+
+            const cardStep = () => {
+                const card = scroller && scroller.querySelector(".home-review");
+                if (!card) return 280;
+                const styles = window.getComputedStyle(scroller);
+                const gap = parseFloat(styles.columnGap || styles.gap || "12") || 12;
+                return card.getBoundingClientRect().width + gap;
+            };
+
+            const syncNav = () => {
+                if (!scroller || !prevBtn || !nextBtn) return;
+                const mobile = mq.matches;
+                const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+                const canScroll = mobile && maxScroll > 8;
+                reviewsCarousel.classList.toggle("has-scroll", canScroll);
+                prevBtn.hidden = !canScroll;
+                nextBtn.hidden = !canScroll;
+                if (hint) hint.hidden = !canScroll;
+                if (!canScroll) return;
+                const atStart = scroller.scrollLeft <= 4;
+                const atEnd = scroller.scrollLeft >= maxScroll - 4;
+                prevBtn.disabled = atStart;
+                nextBtn.disabled = atEnd;
+                if (hint) hint.hidden = !atStart;
+            };
+
+            const scrollByDir = (dir) => {
+                if (!scroller) return;
+                scroller.scrollBy({ left: dir * cardStep(), behavior: "smooth" });
+            };
+
+            if (prevBtn) prevBtn.addEventListener("click", () => scrollByDir(-1));
+            if (nextBtn) nextBtn.addEventListener("click", () => scrollByDir(1));
+            if (scroller) {
+                scroller.addEventListener("scroll", syncNav, { passive: true });
+                window.addEventListener("resize", syncNav);
+                if (typeof mq.addEventListener === "function") mq.addEventListener("change", syncNav);
+                else if (typeof mq.addListener === "function") mq.addListener(syncNav);
+                syncNav();
+            }
+        }
+
         const picker = document.querySelector("[data-home-picker]");
         if (picker) {
             const tabs = picker.querySelectorAll("[data-picker-tab]");

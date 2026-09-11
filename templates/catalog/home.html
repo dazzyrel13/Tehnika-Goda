@@ -528,7 +528,9 @@
         </div>
 
         {% if home_reviews %}
-        <div class="home-reviews-grid">
+        <div class="home-reviews-carousel">
+            <button type="button" class="home-reviews-nav home-reviews-nav--prev js-reviews-prev" aria-label="Предыдущие отзывы" hidden>‹</button>
+            <div class="home-reviews-grid js-reviews-scroller">
             {% for review in home_reviews %}
             <article class="home-review reveal">
                 <div class="home-review__head">
@@ -586,6 +588,9 @@
                 </span>
             </article>
             {% endif %}
+            </div>
+            <button type="button" class="home-reviews-nav home-reviews-nav--next js-reviews-next" aria-label="Следующие отзывы" hidden>›</button>
+            <p class="home-reviews-swipe-hint js-reviews-hint" hidden>Листайте вбок <span aria-hidden="true">→</span></p>
         </div>
         {% else %}
         <div class="home-reviews-empty reveal" aria-live="polite">
@@ -614,7 +619,8 @@
                         {{ platform.score }}
                         {% if platform.has_rating %}<span class="home-reviews-platform__star">★</span>{% endif %}
                     </span>
-                    <span class="home-reviews-platform__label">{{ platform.label }}</span>
+                    <span class="home-reviews-platform__name">{{ platform.name }}</span>
+                    <span class="home-reviews-platform__label">{{ platform.count_label }}</span>
                 </span>
             {% if platform.url %}
             </a>
@@ -628,5 +634,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/home.js' %}?v=3"></script>
+<script src="{% static 'js/home.js' %}?v=4"></script>
 {% endblock %}

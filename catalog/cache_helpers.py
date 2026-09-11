@@ -413,7 +413,7 @@ def review_platforms() -> list[dict]:
                 item["score"] = "—"
                 item["has_rating"] = False
             item["count_label"] = _reviews_count_label(count)
-            item["label"] = f"{item['caption']} · {item['count_label']}"
+            item["label"] = f"{item['name']} · {item['count_label']}"
         return platforms
 
     return cache_get_or_set(REVIEW_PLATFORMS_CACHE_KEY, build, CACHE_TTL)
