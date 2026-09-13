@@ -51,6 +51,10 @@
                         class="vehicle-gallery-nav vehicle-gallery-nav--next"
                         aria-label="Следующее фото"
                     >›</button>
+                    <div class="vehicle-gallery-chrome" aria-hidden="true">
+                        <span id="vehicle-gallery-counter" class="vehicle-gallery-counter">1 / {{ gallery_images|length }}</span>
+                        <span class="vehicle-gallery-expand">Открыть</span>
+                    </div>
                     {% else %}
                     <div class="vehicle-gallery-empty">Нет фото</div>
                     {% endif %}
@@ -65,12 +69,12 @@
                 </div>
 
                 {% if gallery_images %}
-                <div class="vehicle-thumbs-grid">
+                <div class="vehicle-thumbs-grid" role="list">
                     {% for photo in gallery_images %}
                         {% responsive_image photo 400 as thumb %}
                         <button
                             type="button"
-                            class="glass-panel vehicle-gallery-thumb"
+                            class="glass-panel vehicle-gallery-thumb{% if forloop.first %} is-active{% endif %}"
                             data-full-src="{{ thumb.full_src }}"
                             data-srcset="{{ thumb.srcset }}"
                             data-display-src="{{ thumb.src }}"
@@ -231,12 +235,18 @@
         </div>
     </div>
 </section>
-<div id="vehicle-lightbox" class="vehicle-lightbox" hidden>
+<div id="vehicle-lightbox" class="vehicle-lightbox" hidden role="dialog" aria-modal="true" aria-label="Просмотр фото">
+    <div class="vehicle-lightbox__backdrop" aria-hidden="true"></div>
     <button type="button" class="vehicle-lightbox__close" aria-label="Закрыть фото">×</button>
-    <img id="vehicle-lightbox-image" class="vehicle-lightbox__img" alt="">
+    <button type="button" id="vehicle-lightbox-prev" class="vehicle-lightbox__nav vehicle-lightbox__nav--prev" aria-label="Предыдущее фото">‹</button>
+    <button type="button" id="vehicle-lightbox-next" class="vehicle-lightbox__nav vehicle-lightbox__nav--next" aria-label="Следующее фото">›</button>
+    <div class="vehicle-lightbox__stage">
+        <img id="vehicle-lightbox-image" class="vehicle-lightbox__img" alt="" draggable="false">
+    </div>
+    <div id="vehicle-lightbox-counter" class="vehicle-lightbox__counter" aria-live="polite"></div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/detail.js' %}?v=5" defer></script>
+<script src="{% static 'js/detail.js' %}?v=6" defer></script>
 {% endblock %}
