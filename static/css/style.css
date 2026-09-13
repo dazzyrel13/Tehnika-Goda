@@ -766,8 +766,8 @@ header::after {
     }
 
     .site-tagline {
-        font-size: 15px;
-        letter-spacing: -0.03em;
+        font-size: 13px;
+        letter-spacing: -0.01em;
     }
 
     .site-logo-wrap {
@@ -4785,10 +4785,10 @@ body.bg-faq .leads-cta-section {
     margin: 0;
     padding: 0;
     font-family: var(--font-hero);
-    font-size: clamp(14px, 1.35vw, 20px);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-size: clamp(12px, 3.2vw, 14px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
     text-transform: uppercase;
     color: var(--text-main);
     white-space: nowrap;
@@ -4797,7 +4797,7 @@ body.bg-faq .leads-cta-section {
 
 @media (min-width: 992px) {
     body::before {
-        height: calc(112px + env(safe-area-inset-top, 0px));
+        height: calc(96px + env(safe-area-inset-top, 0px));
     }
 
     header {
@@ -4806,85 +4806,88 @@ body.bg-faq .leads-cta-section {
     }
 
     .site-header-inner {
-        display: flex;
-        flex-wrap: nowrap;
-        align-items: flex-start;
-        column-gap: 16px;
-        row-gap: 0;
+        display: grid;
+        grid-template-columns: auto minmax(148px, 200px) minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        align-items: center;
+        column-gap: 12px;
+        row-gap: 6px;
         min-height: 0;
-        padding-top: 12px;
+        padding-top: 10px;
         padding-bottom: 12px;
         box-sizing: border-box;
     }
 
-    .site-logo-wrap {
-        flex: 0 0 auto;
-        margin-right: 0;
-        /* Align emblem with the menu row, not the search under it */
-        min-height: 44px;
-        padding-top: 2px;
+    /* Flatten wrappers so emblem / tagline / search / menu can sit on the grid */
+    .site-logo-wrap,
+    .site-nav {
+        display: contents;
+    }
+
+    .site-logo-link {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        align-self: center;
     }
 
     .site-tagline {
-        font-size: clamp(13px, 1.05vw, 16px);
+        grid-column: 2;
+        grid-row: 1;
+        align-self: end;
+        justify-self: start;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        line-height: 1.2;
     }
 
-    .site-nav {
-        flex: 1 1 auto;
-        display: flex;
-        flex-direction: column;
-        flex-wrap: nowrap;
-        align-items: flex-end;
-        justify-content: flex-start;
-        gap: 8px;
-        min-width: 0;
-        max-width: 100%;
-        overflow: visible;
-        position: static;
-        transform: none;
-        visibility: visible;
-        pointer-events: auto;
-        background: transparent;
-        box-shadow: none;
+    .desktop-search {
+        grid-column: 2;
+        grid-row: 2;
+        align-self: start;
+        justify-self: start;
+        width: 100%;
+        max-width: 190px;
+        margin: 0;
         padding: 0;
-        inset: auto;
-        z-index: 3001;
     }
 
-    .site-nav .nav-links {
+    .desktop-search__input {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .desktop-search__results {
+        left: 0;
+        right: auto;
+        width: min(300px, 70vw);
+    }
+
+    .nav-links {
+        grid-column: 3;
+        grid-row: 1 / span 2;
         display: flex;
         flex-wrap: nowrap;
-        justify-content: flex-end;
+        justify-content: center;
         align-items: center;
-        gap: 2px;
+        gap: 4px;
         margin: 0;
-        width: auto;
+        width: 100%;
         max-width: 100%;
+        min-width: 0;
     }
 
-    .site-nav .desktop-search {
-        flex: 0 0 auto;
-        width: auto;
-        max-width: 260px;
-        margin: 0;
-        padding: 0;
-        justify-content: flex-end;
+    .nav-links a {
+        font-size: 14px;
+        padding: 8px 10px;
     }
 
-    .site-nav .desktop-search__input {
-        width: 240px;
-        max-width: 100%;
-        margin: 0;
-    }
-
-    .site-nav .nav-links a {
-        font-size: 12px;
-        padding: 6px 8px;
-    }
-
-    .site-nav .nav-cta {
-        padding: 8px 12px;
-        font-size: 12px;
+    .nav-cta {
+        padding: 9px 14px;
+        font-size: 13px;
         white-space: nowrap;
     }
 }
