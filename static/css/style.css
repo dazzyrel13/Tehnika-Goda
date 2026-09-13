@@ -4797,59 +4797,84 @@ body.bg-faq .leads-cta-section {
 
 @media (min-width: 992px) {
     body::before {
-        height: calc(118px + env(safe-area-inset-top, 0px));
+        height: calc(112px + env(safe-area-inset-top, 0px));
+    }
+
+    header {
+        min-height: 0;
+        align-items: stretch;
     }
 
     .site-header-inner {
-        flex-wrap: wrap;
-        align-items: center;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        column-gap: 16px;
         row-gap: 0;
         min-height: 0;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        box-sizing: border-box;
     }
 
     .site-logo-wrap {
-        flex-shrink: 0;
-        margin-right: 16px;
+        flex: 0 0 auto;
+        margin-right: 0;
+        /* Align emblem with the menu row, not the search under it */
+        min-height: 44px;
+        padding-top: 2px;
     }
 
     .site-tagline {
-        font-size: clamp(13px, 1.1vw, 17px);
+        font-size: clamp(13px, 1.05vw, 16px);
     }
 
     .site-nav {
-        flex: 1 1 0;
+        flex: 1 1 auto;
         display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 8px 12px;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: flex-end;
+        justify-content: flex-start;
+        gap: 8px;
         min-width: 0;
+        max-width: 100%;
         overflow: visible;
-        position: relative;
+        position: static;
+        transform: none;
+        visibility: visible;
+        pointer-events: auto;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        inset: auto;
         z-index: 3001;
     }
 
     .site-nav .nav-links {
-        order: 1;
-        flex: 1 1 auto;
+        display: flex;
+        flex-wrap: nowrap;
         justify-content: flex-end;
-        min-width: 0;
-        gap: 4px;
+        align-items: center;
+        gap: 2px;
+        margin: 0;
+        width: auto;
+        max-width: 100%;
     }
 
     .site-nav .desktop-search {
-        order: 2;
-        flex: 1 0 100%;
-        max-width: none;
-        width: 100%;
-        justify-content: flex-end;
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 260px;
         margin: 0;
-        padding: 0 0 10px;
+        padding: 0;
+        justify-content: flex-end;
     }
 
     .site-nav .desktop-search__input {
-        max-width: 280px;
-        margin-left: auto;
+        width: 240px;
+        max-width: 100%;
+        margin: 0;
     }
 
     .site-nav .nav-links a {
@@ -4860,6 +4885,7 @@ body.bg-faq .leads-cta-section {
     .site-nav .nav-cta {
         padding: 8px 12px;
         font-size: 12px;
+        white-space: nowrap;
     }
 }
 
