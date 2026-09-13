@@ -4796,15 +4796,70 @@ body.bg-faq .leads-cta-section {
 }
 
 @media (min-width: 992px) {
+    body::before {
+        height: calc(118px + env(safe-area-inset-top, 0px));
+    }
+
+    .site-header-inner {
+        flex-wrap: wrap;
+        align-items: center;
+        row-gap: 0;
+        min-height: 0;
+    }
+
+    .site-logo-wrap {
+        flex-shrink: 0;
+        margin-right: 16px;
+    }
+
+    .site-tagline {
+        font-size: clamp(13px, 1.1vw, 17px);
+    }
+
     .site-nav {
-        flex: 1;
+        flex: 1 1 0;
         display: flex;
-        align-items: stretch;
+        flex-wrap: wrap;
+        align-items: center;
         justify-content: flex-end;
-        gap: 20px;
+        gap: 8px 12px;
+        min-width: 0;
         overflow: visible;
         position: relative;
         z-index: 3001;
+    }
+
+    .site-nav .nav-links {
+        order: 1;
+        flex: 1 1 auto;
+        justify-content: flex-end;
+        min-width: 0;
+        gap: 4px;
+    }
+
+    .site-nav .desktop-search {
+        order: 2;
+        flex: 1 0 100%;
+        max-width: none;
+        width: 100%;
+        justify-content: flex-end;
+        margin: 0;
+        padding: 0 0 10px;
+    }
+
+    .site-nav .desktop-search__input {
+        max-width: 280px;
+        margin-left: auto;
+    }
+
+    .site-nav .nav-links a {
+        font-size: 12px;
+        padding: 6px 8px;
+    }
+
+    .site-nav .nav-cta {
+        padding: 8px 12px;
+        font-size: 12px;
     }
 }
 
