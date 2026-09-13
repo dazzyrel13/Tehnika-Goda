@@ -4941,6 +4941,7 @@ body.bg-faq .leads-cta-section {
 /* —— Vehicle detail —— */
 .detail-page-section {
     padding: 40px 0;
+    overflow-x: clip;
 }
 
 .detail-breadcrumbs {
@@ -5208,10 +5209,16 @@ body.bg-faq .leads-cta-section {
     gap: 40px;
 }
 
+.vehicle-detail-layout > * {
+    min-width: 0;
+    max-width: 100%;
+}
+
 .vehicle-thumbs-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;
+    max-width: 100%;
 }
 
 .vehicle-specs-grid {
@@ -5667,12 +5674,14 @@ body.vehicle-lightbox-open {
         gap: 8px;
         overflow-x: auto;
         overflow-y: hidden;
+        overscroll-behavior-x: contain;
         scroll-snap-type: x proximity;
         -webkit-overflow-scrolling: touch;
         padding-bottom: 4px;
-        margin: 0 -4px;
-        padding-left: 4px;
-        padding-right: 4px;
+        margin: 0;
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
         scrollbar-width: none;
     }
 
@@ -5684,7 +5693,25 @@ body.vehicle-lightbox-open {
         flex: 0 0 auto;
         width: 88px;
         height: 72px;
+        max-width: 88px;
         scroll-snap-align: start;
+    }
+
+    .vehicle-gallery-main {
+        width: 100%;
+        max-width: 100%;
+        aspect-ratio: 4 / 3;
+        max-height: 320px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+    }
+
+    .vehicle-gallery-main__img {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 320px;
+        object-fit: cover;
     }
 
     .vehicle-description {
@@ -6609,21 +6636,6 @@ body.vehicle-lightbox-open {
         font-size: 14px;
     }
 
-    .vehicle-gallery-main {
-        max-height: none;
-        aspect-ratio: 4 / 3;
-        border-radius: 12px;
-        margin-bottom: 12px;
-    }
-
-    .vehicle-gallery-main__img {
-        width: 100%;
-        height: 100%;
-        max-height: none;
-        aspect-ratio: 4 / 3;
-        object-fit: cover;
-    }
-
     .vehicle-detail-title {
         font-size: 1.35rem;
     }
@@ -6778,13 +6790,12 @@ body.vehicle-lightbox-open {
 
     .vehicle-gallery-main,
     .vehicle-gallery-main__img {
-        max-height: none;
-        height: auto;
-        aspect-ratio: 4 / 3;
+        max-height: 260px;
     }
 
     .vehicle-gallery-thumb {
         width: 72px;
         height: 58px;
+        max-width: 72px;
     }
 }
