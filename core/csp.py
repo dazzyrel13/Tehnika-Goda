@@ -7,8 +7,9 @@ def build_public_csp(*, yandex_metrika_id: str = "") -> str:
     script = ["'self'"]
     connect = ["'self'"]
     img = ["'self'", "data:", "blob:"]
-    frame = ["'self'"]
-    child = ["'self'"]
+    # Rutube embeds on vehicle detail pages.
+    frame = ["'self'", "https://rutube.ru"]
+    child = ["'self'", "https://rutube.ru"]
     if (yandex_metrika_id or "").strip():
         # Hosts from Yandex Metrika CSP docs (RU/.com + static CDN + webvisor).
         ym_hosts = [

@@ -92,6 +92,22 @@
                     {% endfor %}
                 </div>
                 {% endif %}
+
+                {% if vehicle.rutube_embed_url %}
+                <div class="vehicle-video">
+                    <h2 class="vehicle-video__title">Видеообзор</h2>
+                    <div class="vehicle-video__frame">
+                        <iframe
+                            src="{{ vehicle.rutube_embed_url }}"
+                            title="Видео {{ display_title }}"
+                            loading="lazy"
+                            allow="clipboard-write; autoplay; fullscreen; picture-in-picture"
+                            allowfullscreen
+                            referrerpolicy="strict-origin-when-cross-origin"
+                        ></iframe>
+                    </div>
+                </div>
+                {% endif %}
             </div>
 
             <div class="glass-panel vehicle-detail-sidebar">

@@ -437,6 +437,16 @@ class Vehicle(models.Model):
         null=True,
         max_length=255,
     )
+    rutube_url = models.URLField(
+        "Видео Rutube",
+        max_length=500,
+        blank=True,
+        default="",
+        help_text=(
+            "Ссылка на видео с Rutube (обычная или «код вставки»). "
+            "На сайте откроется плеер Rutube — файл на сервер не заливается."
+        ),
+    )
     report = models.OneToOneField(
         InspectionReport,
         on_delete=models.SET_NULL,
@@ -543,6 +553,12 @@ class Vehicle(models.Model):
             "Цена под ключ до Благовещенска. "
             "Доставка автовозом в любой город!"
         )
+
+    @property
+    def rutube_embed_url(self) -> str:
+        from .rutube import parse_rutube_embed_url
+
+        return parse_rutube_embed_url(self.rutube_url)
 
     @property
     def spec_sheet(self):

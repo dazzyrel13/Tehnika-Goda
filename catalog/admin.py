@@ -240,6 +240,12 @@ class VehicleAdminForm(forms.ModelForm):
             "Обложка в списке и на главной. Можно не трогать: после сохранения "
             "сюда подставится первое фото из галереи (перетащите нужное на первое место)."
         )
+        if "rutube_url" in self.fields:
+            self.fields["rutube_url"].label = "Видео Rutube"
+            self.fields["rutube_url"].help_text = (
+                "Ссылка вида https://rutube.ru/video/… или код вставки плеера. "
+                "На сайте откроется плеер Rutube — видео на сервер не заливается."
+            )
         self.fields["mileage"].help_text = "0 — для новых авто"
         self.fields["engine_type"].choices = [("", "Не указан")] + list(
             EngineType.choices
@@ -280,6 +286,19 @@ class VehicleAdminForm(forms.ModelForm):
                 "Не удалось распознать ID Авито. Вставьте число или ссылку на объявление."
             )
         return parsed
+
+    def clean_rutube_url(self):
+        from .rutube import parse_rutube_embed_url
+
+        raw = (self.cleaned_data.get("rutube_url") or "").strip()
+        if not raw:
+            return ""
+        embed = parse_rutube_embed_url(raw)
+        if not embed:
+            raise forms.ValidationError(
+                "Нужна ссылка на Rutube (rutube.ru/video/… или код вставки плеера)."
+            )
+        return embed
 
 
 @admin.register(InspectionReport)
@@ -479,12 +498,14 @@ class VehicleAdmin(admin.ModelAdmin):
                 "fields": (
                     "gallery_images",
                     "main_image",
+                    "rutube_url",
                     "description",
                 ),
                 "description": (
                     "Сначала загрузите пачку фото в «Галерея». "
                     "Обложку можно не указывать — подставится первое фото. "
                     "Порядок на сайте: после сохранения схватите фото в сетке и перетащите. "
+                    "Видео: вставьте ссылку с Rutube — на сайте будет плеер, файл на сервер не нужен. "
                     "Описание — вставьте строки «[Поле] значение», сайт сам сделает два столбца."
                 ),
             },
