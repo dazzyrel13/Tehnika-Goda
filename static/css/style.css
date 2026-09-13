@@ -4834,11 +4834,14 @@ body.bg-faq .leads-cta-section {
         grid-column: 2;
         grid-row: 1;
         align-self: end;
-        justify-self: start;
+        justify-self: center;
+        text-align: center;
         font-size: 12px;
         font-weight: 700;
         letter-spacing: 0.01em;
         line-height: 1.2;
+        width: 100%;
+        max-width: 160px;
     }
 
     .desktop-search {
