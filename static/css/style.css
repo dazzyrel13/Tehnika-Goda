@@ -611,6 +611,21 @@ header::after {
 
     .header-phone {
         display: inline-flex;
+        margin-left: 0;
+    }
+
+    .site-logo-wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+        margin-right: 8px;
+        gap: 0;
+    }
+
+    .site-tagline {
+        flex: 1 1 auto;
+        text-align: center;
+        margin: 0 6px 0 4px;
+        min-width: 0;
     }
 
     .site-nav {
@@ -742,12 +757,14 @@ header::after {
 
 @media (max-width: 380px) {
     .site-tagline {
-        font-size: 13px;
+        font-size: 12px;
         white-space: normal;
         max-width: 7.2em;
     }
 }
 
+@media (max-width: 768px) {
+    h1 { font-size: 1.5rem; }
     .container { padding: 0 16px; }
     body::before {
         height: calc(73px + env(safe-area-inset-top, 0px));
