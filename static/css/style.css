@@ -4810,7 +4810,7 @@ body.bg-faq .leads-cta-section {
         grid-template-columns: auto minmax(148px, 200px) minmax(0, 1fr);
         grid-template-rows: auto auto;
         align-items: center;
-        column-gap: 12px;
+        column-gap: 28px;
         row-gap: 6px;
         min-height: 0;
         padding-top: 10px;
@@ -4847,9 +4847,10 @@ body.bg-faq .leads-cta-section {
         align-self: start;
         justify-self: start;
         width: 100%;
-        max-width: 190px;
+        max-width: 176px;
         margin: 0;
         padding: 0;
+        margin-right: 4px;
     }
 
     .desktop-search__input {
