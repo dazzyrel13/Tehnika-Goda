@@ -740,8 +740,14 @@ header::after {
     }
 }
 
-@media (max-width: 768px) {
-    h1 { font-size: 1.5rem; }
+@media (max-width: 380px) {
+    .site-tagline {
+        font-size: 13px;
+        white-space: normal;
+        max-width: 7.2em;
+    }
+}
+
     .container { padding: 0 16px; }
     body::before {
         height: calc(73px + env(safe-area-inset-top, 0px));
@@ -757,6 +763,16 @@ header::after {
     }
     .site-logo {
         height: 48px;
+    }
+
+    .site-tagline {
+        font-size: 15px;
+        letter-spacing: -0.03em;
+    }
+
+    .site-logo-wrap {
+        gap: 8px;
+        margin-right: 8px;
     }
     section:not(.home-page) {
         padding: 40px 0 !important;
@@ -4744,22 +4760,39 @@ body.bg-faq .leads-cta-section {
 }
 
 .site-logo-wrap {
-    flex-shrink: 0;
-    margin-right: 20px;
+    flex-shrink: 1;
+    min-width: 0;
+    margin-right: 12px;
     display: flex;
     align-items: center;
+    gap: 10px;
 }
 
 .site-logo-link {
     text-decoration: none;
     display: flex;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .site-logo {
     height: 58px;
     width: auto;
     object-fit: contain;
+}
+
+.site-tagline {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-hero);
+    font-size: clamp(14px, 1.35vw, 20px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--text-main);
+    white-space: nowrap;
+    max-width: 100%;
 }
 
 @media (min-width: 992px) {
