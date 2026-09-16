@@ -141,16 +141,19 @@ def submit_inquiry(request):
         logger.exception("Inquiry save failed (ip=%s)", client_ip)
         raise
 
-    # Prefer Celery so a slow/failed Telegram call cannot block the lead UX.
+    # Prefer Celery so a slow/failed Telegram/Bitrix call cannot block the lead UX.
     try:
-        from .tasks import send_inquiry_telegram_task
+        from .tasks import send_inquiry_bitrix_task, send_inquiry_telegram_task
 
         send_inquiry_telegram_task.delay(inquiry.pk)
-        logger.info("New inquiry saved (id=%s); telegram queued", inquiry.pk)
+        send_inquiry_bitrix_task.delay(inquiry.pk)
+        logger.info(
+            "New inquiry saved (id=%s); telegram+bitrix queued", inquiry.pk
+        )
     except Exception:
-        # Never call Telegram inline on the web worker — timeout would stall Gunicorn.
+        # Never call messengers inline on the web worker — timeout would stall Gunicorn.
         logger.exception(
-            "Telegram queue failed (id=%s); lead kept, notification not sent",
+            "Lead notify queue failed (id=%s); inquiry kept, notifications not sent",
             inquiry.pk,
         )
 

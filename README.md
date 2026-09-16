@@ -82,7 +82,7 @@ docker exec tehnikagoda_web_dev python manage.py test
 | App | Назначение |
 |-----|------------|
 | `catalog` | Каталог, фильтры, парсер URL |
-| `leads` | Заявки → Telegram |
+| `leads` | Заявки → Telegram + Bitrix24 (лиды) |
 | `analytics` | Визиты, ретеншн |
 | `content` | FAQ (статический текст), отзывы (`Review`) |
 | `utils` | WebP, санитизация HTML, SSRF-safe HTTP |
@@ -90,4 +90,4 @@ docker exec tehnikagoda_web_dev python manage.py test
 ## Переменные окружения
 
 Обязательные: `SECRET_KEY`, `REDIS_PASSWORD` (Docker).  
-Опциональные: `TELEGRAM_*`, `YANDEX_METRIKA_ID`, `ANALYTICS_ASYNC`, `ANALYTICS_RETENTION_DAYS`, `ADMIN_ALLOWED_IPS`.
+Опциональные: `TELEGRAM_*`, `BITRIX24_WEBHOOK_URL`, `YANDEX_METRIKA_ID`, `ANALYTICS_ASYNC`, `ANALYTICS_RETENTION_DAYS`, `ADMIN_ALLOWED_IPS`.

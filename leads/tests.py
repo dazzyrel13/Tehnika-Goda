@@ -21,6 +21,7 @@ def _valid_payload(**overrides):
 
 
 @override_settings(RATELIMIT_ENABLE=False, TELEGRAM_BOT_TOKEN="", TELEGRAM_CHAT_ID="")
+@patch("leads.tasks.send_inquiry_bitrix_task.delay")
 @patch("leads.tasks.send_inquiry_telegram_task.delay")
 class LeadsViewsTests(TestCase):
     def setUp(self):
@@ -28,7 +29,7 @@ class LeadsViewsTests(TestCase):
 
         cache.clear()
 
-    def test_submit_inquiry_ajax_success(self, _notify):
+    def test_submit_inquiry_ajax_success(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(),
@@ -41,9 +42,11 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(Inquiry.objects.count(), 1)
         self.assertEqual(Inquiry.objects.get().phone, "+79991234567")
         _notify.assert_called_once()
+        _bitrix.assert_called_once()
         self.assertEqual(_notify.call_args.args[0], Inquiry.objects.get().pk)
+        self.assertEqual(_bitrix.call_args.args[0], Inquiry.objects.get().pk)
 
-    def test_submit_inquiry_ajax_validation_error(self, _notify):
+    def test_submit_inquiry_ajax_validation_error(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(phone="invalid-number"),
@@ -53,7 +56,7 @@ class LeadsViewsTests(TestCase):
         payload = response.json()
         self.assertEqual(payload["status"], "error")
 
-    def test_submit_inquiry_ajax_city_required(self, _notify):
+    def test_submit_inquiry_ajax_city_required(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(city=""),
@@ -64,7 +67,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(payload["status"], "error")
         self.assertIn("city", payload["errors"])
 
-    def test_submit_inquiry_ajax_allows_empty_message(self, _notify):
+    def test_submit_inquiry_ajax_allows_empty_message(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(message=""),
@@ -76,7 +79,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(payload["status"], "success")
         self.assertEqual(Inquiry.objects.count(), 1)
 
-    def test_submit_inquiry_ajax_repeat_phone_blocked(self, _notify):
+    def test_submit_inquiry_ajax_repeat_phone_blocked(self, _notify, _bitrix):
         self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(message="First"),
@@ -92,7 +95,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(second.status_code, 429)
         self.assertEqual(Inquiry.objects.count(), 1)
 
-    def test_submit_inquiry_saves_utm_from_post(self, _notify):
+    def test_submit_inquiry_saves_utm_from_post(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(
@@ -111,7 +114,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(inquiry.utm_medium, "cpc")
         self.assertEqual(inquiry.utm_campaign, "spring")
 
-    def test_rejects_foreign_phone_clara_style(self, _notify):
+    def test_rejects_foreign_phone_clara_style(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(
@@ -125,7 +128,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Inquiry.objects.count(), 0)
 
-    def test_rejects_latin_name_even_with_ru_phone(self, _notify):
+    def test_rejects_latin_name_even_with_ru_phone(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(name="Clara Rihtter", city="Москва"),
@@ -135,7 +138,7 @@ class LeadsViewsTests(TestCase):
         self.assertIn("name", response.json()["errors"])
         self.assertEqual(Inquiry.objects.count(), 0)
 
-    def test_rejects_email_in_message(self, _notify):
+    def test_rejects_email_in_message(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(message="Пишите на supergirl@rambler.com"),
@@ -144,7 +147,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Inquiry.objects.count(), 0)
 
-    def test_rejects_bare_domain_in_message(self, _notify):
+    def test_rejects_bare_domain_in_message(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(message="Смотрите на avito.ru срочно"),
@@ -153,7 +156,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Inquiry.objects.count(), 0)
 
-    def test_honeypot_soft_fails(self, _notify):
+    def test_honeypot_soft_fails(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(website="http://spam.test"),
@@ -163,10 +166,10 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(response.json()["status"], "success")
         self.assertEqual(Inquiry.objects.count(), 0)
 
-    def test_normalize_phone_from_8(self, _notify):
+    def test_normalize_phone_from_8(self, _notify, _bitrix):
         self.assertEqual(normalize_ru_phone("8 (924) 149-00-13"), "+79241490013")
 
-    def test_unpublished_vehicle_is_not_attached(self, _notify):
+    def test_unpublished_vehicle_is_not_attached(self, _notify, _bitrix):
         from catalog.models import Brand, Category, Vehicle
 
         brand = Brand.objects.create(name="LeadBrand", slug="leadbrand")
@@ -210,7 +213,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(visible_resp.status_code, 200)
         self.assertEqual(Inquiry.objects.get(phone="+79991110002").vehicle_id, visible.pk)
 
-    def test_missing_form_ts_creates_inquiry(self, _notify):
+    def test_missing_form_ts_creates_inquiry(self, _notify, _bitrix):
         data = _valid_payload()
         data.pop("form_ts")
         response = self.client.post(
@@ -221,7 +224,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Inquiry.objects.count(), 1)
 
-    def test_instant_form_ts_soft_fails(self, _notify):
+    def test_instant_form_ts_soft_fails(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(form_ts=str(time.time())),
@@ -231,7 +234,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(response.json()["status"], "success")
         self.assertEqual(Inquiry.objects.count(), 0)
 
-    def test_small_clock_skew_allowed(self, _notify):
+    def test_small_clock_skew_allowed(self, _notify, _bitrix):
         response = self.client.post(
             reverse("leads:submit"),
             data=_valid_payload(form_ts=str(time.time() + 30)),
@@ -240,7 +243,7 @@ class LeadsViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Inquiry.objects.count(), 1)
 
-    def test_save_failure_releases_cooldown(self, _notify):
+    def test_save_failure_releases_cooldown(self, _notify, _bitrix):
         with patch.object(Inquiry, "save", side_effect=RuntimeError("db down")):
             with self.assertRaises(RuntimeError):
                 self.client.post(

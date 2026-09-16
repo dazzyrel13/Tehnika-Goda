@@ -34,6 +34,9 @@ for _loopback in ("127.0.0.1", "localhost"):
 SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000")
 TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="")
+# Bitrix24 incoming webhook base, e.g. https://xxx.bitrix24.ru/rest/1/xxxxx/
+# Empty = leads stay Telegram-only.
+BITRIX24_WEBHOOK_URL = (env("BITRIX24_WEBHOOK_URL", default="") or "").strip()
 # Avito API (price sync site → Avito). Empty = sync disabled.
 AVITO_CLIENT_ID = (env("AVITO_CLIENT_ID", default="") or "").strip()
 AVITO_CLIENT_SECRET = (env("AVITO_CLIENT_SECRET", default="") or "").strip()
