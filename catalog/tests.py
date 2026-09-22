@@ -1277,7 +1277,10 @@ class SyncMainImageFromGalleryTests(TestCase):
             )
             self.assertTrue(sync_main_image_from_gallery(vehicle))
             vehicle.refresh_from_db()
-            self.assertEqual(vehicle.main_image.name, first.image.name)
+            first.refresh_from_db()
+            # Cover is a copy — must not share the gallery storage path.
+            self.assertNotEqual(vehicle.main_image.name, first.image.name)
+            self.assertTrue(vehicle.main_image.name)
             self.assertFalse(sync_main_image_from_gallery(vehicle))
             vehicle.gallery.all().delete()
             vehicle.delete()
@@ -1507,6 +1510,73 @@ class ListingIngestTests(TestCase):
         self.assertEqual(result.photos_added, 1)
         self.assertTrue(result.vehicle.main_image)
         self.assertEqual(result.vehicle.gallery.count(), 1)
+        result.vehicle.main_image.close()
+        for item in result.vehicle.gallery.all():
+            item.image.close()
+
+    def test_ingest_many_photos_all_files_exist_after_attach_and_process(self):
+        """Regression: middle gallery slots must not become missing files."""
+        import tempfile
+        from io import BytesIO
+
+        from django.core.files.storage import default_storage
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.test import override_settings
+        from PIL import Image
+
+        from catalog.listing_ingest import ingest_listing
+        from catalog.tasks import process_gallery_image_task
+
+        tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.addCleanup(tmp.cleanup)
+        media = override_settings(
+            MEDIA_ROOT=tmp.name, IMAGE_PROCESSING_ASYNC=False
+        )
+        media.enable()
+        self.addCleanup(media.disable)
+
+        uploads = []
+        for i in range(8):
+            buf = BytesIO()
+            Image.new("RGB", (120 + i, 90 + i), (i * 20, 40, 80)).save(
+                buf, format="JPEG"
+            )
+            uploads.append(
+                SimpleUploadedFile(
+                    f"shot-{i}.jpg",
+                    buf.getvalue(),
+                    content_type="image/jpeg",
+                )
+            )
+
+        result = ingest_listing(self.SAMPLE, uploads=uploads)
+        self.assertEqual(result.photos_added, 8)
+        self.assertEqual(result.photos_skipped, 0)
+        self.assertEqual(result.vehicle.gallery.count(), 8)
+
+        for item in result.vehicle.gallery.order_by("order", "id"):
+            self.assertTrue(
+                default_storage.exists(item.image.name),
+                msg=f"missing after attach: {item.image.name}",
+            )
+            process_gallery_image_task(item.pk)
+            item.refresh_from_db()
+            self.assertTrue(
+                default_storage.exists(item.image.name),
+                msg=f"missing after process: {item.image.name}",
+            )
+            with default_storage.open(item.image.name, "rb") as fh:
+                with Image.open(fh) as img:
+                    img.load()
+                    self.assertGreater(img.width, 0)
+
+        result.vehicle.refresh_from_db()
+        self.assertTrue(default_storage.exists(result.vehicle.main_image.name))
+        # Cover must be a separate file from gallery[0] (cleanup-safe).
+        first = result.vehicle.gallery.order_by("order", "id").first()
+        self.assertNotEqual(
+            result.vehicle.main_image.name, first.image.name
+        )
         result.vehicle.main_image.close()
         for item in result.vehicle.gallery.all():
             item.image.close()

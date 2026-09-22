@@ -29,6 +29,8 @@ def enqueue_process_gallery_image(image_id: int) -> None:
 
 def _finalize_image_field(instance, field_name: str) -> None:
     """Convert master to WebP if needed, then write .w400/.w800 variants."""
+    from django.core.files.storage import default_storage
+
     from utils.image_processing import (
         process_image_to_webp,
         should_process_image,
@@ -39,12 +41,37 @@ def _finalize_image_field(instance, field_name: str) -> None:
     if not field or not getattr(field, "name", None):
         return
 
+    old_name = field.name
+    if not default_storage.exists(old_name):
+        logger.error(
+            "Image process skipped: missing file %s on %s.%s id=%s",
+            old_name,
+            instance.__class__.__name__,
+            field_name,
+            getattr(instance, "pk", None),
+        )
+        return
+
     if should_process_image(field):
         processed = process_image_to_webp(field)
         if processed:
             setattr(instance, field_name, processed)
             instance.save(update_fields=[field_name], skip_image_queue=True)
-            return
+            field = getattr(instance, field_name)
+            # Cover often aliased the same storage path before this fix —
+            # keep Vehicle.main_image pointing at the surviving file.
+            if field_name == "image" and hasattr(instance, "vehicle_id"):
+                try:
+                    from .models import Vehicle
+
+                    Vehicle.objects.filter(
+                        pk=instance.vehicle_id, main_image=old_name
+                    ).update(main_image=field.name)
+                except Exception:
+                    logger.exception(
+                        "Failed to retarget main_image after gallery WebP id=%s",
+                        getattr(instance, "pk", None),
+                    )
 
     write_responsive_variants(field)
 

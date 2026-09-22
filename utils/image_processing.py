@@ -29,21 +29,24 @@ def _load_image(image_field) -> Image.Image | None:
     if not image_field:
         return None
     try:
-        image_field.open()
+        try:
+            image_field.open()
+        except Exception:
+            pass
+        try:
+            image_field.seek(0)
+        except Exception:
+            pass
+        img = Image.open(image_field)
+        img = ImageOps.exif_transpose(img)
+        img.load()
+        try:
+            image_field.seek(0)
+        except Exception:
+            pass
+        return img
     except Exception:
-        pass
-    try:
-        image_field.seek(0)
-    except Exception:
-        pass
-    img = Image.open(image_field)
-    img = ImageOps.exif_transpose(img)
-    img.load()
-    try:
-        image_field.seek(0)
-    except Exception:
-        pass
-    return img
+        return None
 
 
 def is_new_upload(image_field) -> bool:

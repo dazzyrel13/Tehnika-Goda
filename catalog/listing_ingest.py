@@ -2,20 +2,24 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
 
+from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Max
 from django.utils.text import slugify
 from PIL import Image
 from unidecode import unidecode
 
-from .models import Brand, Category, Vehicle, VehicleImage
 from .engine_type import detect_engine_type
+from .models import Brand, Category, Vehicle, VehicleImage, _short_upload_name
 from .spec_sheet import parse_spec_sheet
+
+logger = logging.getLogger(__name__)
 
 # Status-only car filters — prefer body-type category when known.
 _CAR_STATUS_SLUGS = frozenset({"cars_new", "cars_used", "cars_bought"})
@@ -421,25 +425,92 @@ def attach_vehicle_images(vehicle: Vehicle, uploads) -> tuple[int, int]:
     max_order = vehicle.gallery.aggregate(max_order=Max("order")).get("max_order") or 0
     added = 0
     skipped = 0
+    next_order = max_order
     for index, image in enumerate(files, start=1):
         raw = _read_upload(image)
         if raw is None:
             skipped += 1
+            logger.warning(
+                "Skipping non-image/truncated upload for vehicle_id=%s index=%s name=%s",
+                vehicle.pk,
+                index,
+                getattr(image, "name", ""),
+            )
             continue
-        VehicleImage.objects.create(
-            vehicle=vehicle,
-            image=image,
-            order=max_order + index,
-        )
-        added += 1
+        next_order += 1
+        # Snapshot bytes into ContentFile so TemporaryUploadedFile cannot be
+        # invalidated after the request ends or while Celery converts siblings.
+        original_name = getattr(image, "name", "") or f"photo-{next_order}.jpg"
+        content = ContentFile(raw, name=_short_upload_name(original_name))
+        try:
+            VehicleImage.objects.create(
+                vehicle=vehicle,
+                image=content,
+                order=next_order,
+            )
+            added += 1
+        except Exception:
+            skipped += 1
+            logger.exception(
+                "Failed to save gallery upload for vehicle_id=%s index=%s",
+                vehicle.pk,
+                index,
+            )
 
     vehicle.refresh_from_db()
     if added and not vehicle.main_image:
-        first = vehicle.gallery.order_by("order", "id").first()
-        if first and first.image:
-            vehicle.main_image = first.image
-            vehicle.save(update_fields=["main_image"], skip_image_queue=True)
+        _copy_first_gallery_to_main(vehicle)
     return added, skipped
+
+
+def _copy_first_gallery_to_main(vehicle: Vehicle) -> bool:
+    """
+    Set cover from the first gallery photo without sharing the same storage
+    path (so WebP conversion of the gallery row cannot delete the cover).
+    """
+    first = (
+        vehicle.gallery.exclude(image="")
+        .exclude(image__isnull=True)
+        .order_by("order", "id")
+        .first()
+    )
+    if not first or not first.image:
+        return False
+    payload = b""
+    try:
+        first.image.open("rb")
+        payload = first.image.read()
+    except Exception:
+        logger.exception(
+            "Cannot read first gallery image for cover vehicle_id=%s", vehicle.pk
+        )
+        return False
+    finally:
+        try:
+            first.image.close()
+        except Exception:
+            pass
+    if not payload:
+        return False
+    vehicle.main_image = ContentFile(
+        payload, name=_short_upload_name(first.image.name or "cover.jpg")
+    )
+    vehicle.save(update_fields=["main_image"], skip_image_queue=True)
+    return True
+
+
+def _image_fingerprint(field) -> tuple[int, str]:
+    import hashlib
+
+    field.open("rb")
+    try:
+        data = field.read()
+    finally:
+        try:
+            field.close()
+        except Exception:
+            pass
+    return len(data), hashlib.sha256(data).hexdigest()
 
 
 def sync_main_image_from_gallery(vehicle: Vehicle) -> bool:
@@ -461,20 +532,36 @@ def sync_main_image_from_gallery(vehicle: Vehicle) -> bool:
     old_name = (
         (vehicle.main_image.name or "").strip() if vehicle.main_image else ""
     )
-    if new_name == old_name:
+    if new_name and new_name == old_name:
         return False
-    vehicle.main_image = first.image
-    vehicle.save(update_fields=["main_image"], skip_image_queue=True)
-    return True
+    if old_name:
+        try:
+            if _image_fingerprint(vehicle.main_image) == _image_fingerprint(
+                first.image
+            ):
+                return False
+        except Exception:
+            pass
+    # Copy bytes — never alias the same storage path as a gallery row.
+    return _copy_first_gallery_to_main(vehicle)
 
 
 def _read_upload(image: UploadedFile) -> bytes | None:
+    """Return raw bytes if the upload is a fully decodable image."""
     try:
         raw = image.read()
-        image.seek(0)
-        probe = Image.open(BytesIO(raw))
-        probe.verify()
-        image.seek(0)
+        if not raw:
+            return None
+        try:
+            image.seek(0)
+        except Exception:
+            pass
+        with Image.open(BytesIO(raw)) as probe:
+            probe.load()  # full decode catches truncated multipart parts
+        try:
+            image.seek(0)
+        except Exception:
+            pass
         return raw
     except Exception:
         return None
