@@ -38,6 +38,7 @@ _TRUCK_TYPE_SLUGS = (
 _SPECIAL_TYPE_SLUGS = (
     "special_lifts",
     "special_cranes",
+    "special_vacuum",
 )
 
 T = TypeVar("T")

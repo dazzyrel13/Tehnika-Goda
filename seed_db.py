@@ -81,6 +81,9 @@ def seed_database():
     Category.objects.get_or_create(
         name="Башенные краны", slug="special_cranes", parent=cat_special
     )
+    Category.objects.get_or_create(
+        name="Ассенизаторы", slug="special_vacuum", parent=cat_special
+    )
 
     Brand.objects.get_or_create(name="Xiaomi", slug="xiaomi")
     Brand.objects.get_or_create(name="Zeekr", slug="zeekr")

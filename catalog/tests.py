@@ -116,6 +116,10 @@ class CatalogPagesTests(TestCase):
             slug="special_cranes",
             defaults={"name": "Башенные краны", "parent": special},
         )
+        Category.objects.get_or_create(
+            slug="special_vacuum",
+            defaults={"name": "Ассенизаторы", "parent": special},
+        )
         invalidate_nav_cache()
         response = self.client.get(reverse("home"))
         self.assertContains(response, "Подбор по параметрам")
@@ -129,12 +133,14 @@ class CatalogPagesTests(TestCase):
         self.assertContains(response, "Грузовики")
         self.assertContains(response, "Автовышки")
         self.assertContains(response, "Башенные краны")
+        self.assertContains(response, "Ассенизаторы")
         self.assertContains(response, 'value="cars"')
         self.assertContains(response, 'value="trucks"')
         self.assertContains(response, 'value="special"')
         self.assertContains(response, 'value="trucks_trucks"')
         self.assertContains(response, 'value="special_lifts"')
         self.assertContains(response, 'value="special_cranes"')
+        self.assertContains(response, 'value="special_vacuum"')
         self.assertNotContains(response, "Фронтальные погрузчики")
         self.assertNotContains(response, "Вилочные погрузчики")
         self.assertNotContains(response, "Экскаваторы-погрузчики")

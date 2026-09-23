@@ -71,6 +71,10 @@ BODY_TO_SLUG = {
     "башенный кран": "special_cranes",
     "башенные краны": "special_cranes",
     "кран": "special_cranes",
+    "ассенизатор": "special_vacuum",
+    "ассенизаторы": "special_vacuum",
+    "илосос": "special_vacuum",
+    "илососы": "special_vacuum",
     "грузовик": "trucks_trucks",
     "грузовики": "trucks_trucks",
     "фургон": "trucks_vans",
@@ -80,7 +84,10 @@ BODY_TO_SLUG = {
 }
 
 PARENT_HINTS = (
-    (("автовышк", "башенн", "кран", "спецтехник"), "special"),
+    (
+        ("автовышк", "башенн", "кран", "ассенизатор", "илосос", "спецтехник"),
+        "special",
+    ),
     (("грузовик", "фургон", "эвакуатор", "кму", "коммерческ"), "trucks"),
 )
 
