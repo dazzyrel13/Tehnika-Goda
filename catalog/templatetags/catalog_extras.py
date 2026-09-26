@@ -92,19 +92,47 @@ def responsive_image(image_field, default_width=800):
 @register.simple_tag
 def vehicle_gallery_images(vehicle):
     """Cover first, then unique gallery photos (cover is stored separately)."""
+    import hashlib
+
     images = []
     seen = set()
+    fingerprints = set()
+
+    def fingerprint(field):
+        """Identify copied files even when their storage names differ."""
+        try:
+            field.open("rb")
+            digest = hashlib.sha256(field.read()).hexdigest()
+            field.close()
+            return digest
+        except Exception:
+            try:
+                field.close()
+            except Exception:
+                pass
+            return None
+
     cover = getattr(vehicle, "main_image", None)
     cover_name = (getattr(cover, "name", None) or "").strip()
     if cover_name:
         images.append(cover)
         seen.add(cover_name)
+        cover_fingerprint = fingerprint(cover)
+        if cover_fingerprint:
+            fingerprints.add(cover_fingerprint)
     gallery = getattr(vehicle, "gallery", None)
     items = gallery.all() if gallery is not None else []
     for item in items:
         photo = getattr(item, "image", None)
         name = (getattr(photo, "name", None) or "").strip()
-        if name and name not in seen:
+        photo_fingerprint = fingerprint(photo) if name else None
+        if (
+            name
+            and name not in seen
+            and (not photo_fingerprint or photo_fingerprint not in fingerprints)
+        ):
             images.append(photo)
             seen.add(name)
+            if photo_fingerprint:
+                fingerprints.add(photo_fingerprint)
     return images

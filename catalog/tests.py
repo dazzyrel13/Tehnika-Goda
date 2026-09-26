@@ -1020,6 +1020,37 @@ class VehicleImageVariantTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, vehicle.main_image.url)
 
+    def test_copied_cover_is_not_shown_twice_when_gallery_path_differs(self):
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+
+        from catalog.templatetags.catalog_extras import vehicle_gallery_images
+
+        def _jpeg(name):
+            buf = BytesIO()
+            Image.new("RGB", (800, 600), (10, 10, 10)).save(buf, format="JPEG")
+            buf.seek(0)
+            return SimpleUploadedFile(name, buf.read(), content_type="image/jpeg")
+
+        vehicle = Vehicle.objects.create(
+            title="Copied Cover Car",
+            brand=self.brand,
+            category=self.category,
+            year=2024,
+            mileage=100,
+            price_rub=1500000,
+            is_published=True,
+            slug="copied-cover-car",
+            main_image=_jpeg("main-copy.jpg"),
+        )
+        VehicleImage.objects.create(
+            vehicle=vehicle, image=_jpeg("gallery-copy.jpg"), order=1
+        )
+
+        self.assertEqual(len(vehicle_gallery_images(vehicle)), 1)
+
     @override_settings(
         IMAGE_PROCESSING_ASYNC=True,
         CELERY_TASK_ALWAYS_EAGER=True,
