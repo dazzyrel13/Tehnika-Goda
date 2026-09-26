@@ -13,6 +13,7 @@ KEEP_LABELS = {
     "catalog.currencyratesettings",
     "content.review",
     "content.reviewplatformsettings",
+    "content.promobanner",
     "leads.inquiry",
 }
 
