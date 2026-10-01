@@ -99,71 +99,6 @@
             </figure>
         </div>
     </section>
-
-    <nav class="home-mobile-quick" aria-label="Быстрые ссылки">
-        <a class="home-mobile-quick__item" href="{% url 'catalog:category' category_slug='cars' %}">
-            <span class="home-mobile-quick__label">Каталог</span>
-        </a>
-        <a class="home-mobile-quick__item" href="{% url 'avto_pod_zakaz' %}">
-            <span class="home-mobile-quick__label">Прайс</span>
-        </a>
-        <a class="home-mobile-quick__item" href="#how-we-work">
-            <span class="home-mobile-quick__label">Как купить</span>
-        </a>
-        <a class="home-mobile-quick__item" href="#leads-section">
-            <span class="home-mobile-quick__label">Заявка</span>
-        </a>
-    </nav>
-
-    <section class="ed-metrics" aria-label="Ключевые факты">
-        <div class="ed-metrics__inner">
-            <div class="ed-metrics__item">
-                <strong>До 30 рабочих дней</strong>
-                <span>После оплаты инвойса</span>
-            </div>
-            <div class="ed-metrics__item">
-                <strong>Подбор</strong>
-                <span>Бесплатно</span>
-            </div>
-            <div class="ed-metrics__item">
-                <strong>Под ключ</strong>
-                <span>До Благовещенска</span>
-            </div>
-            <div class="ed-metrics__item">
-                <strong>Доставка</strong>
-                <span>Автовозом в любой город</span>
-            </div>
-        </div>
-    </section>
-
-    <section class="ed-warranty" aria-labelledby="ed-warranty-heading">
-        <div class="ed-warranty__panel">
-            <div class="ed-warranty__copy reveal">
-                <p class="ed-warranty__eyebrow">Почему мы?!</p>
-                <h2 id="ed-warranty-heading">Гарантия 6&nbsp;месяцев на ДВС и КПП</h2>
-                <p class="ed-warranty__lead">Даём гарантию на двигатель и коробку передач для авто с нашей площадки. Срок и условия фиксируем в договоре.</p>
-            </div>
-            <div class="ed-warranty__visual">
-                <img
-                    class="ed-warranty__media"
-                    src="{% static 'images/home/warranty-banner.webp' %}?v=5"
-                    alt="Площадка и техника: гарантия на двигатель и коробку передач"
-                    width="1024"
-                    height="530"
-                    loading="lazy"
-                    decoding="async"
-                >
-                <div class="ed-warranty__write" data-warranty-write aria-hidden="true">
-                    <p class="ed-warranty__write-word">Единственные!</p>
-                </div>
-                <div class="ed-warranty__aside">
-                    <p class="ed-warranty__aside-title">Каждый автомобиль на нашей площадке прошёл тщательную диагностику.</p>
-                    <p class="ed-warranty__aside-sub">Мы уверены в качестве и готовы дать уникальное предложение!</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <div class="home-search-block reveal">
         <div class="home-deep-search" data-home-picker>
             <details class="home-deep-search__fold" open>
@@ -274,41 +209,6 @@
             </details>
         </div>
     </div>
-
-    <section class="home-promos reveal" aria-labelledby="home-promos-heading">
-        <div class="home-section__head">
-            <div class="home-section__eyebrow">Спецпредложения</div>
-            <h2 id="home-promos-heading">Акции</h2>
-            <p>Актуальные предложения при заказе автомобиля из&nbsp;Китая.</p>
-        </div>
-        {% if home_promos %}
-        <div class="home-promos__grid">
-            {% for promo in home_promos %}
-            <article class="promo-card">
-                <a class="promo-card__media" href="{{ promo.href }}">
-                    <img
-                        src="{{ promo.image.url }}"
-                        alt="{{ promo.title }}"
-                        width="600"
-                        height="600"
-                        loading="lazy"
-                        decoding="async"
-                    >
-                </a>
-                <div class="promo-card__body">
-                    <h3 class="promo-card__title">
-                        <a href="{{ promo.href }}">{{ promo.title }}</a>
-                    </h3>
-                    <p class="promo-card__teaser">{{ promo.teaser }}</p>
-                </div>
-            </article>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p class="home-offer-empty">Сейчас активных акций нет — следите за обновлениями.</p>
-        {% endif %}
-    </section>
-
     <div class="home-section home-section--offers">
         <div class="home-section__head reveal">
             <div class="home-section__eyebrow">Каталог</div>
@@ -372,6 +272,106 @@
         </div>
         {% endif %}
     </div>
+
+    <nav class="home-mobile-quick" aria-label="Быстрые ссылки">
+        <a class="home-mobile-quick__item" href="{% url 'catalog:category' category_slug='cars' %}">
+            <span class="home-mobile-quick__label">Каталог</span>
+        </a>
+        <a class="home-mobile-quick__item" href="{% url 'avto_pod_zakaz' %}">
+            <span class="home-mobile-quick__label">Прайс</span>
+        </a>
+        <a class="home-mobile-quick__item" href="#how-we-work">
+            <span class="home-mobile-quick__label">Как купить</span>
+        </a>
+        <a class="home-mobile-quick__item" href="#leads-section">
+            <span class="home-mobile-quick__label">Заявка</span>
+        </a>
+    </nav>
+
+    <section class="ed-metrics" aria-label="Ключевые факты">
+        <div class="ed-metrics__inner">
+            <div class="ed-metrics__item">
+                <strong>До 30 рабочих дней</strong>
+                <span>После оплаты инвойса</span>
+            </div>
+            <div class="ed-metrics__item">
+                <strong>Подбор</strong>
+                <span>Бесплатно</span>
+            </div>
+            <div class="ed-metrics__item">
+                <strong>Под ключ</strong>
+                <span>До Благовещенска</span>
+            </div>
+            <div class="ed-metrics__item">
+                <strong>Доставка</strong>
+                <span>Автовозом в любой город</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="ed-warranty" aria-labelledby="ed-warranty-heading">
+        <div class="ed-warranty__panel">
+            <div class="ed-warranty__copy reveal">
+                <p class="ed-warranty__eyebrow">Почему мы?!</p>
+                <h2 id="ed-warranty-heading">Гарантия 6&nbsp;месяцев на ДВС и КПП</h2>
+                <p class="ed-warranty__lead">Даём гарантию на двигатель и коробку передач для авто с нашей площадки. Срок и условия фиксируем в договоре.</p>
+            </div>
+            <div class="ed-warranty__visual">
+                <img
+                    class="ed-warranty__media"
+                    src="{% static 'images/home/warranty-banner.webp' %}?v=5"
+                    alt="Площадка и техника: гарантия на двигатель и коробку передач"
+                    width="1024"
+                    height="530"
+                    loading="lazy"
+                    decoding="async"
+                >
+                <div class="ed-warranty__write" data-warranty-write aria-hidden="true">
+                    <p class="ed-warranty__write-word">Единственные!</p>
+                </div>
+                <div class="ed-warranty__aside">
+                    <p class="ed-warranty__aside-title">Каждый автомобиль на нашей площадке прошёл тщательную диагностику.</p>
+                    <p class="ed-warranty__aside-sub">Мы уверены в качестве и готовы дать уникальное предложение!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="home-promos reveal" aria-labelledby="home-promos-heading">
+        <div class="home-section__head">
+            <div class="home-section__eyebrow">Спецпредложения</div>
+            <h2 id="home-promos-heading">Акции</h2>
+            <p>Актуальные предложения при заказе автомобиля из&nbsp;Китая.</p>
+        </div>
+        {% if home_promos %}
+        <div class="home-promos__grid">
+            {% for promo in home_promos %}
+            <article class="promo-card">
+                <a class="promo-card__media" href="{{ promo.href }}">
+                    <img
+                        src="{{ promo.image.url }}"
+                        alt="{{ promo.title }}"
+                        width="600"
+                        height="600"
+                        loading="lazy"
+                        decoding="async"
+                    >
+                </a>
+                <div class="promo-card__body">
+                    <h3 class="promo-card__title">
+                        <a href="{{ promo.href }}">{{ promo.title }}</a>
+                    </h3>
+                    <p class="promo-card__teaser">{{ promo.teaser }}</p>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="home-offer-empty">Сейчас активных акций нет — следите за обновлениями.</p>
+        {% endif %}
+    </section>
+
 
     <div class="home-section" id="how-we-work">
         <div class="home-section__head reveal">
