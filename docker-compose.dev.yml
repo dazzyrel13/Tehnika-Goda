@@ -78,6 +78,17 @@ services:
       - redis
       - web
     restart: unless-stopped
+    healthcheck:
+      # Сетевой healthcheck: Redis + внешняя сеть (Telegram API).
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import socket; s=socket.create_connection(('redis',6379),timeout=3); s.close()\" && python -c \"import socket; s=socket.create_connection(('api.telegram.org',443),timeout=5); s.close()\""
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
   postgres_data:

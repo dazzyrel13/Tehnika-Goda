@@ -81,6 +81,18 @@ services:
       - redis
       - web
     restart: always
+    healthcheck:
+      # Проверяем: 1) Redis доступен, 2) внешняя сеть (Telegram API) отвечает.
+      # Если оба условия не выполняются 3 раза подряд — Docker перезапустит контейнер.
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import socket; s=socket.create_connection(('redis',6379),timeout=3); s.close()\" && python -c \"import socket; s=socket.create_connection(('api.telegram.org',443),timeout=5); s.close()\""
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   celery_beat:
     image: tehnikagoda_app:latest
