@@ -1,4 +1,4 @@
-"""Generate social-media promo cards without changing catalog data."""
+"""Generate branded social-media promo cards without changing catalog data."""
 
 from io import BytesIO
 from pathlib import Path
@@ -6,32 +6,33 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-
 WIDTH, HEIGHT = 1080, 1920
-NAVY = (10, 22, 40)
-BLUE = (35, 75, 125)
-YELLOW = (255, 179, 0)
-WHITE = (245, 247, 250)
-MUTED = (174, 187, 204)
+INK = (10, 22, 40)
+PANEL = (20, 35, 55)
+GOLD = (255, 179, 0)
+WHITE = (248, 249, 250)
+MUTED = (171, 184, 199)
 
 
 def _font(size, bold=False):
-    names = (
-        ("C:\\Windows\\Fonts\\arialbd.ttf", "C:\\Windows\\Fonts\\arial.ttf")
-        if __import__("os").name == "nt"
-        else ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
+    """Use a Cyrillic-capable font in both the Linux container and Windows."""
+    import os
+
+    candidates = (
+        ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
+        if os.name != "nt"
+        else ("C:\\Windows\\Fonts\\arialbd.ttf", "C:\\Windows\\Fonts\\arial.ttf")
     )
-    for name in (names[0] if bold else names[1], names[1]):
-        if Path(name).exists():
-            return ImageFont.truetype(name, size)
+    for path in (candidates[0] if bold else candidates[1], candidates[1]):
+        if Path(path).exists():
+            return ImageFont.truetype(path, size)
     return ImageFont.load_default()
 
 
-def _fit_image(field, size):
+def _fit(field, size):
     field.open("rb")
     try:
-        image = Image.open(field).convert("RGB")
-        return ImageOps.fit(image, size, method=Image.Resampling.LANCZOS)
+        return ImageOps.fit(Image.open(field).convert("RGB"), size, Image.Resampling.LANCZOS)
     finally:
         field.close()
 
@@ -40,46 +41,60 @@ def _text(draw, xy, value, font, fill=WHITE, anchor=None):
     draw.text(xy, str(value), font=font, fill=fill, anchor=anchor)
 
 
+def _wrap(draw, value, font, max_width, limit=2):
+    words = str(value).split()
+    lines, current = [], ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if current and draw.textbbox((0, 0), candidate, font=font)[2] > max_width:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return lines[:limit] or ["Автомобиль"]
+
+
+def _gallery(vehicle):
+    from .templatetags.catalog_extras import vehicle_gallery_images
+
+    return vehicle_gallery_images(vehicle)[:4]
+
+
 def render_vehicle_card(vehicle):
-    """Return a 1080x1920 WebP promo card for a Vehicle instance."""
-    canvas = Image.new("RGB", (WIDTH, HEIGHT), NAVY)
+    """Return a branded 1080x1920 WebP-ready promo card."""
+    canvas = Image.new("RGB", (WIDTH, HEIGHT), INK)
     draw = ImageDraw.Draw(canvas)
-    draw.rectangle((0, 0, WIDTH, 18), fill=YELLOW)
-
-    if vehicle.main_image:
-        hero = _fit_image(vehicle.main_image, (WIDTH, 900))
-        canvas.paste(hero, (0, 18))
-        overlay = Image.new("RGBA", hero.size, (0, 0, 0, 0))
-        ImageDraw.Draw(overlay).rectangle((0, 500, WIDTH, 900), fill=(10, 22, 40, 190))
-        canvas.paste(overlay, (0, 18), overlay)
+    draw.rectangle((0, 0, WIDTH, 16), fill=GOLD)
+    images = _gallery(vehicle)
+    if images:
+        canvas.paste(_fit(images[0], (WIDTH - 72, 930)), (36, 58))
+        if len(images) > 1:
+            thumb_y, thumb_w, gap = 1010, 234, 18
+            for index, image in enumerate(images[1:4]):
+                canvas.paste(_fit(image, (thumb_w, 170)), (36 + index * (thumb_w + gap), thumb_y))
     else:
-        draw.rounded_rectangle((55, 80, WIDTH - 55, 780), 28, fill=(24, 45, 70))
-        _text(draw, (WIDTH // 2, 430), "ФОТО НЕТ", _font(52, True), MUTED, "mm")
-
-    _text(draw, (62, 72), "ТЕХНИКА ГОДА", _font(28, True), WHITE)
+        draw.rounded_rectangle((36, 58, WIDTH - 36, 988), 28, fill=PANEL)
+        _text(draw, (WIDTH // 2, 520), "ФОТО НЕТ", _font(52, True), MUTED, "mm")
+    _text(draw, (58, 42), "ТЕХНИКА ГОДА", _font(27, True), WHITE)
+    draw.ellipse((WIDTH - 112, 38, WIDTH - 58, 92), fill=GOLD)
+    _text(draw, (WIDTH - 85, 65), "TG", _font(20, True), INK, "mm")
+    title_font = _font(54, True)
     title = vehicle.title or f"{vehicle.brand.name} {vehicle.model}".strip()
-    _text(draw, (62, 790), title[:42], _font(58, True), WHITE)
-    _text(draw, (62, 870), "АВТО ИЗ КИТАЯ ПОД ЗАКАЗ", _font(25, True), YELLOW)
-
-    draw.rounded_rectangle((55, 980, WIDTH - 55, 1350), 30, fill=(19, 39, 65), outline=(48, 78, 112), width=2)
-    specs = [
-        ("Год", vehicle.year or "—"),
-        ("Пробег", f"{vehicle.mileage:,} км".replace(",", " ") if vehicle.mileage else "—"),
-        ("Двигатель", vehicle.get_engine_type_display() if vehicle.engine_type else "—"),
-        ("Кузов", vehicle.body_type or "—"),
-    ]
+    for index, line in enumerate(_wrap(draw, title, title_font, WIDTH - 116)):
+        _text(draw, (58, 1245 + index * 66), line, title_font, WHITE)
+    _text(draw, (58, 1390), "АВТО ИЗ КИТАЯ ПОД ЗАКАЗ", _font(23, True), GOLD)
+    draw.rounded_rectangle((36, 1470, WIDTH - 36, 1712), 28, fill=PANEL, outline=(53, 70, 92), width=2)
+    specs = [("ГОД", vehicle.year or "—"), ("ПРОБЕГ", f"{vehicle.mileage:,} км".replace(",", " ") if vehicle.mileage else "—"), ("ДВИГАТЕЛЬ", vehicle.get_engine_type_display() if vehicle.engine_type else "—"), ("КУЗОВ", vehicle.body_type or "—")]
     for index, (label, value) in enumerate(specs):
-        x = 95 + (index % 2) * 480
-        y = 1035 + (index // 2) * 145
-        _text(draw, (x, y), label.upper(), _font(22, True), MUTED)
-        _text(draw, (x, y + 42), value, _font(31, True), WHITE)
-
+        x, y = 72 + (index % 2) * 480, 1510 + (index // 2) * 105
+        _text(draw, (x, y), label, _font(18, True), MUTED)
+        _text(draw, (x, y + 34), value, _font(28, True), WHITE)
     price = f"{vehicle.price_rub:,.0f} ₽".replace(",", " ") if vehicle.price_rub else "ЦЕНА ПО ЗАПРОСУ"
-    _text(draw, (62, 1450), price, _font(58, True), YELLOW)
-    _text(draw, (62, 1535), "Проверка до оплаты • Гарантия на ДВС и КПП", _font(23), MUTED)
-    draw.rounded_rectangle((55, 1665, WIDTH - 55, 1815), 26, fill=BLUE)
-    _text(draw, (WIDTH // 2, 1715), "tehnikagoda.ru", _font(40, True), WHITE, "mm")
-    _text(draw, (WIDTH // 2, 1770), "Напишите нам — подберём автомобиль", _font(22), WHITE, "mm")
+    _text(draw, (58, 1770), price, _font(47, True), GOLD)
+    _text(draw, (WIDTH - 58, 1778), "tehnikagoda.ru", _font(27, True), WHITE, "ra")
+    _text(draw, (58, 1854), "Проверка до оплаты  •  Гарантия на ДВС и КПП", _font(19), MUTED)
     return canvas
 
 
@@ -90,7 +105,6 @@ def build_promo_archive(vehicles):
         output = BytesIO()
         render_vehicle_card(vehicles[0]).save(output, "WEBP", quality=92, method=6)
         return f"promo-{vehicles[0].slug or vehicles[0].pk}.webp", output.getvalue()
-
     archive = BytesIO()
     with ZipFile(archive, "w", ZIP_DEFLATED) as zipped:
         for vehicle in vehicles:
