@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
     gosu \
+    fonts-dejavu \
     && rm -rf /var/lib/apt/lists/* \
     && adduser --disabled-password --gecos "" appuser \
     && mkdir -p /usr/src/app/logs /usr/src/app/staticfiles /usr/src/app/media
