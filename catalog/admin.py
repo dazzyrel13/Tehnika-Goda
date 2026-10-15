@@ -3,6 +3,7 @@ from io import BytesIO
 
 from django import forms
 from django.contrib import admin, messages
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
@@ -446,6 +447,7 @@ class VehicleAdmin(admin.ModelAdmin):
         "show_on_home_selected",
         "hide_from_home_selected",
         "sync_avito_price_now",
+        "download_promo_cards",
     ]
     readonly_fields = (
         "avito_price_synced_at",
@@ -646,6 +648,17 @@ class VehicleAdmin(admin.ModelAdmin):
             request,
             f"В очередь Авито: {queued}. Пропущено (нет ID или цены): {skipped}.",
         )
+
+    @admin.action(description="Скачать промо-карточки (WebP / ZIP)")
+    def download_promo_cards(self, request, queryset):
+        from .promo_cards import build_promo_archive
+
+        vehicles = queryset.select_related("brand").prefetch_related("gallery")
+        filename, content = build_promo_archive(vehicles)
+        content_type = "application/zip" if filename.endswith(".zip") else "image/webp"
+        response = HttpResponse(content, content_type=content_type)
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
 
     @admin.action(description="Отметить как новые")
     def mark_new(self, request, queryset):

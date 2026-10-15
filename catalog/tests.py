@@ -20,6 +20,54 @@ class RemovedDealerOfferTests(TestCase):
         )
 
 
+class PromoCardTests(TestCase):
+    def setUp(self):
+        self.brand = Brand.objects.create(name="PromoBrand", slug="promobrand")
+        self.category, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Cars"}
+        )
+
+    def test_single_vehicle_card_is_webp_with_social_dimensions(self):
+        from catalog.promo_cards import build_promo_archive
+
+        vehicle = Vehicle.objects.create(
+            title="Promo Car",
+            brand=self.brand,
+            category=self.category,
+            year=2025,
+            price_rub=2_500_000,
+            slug="promo-card-car",
+        )
+        filename, content = build_promo_archive([vehicle])
+
+        self.assertEqual(filename, "promo-promo-card-car.webp")
+        self.assertTrue(content.startswith(b"RIFF"))
+
+    def test_multiple_vehicle_cards_are_returned_as_zip(self):
+        from zipfile import ZipFile
+        from io import BytesIO
+
+        from catalog.promo_cards import build_promo_archive
+
+        vehicles = [
+            Vehicle.objects.create(
+                title=f"Promo Car {index}",
+                brand=self.brand,
+                category=self.category,
+                slug=f"promo-card-car-{index}",
+            )
+            for index in (1, 2)
+        ]
+        filename, content = build_promo_archive(vehicles)
+
+        self.assertEqual(filename, "promo-cards.zip")
+        with ZipFile(BytesIO(content)) as archive:
+            self.assertEqual(
+                sorted(archive.namelist()),
+                ["promo-promo-card-car-1.webp", "promo-promo-card-car-2.webp"],
+            )
+
+
 class VehicleDossierTests(TestCase):
     def setUp(self):
         self.brand = Brand.objects.create(name="TestBrand", slug="testbrand")
