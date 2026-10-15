@@ -993,9 +993,9 @@ class VehicleImageVariantTests(TestCase):
 
         from catalog.templatetags.catalog_extras import vehicle_gallery_images
 
-        def _jpeg(name):
+        def _jpeg(name, color):
             buf = BytesIO()
-            Image.new("RGB", (800, 600), (10, 10, 10)).save(buf, format="JPEG")
+            Image.new("RGB", (800, 600), color).save(buf, format="JPEG")
             buf.seek(0)
             return SimpleUploadedFile(name, buf.read(), content_type="image/jpeg")
 
@@ -1009,9 +1009,11 @@ class VehicleImageVariantTests(TestCase):
             is_published=True,
             slug="cover-car",
         )
-        vehicle.main_image = _jpeg("cover.jpg")
+        vehicle.main_image = _jpeg("cover.jpg", (10, 10, 10))
         vehicle.save()
-        VehicleImage.objects.create(vehicle=vehicle, image=_jpeg("gallery.jpg"), order=1)
+        VehicleImage.objects.create(
+            vehicle=vehicle, image=_jpeg("gallery.jpg", (10, 80, 160)), order=1
+        )
         vehicle.refresh_from_db()
         slides = vehicle_gallery_images(vehicle)
         self.assertGreaterEqual(len(slides), 2)
