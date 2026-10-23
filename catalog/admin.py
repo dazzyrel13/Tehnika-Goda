@@ -23,6 +23,7 @@ from .models import (
     PriceListItem,
     Vehicle,
     VehicleImage,
+    VEHICLE_SLUG_MAX_LENGTH,
 )
 from .listing_ingest import (
     BODY_TO_SLUG,
@@ -191,6 +192,17 @@ class MultipleFileField(forms.FileField):
 
 
 class VehicleAdminForm(forms.ModelForm):
+    slug = forms.SlugField(
+        label="Slug URL",
+        required=False,
+        max_length=VEHICLE_SLUG_MAX_LENGTH,
+        help_text=(
+            "Короткий адрес карточки в URL: латинские буквы, цифры и дефисы. "
+            "Если оставить пустым, он создастся автоматически. "
+            "При изменении старый адрес потребует 301-редиректа."
+        ),
+    )
+
     gallery_images = MultipleFileField(
         required=False,
         label="Галерея — загрузить пачкой",
@@ -205,7 +217,6 @@ class VehicleAdminForm(forms.ModelForm):
     class Meta:
         model = Vehicle
         exclude = (
-            "slug",
             "model",
             "specs",
             "is_currency_fixed",
@@ -462,6 +473,7 @@ class VehicleAdmin(admin.ModelAdmin):
                 "fields": (
                     ("brand", "category"),
                     "title",
+                    "slug",
                     ("year", "mileage", "horsepower"),
                     ("transmission", "body_type", "color"),
                     "engine_type",

@@ -1255,6 +1255,112 @@ class VehicleAdminAddFormTests(TestCase):
         self.assertContains(response, "Цена, ¥")
         self.assertContains(response, "1")
 
+    def test_change_form_renders_editable_slug(self):
+        from django.contrib.admin.sites import AdminSite
+        from django.contrib.auth import get_user_model
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        from django.test import RequestFactory
+
+        from catalog.admin import VehicleAdmin
+
+        brand = Brand.objects.create(name="SlugBrand", slug="slugbrand")
+        category, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Cars"}
+        )
+        vehicle = Vehicle.objects.create(
+            title="Slug Car",
+            brand=brand,
+            category=category,
+            year=2024,
+            slug="old-slug",
+        )
+        user = get_user_model().objects.create_superuser(
+            "slug-admin", "slug@example.com", "pass-not-used"
+        )
+        request = RequestFactory().get(f"/admin/catalog/vehicle/{vehicle.pk}/change/")
+        request.user = user
+        request.session = {}
+        request._messages = FallbackStorage(request)
+
+        response = VehicleAdmin(Vehicle, AdminSite()).change_view(
+            request, str(vehicle.pk)
+        )
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="slug"')
+        self.assertContains(response, "old-slug")
+        self.assertContains(response, "Slug URL")
+
+    def test_manual_slug_is_saved(self):
+        from catalog.admin import VehicleAdminForm
+
+        brand = Brand.objects.create(name="ManualSlugBrand", slug="manualslugbrand")
+        category, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Cars"}
+        )
+        vehicle = Vehicle.objects.create(
+            title="Manual Slug Car",
+            brand=brand,
+            category=category,
+            year=2024,
+            slug="before-edit",
+        )
+
+        form = VehicleAdminForm(
+            data={
+                "brand": brand.pk,
+                "category": category.pk,
+                "title": vehicle.title,
+                "slug": "toyota-levin-2022",
+                "year": "2024",
+                "mileage": "0",
+                "horsepower": "",
+                "transmission": "",
+                "body_type": "",
+                "color": "",
+                "engine_type": "",
+                "price_cny": "",
+                "price_rub": "",
+                "avito_item_id": "",
+                "description": "",
+                "is_published": "",
+                "show_on_home": "",
+                "is_new": "",
+                "is_featured": "",
+                "cny_rate": "12.48",
+                "report": "",
+                "rutube_url": "",
+            },
+            instance=vehicle,
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        saved = form.save()
+        self.assertEqual(saved.slug, "toyota-levin-2022")
+
+    def test_slug_is_limited_to_generator_length(self):
+        from catalog.admin import VehicleAdminForm
+
+        brand = Brand.objects.create(name="LongSlugBrand", slug="longslugbrand")
+        category, _ = Category.objects.get_or_create(
+            slug="cars", defaults={"name": "Cars"}
+        )
+        vehicle = Vehicle.objects.create(
+            title="Long Slug Car",
+            brand=brand,
+            category=category,
+            year=2024,
+            slug="long-slug-car",
+        )
+
+        form = VehicleAdminForm(
+            data={"slug": "a" * 81},
+            instance=vehicle,
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("slug", form.errors)
+
 
 class VehicleAdminGalleryGridTests(TestCase):
     def test_change_form_renders_horizontal_photo_grid(self):
