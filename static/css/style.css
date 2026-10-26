@@ -998,28 +998,15 @@ footer {
 }
 
 .site-footer__max-icon {
-    display: inline-flex;
     flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
     width: 20px;
     height: 20px;
-    border-radius: 6px;
-    background: #1687f7;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 800;
-    line-height: 1;
+    object-fit: contain;
 }
 
 .site-footer__max:hover {
     color: var(--accent-yellow) !important;
     opacity: 1;
-}
-
-.site-footer__max:hover .site-footer__max-icon {
-    background: var(--accent-yellow);
-    color: var(--text-main);
 }
 
 .site-footer__bottom {
