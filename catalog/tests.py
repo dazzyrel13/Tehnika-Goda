@@ -754,6 +754,73 @@ class VehicleFilterAndBadgeTests(TestCase):
         self.assertNotIn("Used Plain", titles)
         self.assertNotIn("New Zero", titles)
 
+    def test_under_1200000_category_filters_published_cars_and_supports_search(self):
+        expensive = Vehicle.objects.create(
+            title="Expensive Car",
+            brand=self.brand,
+            category=self.cars,
+            year=2024,
+            is_published=True,
+            slug="expensive-car",
+            price_rub=1_200_001,
+        )
+        no_price = Vehicle.objects.create(
+            title="Price On Request",
+            brand=self.brand,
+            category=self.cars,
+            year=2024,
+            is_published=True,
+            slug="price-on-request",
+            price_rub=None,
+        )
+        draft = Vehicle.objects.create(
+            title="Draft Budget Car",
+            brand=self.brand,
+            category=self.cars,
+            year=2024,
+            is_published=False,
+            slug="draft-budget-car",
+            price_rub=500_000,
+        )
+        trucks = Category.objects.create(name="Trucks", slug="test-trucks")
+        non_car = Vehicle.objects.create(
+            title="Cheap Truck",
+            brand=self.brand,
+            category=trucks,
+            year=2024,
+            is_published=True,
+            slug="cheap-truck",
+            price_rub=500_000,
+        )
+
+        url = reverse(
+            "catalog:category", kwargs={"category_slug": "cars_under_1200000"}
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        titles = [vehicle.title for vehicle in response.context["vehicles"]]
+        self.assertIn("New Zero", titles)
+        self.assertIn("Used Plain", titles)
+        self.assertNotIn(expensive.title, titles)
+        self.assertNotIn(no_price.title, titles)
+        self.assertNotIn(draft.title, titles)
+        self.assertNotIn(non_car.title, titles)
+        self.assertTrue(response.context["canonical_url"].endswith(url))
+        self.assertIn("1 200 000", response.context["seo_h1"])
+
+        searched = self.client.get(url, {"q": "Used Plain"})
+        self.assertEqual(searched.status_code, 200)
+        self.assertEqual(
+            [vehicle.title for vehicle in searched.context["vehicles"]], ["Used Plain"]
+        )
+
+        empty = self.client.get(url, {"price_from": "999999999"})
+        self.assertEqual(empty.status_code, 200)
+        self.assertFalse(empty.context["vehicles"])
+        self.assertEqual(empty.context["meta_robots"], "noindex, follow")
+        self.assertTrue(empty.context["canonical_url"].endswith(url))
+
     def test_featured_and_new_in_both_filters(self):
         Vehicle.objects.create(
             title="New Featured",

@@ -57,6 +57,11 @@ def seed_database():
     Category.objects.get_or_create(
         name="Выкупленные", slug="cars_bought", parent=cat_cars
     )
+    Category.objects.get_or_create(
+        name="Автомобили до 1 200 000 ₽",
+        slug="cars_under_1200000",
+        parent=cat_cars,
+    )
     Category.objects.get_or_create(name="Седаны", slug="cars_sedan", parent=cat_cars)
     Category.objects.get_or_create(
         name="Кроссоверы", slug="cars_crossover", parent=cat_cars

@@ -4,6 +4,7 @@ from django.urls import reverse
 from utils.sitemaps import SiteUrlSitemap
 
 from .models import Brand, CarModel, Category, Vehicle
+from .cache_helpers import CAR_PRICE_SLUG
 from .seo_pages import seo_brands_queryset, seo_model_pages_enabled
 
 
@@ -74,7 +75,7 @@ class CategorySitemap(SiteUrlSitemap):
         )
         vehicle_cat_ids.discard(None)
         if not vehicle_cat_ids:
-            return Category.objects.none()
+            return [CAR_PRICE_SLUG]
 
         parent_map = dict(Category.objects.values_list("pk", "parent_id"))
         expanded = set(vehicle_cat_ids)
@@ -83,4 +84,14 @@ class CategorySitemap(SiteUrlSitemap):
             while pid:
                 expanded.add(pid)
                 pid = parent_map.get(pid)
-        return Category.objects.filter(pk__in=expanded).order_by("name")
+        categories = list(Category.objects.filter(pk__in=expanded).order_by("name"))
+        if not any(category.slug == CAR_PRICE_SLUG for category in categories):
+            categories.append(CAR_PRICE_SLUG)
+        return categories
+
+    def location(self, item):
+        if item == CAR_PRICE_SLUG:
+            return reverse(
+                "catalog:category", kwargs={"category_slug": CAR_PRICE_SLUG}
+            )
+        return item.get_absolute_url()

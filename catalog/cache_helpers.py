@@ -28,7 +28,10 @@ HOME_SECTION_LIMIT = 10
 
 # Special car filters — not body-type options in search dropdowns
 CAR_STATUS_SLUGS = ("cars_new", "cars_used", "cars_bought")
-_CAR_SPECIAL_SLUGS = CAR_STATUS_SLUGS
+CAR_PRICE_SLUG = "cars_under_1200000"
+CAR_PRICE_LIMIT_RUB = 1_200_000
+CAR_SPECIAL_SLUGS = CAR_STATUS_SLUGS + (CAR_PRICE_SLUG,)
+_CAR_SPECIAL_SLUGS = CAR_SPECIAL_SLUGS
 _TRUCK_TYPE_SLUGS = (
     "trucks_trucks",
     "trucks_vans",
@@ -125,7 +128,7 @@ def is_car_body_type_category(category: Category) -> bool:
     parent = getattr(category, "parent", None)
     if parent is None or getattr(parent, "slug", None) != "cars":
         return False
-    return category.slug not in CAR_STATUS_SLUGS
+    return category.slug not in CAR_SPECIAL_SLUGS
 
 
 def _ordered_children(

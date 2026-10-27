@@ -16,6 +16,8 @@ from content.promos import home_promos
 
 from .cache_helpers import (
     available_colors,
+    CAR_PRICE_LIMIT_RUB,
+    CAR_PRICE_SLUG,
     home_faqs,
     home_reviews,
     home_sections,
@@ -151,7 +153,15 @@ class VehicleListView(ListView):
         params = self.request.GET
 
         category_slug = self.category_slug()
-        if category_slug == "cars_new":
+        if category_slug == CAR_PRICE_SLUG:
+            cars_root = Category.objects.filter(slug="cars").first()
+            cars_ids = cars_root.subtree_ids() if cars_root else set()
+            queryset = queryset.filter(
+                category_id__in=cars_ids,
+                price_rub__lte=CAR_PRICE_LIMIT_RUB,
+                price_rub__isnull=False,
+            )
+        elif category_slug == "cars_new":
             new_cat = Category.objects.filter(slug="cars_new").first()
             cars_root = Category.objects.filter(slug="cars").first()
             cars_ids = cars_root.subtree_ids() if cars_root else set()
@@ -287,11 +297,14 @@ class VehicleListView(ListView):
                 context["is_cars_catalog"] = root.slug == "cars"
                 context["is_trucks_catalog"] = root.slug == "trucks"
                 context["is_special_catalog"] = root.slug == "special"
+            elif cat_slug == CAR_PRICE_SLUG:
+                context["is_cars_catalog"] = True
 
         context["catalog_root_slug"] = "cars"
         context["listing_brands"] = list(context.get("car_brands") or [])
         context["type_chips"] = [
             {"slug": "cars", "label": "Все легковые"},
+            {"slug": CAR_PRICE_SLUG, "label": "До 1 200 000 ₽"},
             {"slug": "cars_new", "label": "Новые"},
             {"slug": "cars_bought", "label": "Выкупленные"},
         ]
