@@ -486,9 +486,9 @@ header::after {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    min-width: 174px;
-    min-height: 34px;
-    padding: 5px 14px;
+    min-width: 154px;
+    min-height: 30px;
+    padding: 4px 12px;
     color: #fff;
     border: 2px solid #fff;
     border-radius: 5px;
@@ -529,7 +529,7 @@ header::after {
 .nav-item-price__label {
     position: relative;
     z-index: 1;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 900;
     line-height: 1.1;
     letter-spacing: -0.025em;
