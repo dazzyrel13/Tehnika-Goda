@@ -7,7 +7,8 @@
 
 {% block font_preload %}
 <link rel="preload" href="{% static 'fonts/caveat-cyrillic-700.woff2' %}" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{% static 'images/team/leadership.webp' %}?v=1" as="image">
+{# Временно убрано фото руководителя и партнёра #}
+{# <link rel="preload" href="{% static 'images/team/leadership.webp' %}?v=1" as="image"> #}
 {% endblock %}
 
 {% block extra_css %}
@@ -78,6 +79,8 @@
                     <a href="{% url 'catalog:category' category_slug='cars' %}" class="btn-elite btn-elite-ghost ed-hero__cta-secondary">Смотреть каталог</a>
                 </div>
             </div>
+            {# Временно убрано фото руководителя и партнёра #}
+            {# 
             <figure class="ed-hero__photo">
                 <img
                     src="{% static 'images/team/leadership.webp' %}?v=1"
@@ -97,6 +100,7 @@
                     — берём всё на себя
                 </p>
             </figure>
+            #}
         </div>
     </section>
     <div class="home-search-block reveal">

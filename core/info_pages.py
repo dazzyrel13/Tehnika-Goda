@@ -25,7 +25,7 @@ _INFO_PAGES = {
             "цена под ключ до Благовещенска, гарантия 6 месяцев на ДВС и КПП."
         ),
         "article_headline": "О компании Техника Года",
-        "article_image": "images/team/leadership.webp",
+        # "article_image": "images/team/leadership.webp",  # Временно убрано фото руководителя и партнёра
         "date_published": "2024-06-01",
         "date_modified": "2026-08-01",
     },
